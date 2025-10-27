@@ -80,7 +80,7 @@ class _AudioUploaderState extends State<AudioUploader> {
   Future<String?> _uploadSingleFile(String fileName, String lessonId) async {
     try {
       // Load file từ assets thành bytes
-      final ByteData data = await rootBundle.load('assets/audios/$fileName');
+      final ByteData data = await rootBundle.load('lib/resources/assets/audios/$fileName');
       final Uint8List bytes = data.buffer.asUint8List();
 
       // Tạo file tạm để upload (Firebase cần File hoặc bytes)

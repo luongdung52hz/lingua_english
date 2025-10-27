@@ -10,6 +10,11 @@
 
     <!-- Queries cho Android 11+ (thêm Facebook provider để tránh lỗi) – di chuyển ra ngoài <application> -->
     <queries>
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
+    </queries>
+    <queries>
 
         <!-- Google (nếu cần) -->
         <package android:name="com.google.android.gms" />

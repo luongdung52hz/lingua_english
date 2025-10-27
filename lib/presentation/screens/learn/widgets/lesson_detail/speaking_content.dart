@@ -29,13 +29,13 @@ class _SpeakingContentState extends State<SpeakingContent> {
   late AIService aiService;
   bool _speechInitialized = false;
   bool _checkingPermission = false;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
     speech = stt.SpeechToText();
 
-    // Sử dụng factory constructor
     aiService = AIService.create(
       providerType: AIProviderType.gemini,
       apiKey: 'AIzaSyBl_JBlqSWCh5QcwrnNKW5SjR4sw6InMOM',
@@ -43,7 +43,6 @@ class _SpeakingContentState extends State<SpeakingContent> {
       maxRetries: 2,
     );
 
-    // Khởi tạo speech recognition sớm
     _initializeSpeech();
   }
 
@@ -53,26 +52,47 @@ class _SpeakingContentState extends State<SpeakingContent> {
   SpeakingResult? speakingResult;
 
   Future<void> _initializeSpeech() async {
+    setState(() {
+      _checkingPermission = true;
+      _errorMessage = null;
+    });
+
     try {
       print('🔄 Bắt đầu khởi tạo speech recognition...');
 
-      // Kiểm tra quyền trước khi khởi tạo
+      // Bước 1: Kiểm tra quyền micro
       final micPermission = await Permission.microphone.status;
       print('🎤 Trạng thái quyền micro: $micPermission');
 
       if (!micPermission.isGranted) {
-        setState(() => _checkingPermission = true);
         final requested = await Permission.microphone.request();
         print('🎤 Kết quả yêu cầu quyền: $requested');
-        setState(() => _checkingPermission = false);
 
         if (!requested.isGranted) {
-          setState(() => _speechInitialized = false);
-          _showError('Quyền micro bị từ chối. Vui lòng cấp quyền trong cài đặt.');
+          setState(() {
+            _speechInitialized = false;
+            _checkingPermission = false;
+            _errorMessage = 'Quyền micro bị từ chối';
+          });
           return;
         }
       }
 
+      // Bước 2: Kiểm tra Speech Recognition có sẵn không
+      bool hasRecognizer = await speech.hasPermission;
+      print('📱 Có Speech Recognizer: $hasRecognizer');
+
+      if (!hasRecognizer) {
+        setState(() {
+          _speechInitialized = false;
+          _checkingPermission = false;
+          _errorMessage = 'Thiết bị thiếu Google Speech Services';
+        });
+        _showGoogleAppInstallDialog();
+        return;
+      }
+
+      // Bước 3: Khởi tạo Speech-to-Text
       bool available = await speech.initialize(
         onStatus: (status) {
           print('📢 Trạng thái speech: $status');
@@ -84,17 +104,22 @@ class _SpeakingContentState extends State<SpeakingContent> {
         },
         onError: (error) {
           print('❌ Lỗi speech: $error');
-          setState(() => isListening = false);
-          if (mounted) {
-            _showError('Lỗi nhận dạng giọng nói: $error');
-          }
+          setState(() {
+            isListening = false;
+            _errorMessage = 'Lỗi: ${error.errorMsg}';
+          });
         },
+        debugLogging: true,
       );
 
       print('✅ Kết quả khởi tạo speech: $available');
 
       setState(() {
         _speechInitialized = available;
+        _checkingPermission = false;
+        if (!available) {
+          _errorMessage = 'Không thể khởi tạo Speech Recognition';
+        }
       });
 
       if (!available && mounted) {
@@ -102,11 +127,102 @@ class _SpeakingContentState extends State<SpeakingContent> {
       }
     } catch (e) {
       print('💥 Lỗi khởi tạo speech: $e');
-      setState(() => _speechInitialized = false);
+      setState(() {
+        _speechInitialized = false;
+        _checkingPermission = false;
+        _errorMessage = e.toString();
+      });
+
       if (mounted) {
-        _showError('Lỗi khởi tạo micro: $e');
+        // Kiểm tra loại lỗi cụ thể
+        if (e.toString().contains('recognizerNotAvailable') ||
+            e.toString().contains('not available on this device')) {
+          _showGoogleAppInstallDialog();
+        } else {
+          _showDetailedError();
+        }
       }
     }
+  }
+
+  void _showGoogleAppInstallDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 28),
+            SizedBox(width: 12),
+            Text('Google Speech Services không khả dụng'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Thiết bị của bạn thiếu Google Speech Recognition Service.',
+              style: TextStyle(fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 16),
+            const Text('Để sử dụng tính năng này, bạn cần:'),
+            const SizedBox(height: 8),
+            _buildBulletPoint('Cài đặt/cập nhật Google app từ Play Store'),
+            _buildBulletPoint('Đảm bảo Google Play Services hoạt động'),
+            _buildBulletPoint('Kiểm tra kết nối internet'),
+            _buildBulletPoint('Khởi động lại ứng dụng sau khi cài'),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, size: 20, color: Colors.blue.shade700),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'Emulator thường không có Google Services. Vui lòng test trên thiết bị thực.',
+                      style: TextStyle(fontSize: 13),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Đóng'),
+          ),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: const Icon(Icons.shop),
+            label: const Text('Mở Play Store'),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBulletPoint(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8, bottom: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('• ', style: TextStyle(fontSize: 16)),
+          Expanded(child: Text(text, style: const TextStyle(fontSize: 14))),
+        ],
+      ),
+    );
   }
 
   void _showDetailedError() {
@@ -114,21 +230,36 @@ class _SpeakingContentState extends State<SpeakingContent> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Không thể khởi tạo nhận dạng giọng nói'),
-        content: const Column(
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Nguyên nhân có thể:'),
-            SizedBox(height: 8),
-            Text('• Quyền micro chưa được cấp'),
-            Text('• Thiết bị không hỗ trợ'),
-            Text('• Thiếu Google Speech Services'),
-            Text('• Không có kết nối internet'),
-            SizedBox(height: 12),
-            Text('Vui lòng thử:'),
-            Text('• Chạy trên thiết bị thực'),
-            Text('• Cấp quyền micro'),
-            Text('• Kiểm tra internet'),
+            if (_errorMessage != null) ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  _errorMessage!,
+                  style: TextStyle(color: Colors.red.shade900),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+            const Text('Nguyên nhân có thể:', style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            _buildBulletPoint('Thiếu Google Speech Services'),
+            _buildBulletPoint('Quyền micro chưa được cấp'),
+            _buildBulletPoint('Thiết bị không hỗ trợ'),
+            _buildBulletPoint('Không có kết nối internet'),
+            const SizedBox(height: 12),
+            const Text('Vui lòng thử:', style: TextStyle(fontWeight: FontWeight.bold)),
+            _buildBulletPoint('Chạy trên thiết bị thực (không phải emulator)'),
+            _buildBulletPoint('Cài đặt Google app từ Play Store'),
+            _buildBulletPoint('Cấp quyền micro trong cài đặt'),
+            _buildBulletPoint('Kiểm tra internet và khởi động lại app'),
           ],
         ),
         actions: [
@@ -139,9 +270,9 @@ class _SpeakingContentState extends State<SpeakingContent> {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              openAppSettings();
+              _initializeSpeech();
             },
-            child: const Text('Cài đặt'),
+            child: const Text('Thử lại'),
           ),
         ],
       ),
@@ -163,41 +294,34 @@ class _SpeakingContentState extends State<SpeakingContent> {
           LessonHeader(lesson: widget.lesson),
           const SizedBox(height: 24),
 
-          // Microphone with Speech-to-Text
           _buildMicrophone(),
           const SizedBox(height: 24),
 
-          // Hiển thị trạng thái khởi tạo
           if (!_speechInitialized) ...[
             _buildInitializationStatus(),
             const SizedBox(height: 16),
           ],
 
-          // Spoken Text Display
           if (spokenText.isNotEmpty) ...[
             _buildSpokenTextCard(),
             const SizedBox(height: 16),
           ],
 
-          // AI Speaking Result
           if (speakingResult != null && !speakingResult!.hasError) ...[
             SpeakingResultCard(result: speakingResult!),
             const SizedBox(height: 24),
           ],
 
-          // Words to Practice
           if (words.isNotEmpty) ...[
             _buildWordsSection(words),
             const SizedBox(height: 24),
           ],
 
-          // Vocabulary List
           if (vocabulary.isNotEmpty) ...[
             _buildVocabularySection(vocabulary),
             const SizedBox(height: 24),
           ],
 
-          // Example Sentences
           if (sentences.isNotEmpty) ...[
             _buildSentencesSection(sentences),
             const SizedBox(height: 24),
@@ -282,12 +406,12 @@ class _SpeakingContentState extends State<SpeakingContent> {
           const SizedBox(height: 16),
           Text(
             _checkingPermission
-                ? '⏳ Đang kiểm tra quyền...'
+                ? ' Đang kiểm tra...'
                 : !_speechInitialized
-                ? '❌ Micro chưa sẵn sàng'
+                ? ' Speech Recognition không khả dụng'
                 : isListening
-                ? '🎤 Đang nghe... Nói gì đó!'
-                : '👆 Chạm và giữ để nói',
+                ? ' Đang nghe... Nói gì đó!'
+                : ' Chạm và giữ để nói',
             style: TextStyle(
               fontSize: 16,
               color: _checkingPermission
@@ -299,26 +423,37 @@ class _SpeakingContentState extends State<SpeakingContent> {
             ),
             textAlign: TextAlign.center,
           ),
+          if (_errorMessage != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              _errorMessage!,
+              style: TextStyle(fontSize: 12, color: Colors.red.shade700),
+              textAlign: TextAlign.center,
+            ),
+          ],
           if (!_speechInitialized) ...[
             const SizedBox(height: 12),
             Wrap(
               spacing: 8,
+              runSpacing: 8,
               children: [
                 ElevatedButton.icon(
                   onPressed: _checkingPermission ? null : _initializeSpeech,
                   icon: const Icon(Icons.refresh, size: 18),
                   label: const Text('Thử lại'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                  ),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
                 ),
                 ElevatedButton.icon(
-                  onPressed: _checkingPermission ? null : _openAppSettings,
+                  onPressed: _checkingPermission ? null : openAppSettings,
                   icon: const Icon(Icons.settings, size: 18),
                   label: const Text('Cài đặt'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                  ),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                ),
+                ElevatedButton.icon(
+                  onPressed: _checkingPermission ? null : _showGoogleAppInstallDialog,
+                  icon: const Icon(Icons.help_outline, size: 18),
+                  label: const Text('Hướng dẫn'),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
                 ),
               ],
             ),
@@ -344,7 +479,7 @@ class _SpeakingContentState extends State<SpeakingContent> {
               const Icon(Icons.info, color: Colors.orange),
               const SizedBox(width: 12),
               const Text(
-                'Micro chưa sẵn sàng',
+                'Speech Recognition chưa sẵn sàng',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ],
@@ -355,9 +490,10 @@ class _SpeakingContentState extends State<SpeakingContent> {
             style: TextStyle(fontSize: 14),
           ),
           const SizedBox(height: 4),
+          Text('• Cài đặt Google app từ Play Store', style: TextStyle(fontSize: 14, color: Colors.grey.shade700)),
           Text('• Cấp quyền micro cho ứng dụng', style: TextStyle(fontSize: 14, color: Colors.grey.shade700)),
           Text('• Đảm bảo có kết nối internet', style: TextStyle(fontSize: 14, color: Colors.grey.shade700)),
-          Text('• Sử dụng thiết bị thực (không dùng giả lập)', style: TextStyle(fontSize: 14, color: Colors.grey.shade700)),
+          Text('• Sử dụng thiết bị thực (không dùng emulator)', style: TextStyle(fontSize: 14, color: Colors.grey.shade700)),
         ],
       ),
     );
@@ -377,10 +513,7 @@ class _SpeakingContentState extends State<SpeakingContent> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                '🎤 Bạn đã nói:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
+              const Text('🎤 Bạn đã nói:', style: TextStyle(fontWeight: FontWeight.bold)),
               Row(
                 children: [
                   if (spokenText.isNotEmpty)
@@ -412,10 +545,7 @@ class _SpeakingContentState extends State<SpeakingContent> {
               borderRadius: BorderRadius.circular(8),
               border: Border.all(color: Colors.orange.shade300),
             ),
-            child: Text(
-              spokenText,
-              style: const TextStyle(fontSize: 16, height: 1.4),
-            ),
+            child: Text(spokenText, style: const TextStyle(fontSize: 16, height: 1.4)),
           ),
           const SizedBox(height: 16),
           SizedBox(
@@ -446,10 +576,7 @@ class _SpeakingContentState extends State<SpeakingContent> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          '🗣️ Từ vựng cần luyện',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
+        const Text('🗣️ Từ vựng cần luyện', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,
@@ -476,10 +603,7 @@ class _SpeakingContentState extends State<SpeakingContent> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          '📚 Từ vựng mở rộng',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
+        const Text('📚 Từ vựng mở rộng', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
         ...vocabulary.map((word) {
           return Card(
@@ -489,9 +613,7 @@ class _SpeakingContentState extends State<SpeakingContent> {
               title: Text(word.toString()),
               trailing: IconButton(
                 icon: const Icon(Icons.volume_up),
-                onPressed: () {
-                  // TODO: Play audio
-                },
+                onPressed: () {},
               ),
             ),
           );
@@ -504,10 +626,7 @@ class _SpeakingContentState extends State<SpeakingContent> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          '💬 Câu mẫu',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
+        const Text(' Câu mẫu', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
         ...sentences.map((sentence) {
           return Container(
@@ -522,14 +641,10 @@ class _SpeakingContentState extends State<SpeakingContent> {
               children: [
                 const Icon(Icons.chat_bubble_outline, color: Colors.orange),
                 const SizedBox(width: 12),
-                Expanded(
-                  child: Text(sentence.toString(), style: const TextStyle(fontSize: 16)),
-                ),
+                Expanded(child: Text(sentence.toString(), style: const TextStyle(fontSize: 16))),
                 IconButton(
                   icon: const Icon(Icons.play_circle_outline),
-                  onPressed: () {
-                    // TODO: Play audio
-                  },
+                  onPressed: () {},
                 ),
               ],
             ),
@@ -543,7 +658,6 @@ class _SpeakingContentState extends State<SpeakingContent> {
     if (!_speechInitialized || isListening || _checkingPermission) return;
 
     try {
-      // Kiểm tra quyền lần cuối trước khi bắt đầu
       final micPermission = await Permission.microphone.status;
       if (!micPermission.isGranted) {
         _showError('Vui lòng cấp quyền micro để ghi âm');
@@ -560,16 +674,12 @@ class _SpeakingContentState extends State<SpeakingContent> {
           print('🎙️ Nhận dạng: ${result.recognizedWords}');
         },
         listenFor: const Duration(seconds: 30),
-        pauseFor: const Duration(seconds: 3),
+        pauseFor: const Duration(seconds: 5),
         partialResults: true,
         localeId: 'vi-VN',
         cancelOnError: true,
         listenMode: stt.ListenMode.confirmation,
-        onSoundLevelChange: (level) {
-          // Có thể thêm hiệu ứng âm thanh ở đây
-        },
       );
-
     } catch (e) {
       print('❌ Lỗi khi bắt đầu ghi âm: $e');
       setState(() => isListening = false);
@@ -579,7 +689,6 @@ class _SpeakingContentState extends State<SpeakingContent> {
 
   Future<void> _stopListening() async {
     if (!isListening) return;
-
     try {
       await speech.stop();
       setState(() => isListening = false);
@@ -630,10 +739,7 @@ class _SpeakingContentState extends State<SpeakingContent> {
       setState(() => isCheckingSpeaking = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Lỗi chấm điểm: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Lỗi chấm điểm: $e'), backgroundColor: Colors.red),
         );
       }
     }
@@ -645,14 +751,6 @@ class _SpeakingContentState extends State<SpeakingContent> {
     if (score >= 70) return 'Tốt!';
     if (score >= 60) return 'Khá';
     return 'Cần luyện tập thêm';
-  }
-
-  Future<void> _openAppSettings() async {
-    try {
-      await openAppSettings();
-    } catch (e) {
-      _showError('Không thể mở cài đặt: $e');
-    }
   }
 
   void _showError(String message) {

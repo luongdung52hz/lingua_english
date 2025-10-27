@@ -20,6 +20,7 @@ import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path/path.dart' as path;
+import 'package:flutter/foundation.dart';  // Để check kDebugMode
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,31 +39,29 @@ void main() async {
   await initDependencies();
   print('🔍 AppRouter.router: ${AppRouter.router.toString()}');
 
-  // Upload demo data (bỏ comment để chạy)
+  // Upload demo lessons to Firestore (bỏ comment để chạy)
   // await uploadDemoLessons();
-
   runApp(const MyApp());
 }
 
-Future<void> uploadDemoLessons() async {
-  final firestore = FirebaseFirestore.instance;
-  final batch = firestore.batch();
-
-  final lessons = LessonDemoData.getAllLessons();
-
-  for (var lesson in lessons) {
-    final docRef = firestore.collection('lessons').doc(lesson.id);
-    batch.set(docRef, lesson.toJson());
-  }
-
-  try {
-    await batch.commit();
-    print('✅ Uploaded ${lessons.length} demo lessons to Firestore!');
-  } catch (e) {
-    print('❌ Error uploading lessons: $e');
-  }
-}
-
+// Future<void> uploadDemoLessons() async {
+//   final firestore = FirebaseFirestore.instance;
+//   final batch = firestore.batch();
+//
+//   final lessons = LessonDemoData.getAllLessons();
+//
+//   for (var lesson in lessons) {
+//     final docRef = firestore.collection('lessons').doc(lesson.id);
+//     batch.set(docRef, lesson.toJson());
+//   }
+//
+//   try {
+//     await batch.commit();
+//     print('✅ Uploaded ${lessons.length} demo lessons to Firestore!');
+//   } catch (e) {
+//     print('❌ Error uploading lessons: $e');
+//   }
+// }
 
 
 class MyApp extends StatelessWidget {
