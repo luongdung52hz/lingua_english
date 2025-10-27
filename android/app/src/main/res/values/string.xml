@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LinguaLearn</string>
+    <string name="facebook_app_id">1777119279590911</string>  <!-- Thay bằng App ID -->
+    <string name="fb_login_protocol_scheme">fb1777119279590911</string>  <!-- fb + App ID -->
+    <string name="facebook_client_token">68473465ebd3522327f671126b53c0f7</string>  <!-- Thay bằng Client Token -->
+</resources>
