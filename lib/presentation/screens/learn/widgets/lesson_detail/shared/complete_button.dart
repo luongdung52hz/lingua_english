@@ -57,7 +57,6 @@ class CompleteButton extends StatelessWidget {
     final controller = Get.find<LearnController>();
     int finalScore = 0;
 
-    // 1️⃣ Tính điểm theo loại bài học
     if (lesson.skill == 'listening' || lesson.skill == 'reading') {
       if (userAnswers != null) {
         finalScore = _calculateQuestionScore(lesson, userAnswers!);
@@ -76,15 +75,12 @@ class CompleteButton extends StatelessWidget {
       }
     }
 
-    // 2️⃣ Gửi dữ liệu hoàn thành bài
     final timeSpent = DateTime.now().difference(startTime).inSeconds;
     controller.completeLesson(lesson, finalScore, timeSpent);
 
-    // 3️⃣ Hiển thị kết quả
     CompleteResultDialog.show(context, lesson, finalScore, startTime, userAnswers);
   }
 
-  // ⭐ NEW: Method local tính score (tránh phụ thuộc dialog)
   static int _calculateQuestionScore(LessonModel lesson, Map<String, String> answers) {
     final questions = lesson.content['questions'] as List? ?? [];
     if (questions.isEmpty) return 0;

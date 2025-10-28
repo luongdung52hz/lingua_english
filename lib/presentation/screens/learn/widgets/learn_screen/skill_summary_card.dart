@@ -18,8 +18,8 @@ class SkillSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final progress = totalLessons > 0 ? completedLessons / totalLessons : 0.0;
-    final progressPercent = (progress * 100).toInt();
+    final progress = (totalLessons > 0 ? completedLessons / totalLessons : 0.0).clamp(0.0, 1.0); // ⭐ Sửa: Clamp progress 0-1 (tổng chỉ đến 100%)
+    final progressPercent = ((completedLessons / totalLessons) * 100).clamp(0.0, 100.0).toInt(); // ⭐ Sửa: Clamp % text 0-100
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -100,7 +100,7 @@ class SkillSummaryCard extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(3),
                   child: LinearProgressIndicator(
-                    value: progress,
+                    value: progress, // Sử dụng progress đã clamp (0-1)
                     backgroundColor: Colors.grey[300],
                     valueColor: AlwaysStoppedAnimation<Color>(skillColor),
                   ),

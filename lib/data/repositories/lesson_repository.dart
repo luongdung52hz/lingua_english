@@ -18,7 +18,7 @@ class LessonRepository {
         .limit(20);
 
     if (topic != null && topic.isNotEmpty) {
-      query = query.where('topic', isEqualTo: topic); // Thêm filter topic nếu có
+      query = query.where('topic', isEqualTo: topic);
     }
 
     return query.snapshots()
@@ -31,20 +31,18 @@ class LessonRepository {
   Future<Map<String, int>> getProgressStats(String level, String skill, {String? topic}) async {
     if (userId.isEmpty) return {'total': 0, 'completed': 0};
 
-    // Tổng bài từ lessons
     var totalQuery = _firestore
         .collection('lessons')
         .where('level', isEqualTo: level)
         .where('skill', isEqualTo: skill);
 
     if (topic != null && topic.isNotEmpty) {
-      totalQuery = totalQuery.where('topic', isEqualTo: topic); // Thêm filter topic
+      totalQuery = totalQuery.where('topic', isEqualTo: topic);
     }
 
     final totalSnap = await totalQuery.get();
     final total = totalSnap.docs.length;
 
-    // Đã học từ user_progress
     var completedQuery = _firestore
         .collection('users')
         .doc(userId)
@@ -54,13 +52,18 @@ class LessonRepository {
         .where('completed', isEqualTo: true);
 
     if (topic != null && topic.isNotEmpty) {
-      completedQuery = completedQuery.where('topic', isEqualTo: topic); // Thêm filter topic
+      completedQuery = completedQuery.where('topic', isEqualTo: topic);
     }
 
     final completedSnap = await completedQuery.get();
     final completed = completedSnap.docs.length;
 
     return {'total': total, 'completed': completed};
+  }
+
+  Future<int> getTotalLessonsInDatabase() async {
+    final snap = await _firestore.collection('lessons').get();
+    return snap.docs.length;
   }
 
   // Lấy danh sách topics unique theo level + skill
@@ -74,8 +77,8 @@ class LessonRepository {
     final topics = snap.docs
         .map((doc) => doc.data()['topic'] as String?)
         .where((topic) => topic != null && topic.isNotEmpty)
-        .cast<String>() // ⭐ Sửa: .cast<String>() để explicit List<String> thay List<String?>
-        .toSet() // Loại trùng lặp
+        .cast<String>()
+        .toSet()
         .toList();
 
     return topics;
@@ -116,7 +119,6 @@ class LessonRepository {
   }
 
   Future<void> completeLesson(String lessonId, int score, int timeSpent) async {
-    // 1. Update user_progress
     await _firestore
         .collection('users')
         .doc(userId)

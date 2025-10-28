@@ -36,13 +36,13 @@ class SkillFilterChip extends StatelessWidget {
             border: Border.all(
               color: isSelected
                   ? skillColor
-                  : skillColor.withOpacity(0.3),
+                  : skillColor.withOpacity(0.2),
               width: 2,
             ),
             boxShadow: isSelected
                 ? [
               BoxShadow(
-                color: skillColor.withOpacity(0.3),
+                color: skillColor.withOpacity(0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),

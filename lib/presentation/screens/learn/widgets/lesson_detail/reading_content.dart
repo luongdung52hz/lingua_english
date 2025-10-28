@@ -25,7 +25,7 @@ class ReadingContent extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           LessonHeader(lesson: lesson),
-          const SizedBox(height: 24),
+          const SizedBox(height: 18),
 
           // Reading Text
           _buildReadingTextBox(text),

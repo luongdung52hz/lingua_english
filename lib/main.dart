@@ -25,7 +25,7 @@ import 'package:flutter/foundation.dart';  // Để check kDebugMode
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
-  print('✅ .env loaded successfully');
+  print(' .env loaded successfully');
 
   // Firebase
   await Firebase.initializeApp(
@@ -37,7 +37,7 @@ void main() async {
   // Đăng ký adapter ở đây nếu cần
   // Hive.registerAdapter(UserModelAdapter());
   await initDependencies();
-  print('🔍 AppRouter.router: ${AppRouter.router.toString()}');
+  print(' AppRouter.router: ${AppRouter.router.toString()}');
 
   // Upload demo lessons to Firestore (bỏ comment để chạy)
   // await uploadDemoLessons();
@@ -57,9 +57,9 @@ void main() async {
 //
 //   try {
 //     await batch.commit();
-//     print('✅ Uploaded ${lessons.length} demo lessons to Firestore!');
+//     print(' Uploaded ${lessons.length} demo lessons to Firestore!');
 //   } catch (e) {
-//     print('❌ Error uploading lessons: $e');
+//     print(' Error uploading lessons: $e');
 //   }
 // }
 

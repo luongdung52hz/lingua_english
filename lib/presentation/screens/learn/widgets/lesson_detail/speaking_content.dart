@@ -60,7 +60,6 @@ class _SpeakingContentState extends State<SpeakingContent> {
     try {
       print('🔄 Bắt đầu khởi tạo speech recognition...');
 
-      // Bước 1: Kiểm tra quyền micro
       final micPermission = await Permission.microphone.status;
       print('🎤 Trạng thái quyền micro: $micPermission');
 
@@ -78,7 +77,6 @@ class _SpeakingContentState extends State<SpeakingContent> {
         }
       }
 
-      // Bước 2: Kiểm tra Speech Recognition có sẵn không
       bool hasRecognizer = await speech.hasPermission;
       print('📱 Có Speech Recognizer: $hasRecognizer');
 
@@ -92,7 +90,6 @@ class _SpeakingContentState extends State<SpeakingContent> {
         return;
       }
 
-      // Bước 3: Khởi tạo Speech-to-Text
       bool available = await speech.initialize(
         onStatus: (status) {
           print('📢 Trạng thái speech: $status');
@@ -134,7 +131,6 @@ class _SpeakingContentState extends State<SpeakingContent> {
       });
 
       if (mounted) {
-        // Kiểm tra loại lỗi cụ thể
         if (e.toString().contains('recognizerNotAvailable') ||
             e.toString().contains('not available on this device')) {
           _showGoogleAppInstallDialog();
@@ -292,10 +288,10 @@ class _SpeakingContentState extends State<SpeakingContent> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           LessonHeader(lesson: widget.lesson),
-          const SizedBox(height: 24),
+          const SizedBox(height: 14),
 
           _buildMicrophone(),
-          const SizedBox(height: 24),
+          const SizedBox(height: 10),
 
           if (!_speechInitialized) ...[
             _buildInitializationStatus(),
@@ -324,7 +320,7 @@ class _SpeakingContentState extends State<SpeakingContent> {
 
           if (sentences.isNotEmpty) ...[
             _buildSentencesSection(sentences),
-            const SizedBox(height: 24),
+            const SizedBox(height: 12),
           ],
 
           CompleteButton(
@@ -603,7 +599,7 @@ class _SpeakingContentState extends State<SpeakingContent> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('📚 Từ vựng mở rộng', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(' Từ vựng mở rộng', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
         ...vocabulary.map((word) {
           return Card(
@@ -642,10 +638,6 @@ class _SpeakingContentState extends State<SpeakingContent> {
                 const Icon(Icons.chat_bubble_outline, color: Colors.orange),
                 const SizedBox(width: 12),
                 Expanded(child: Text(sentence.toString(), style: const TextStyle(fontSize: 16))),
-                IconButton(
-                  icon: const Icon(Icons.play_circle_outline),
-                  onPressed: () {},
-                ),
               ],
             ),
           );

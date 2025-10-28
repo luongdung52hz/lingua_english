@@ -20,23 +20,56 @@ class HomeController extends GetxController {
 
   String get userId => _auth.currentUser?.uid ?? '';
 
-  //  NEW: Stream subscription for real-time updates
   StreamSubscription<DocumentSnapshot>? _userSubscription;
 
   @override
   void onInit() {
     super.onInit();
-    loadUserProgress();
-    _listenToUserChanges(); // ⭐ Lsten to real-time changes
+    _initialize();
   }
 
   @override
   void onClose() {
-    _userSubscription?.cancel(); //  Cancel subscription
+    _userSubscription?.cancel();
     super.onClose();
   }
 
-  ///  NEW: Listen to user document changes (real-time)
+  Future<void> _initialize() async {
+    await checkAndResetDaily();
+    await syncTotalLessons();
+    await loadUserProgress();
+    _listenToUserChanges();
+  }
+
+  Future<void> syncTotalLessons() async {
+    if (userId.isEmpty) return;
+
+    try {
+      final lessonsSnap = await firestore.collection('lessons').get();
+      final actualTotal = lessonsSnap.docs.length;
+
+      final userDoc = await firestore.collection('users').doc(userId).get();
+      if (!userDoc.exists) return;
+
+      final currentTotal = userDoc.data()?['totalLessons'] ?? 0;
+
+      if (currentTotal != actualTotal) {
+        final currentCompleted = userDoc.data()?['completedLessons'] ?? 0;
+        final newProgress = actualTotal > 0 ? (currentCompleted / actualTotal) * 100 : 0.0;
+
+        await firestore.collection('users').doc(userId).update({
+          'totalLessons': actualTotal,
+          'progress': newProgress,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+
+        print('Total lessons synced: $actualTotal');
+      }
+    } catch (e) {
+      print('Error syncing total lessons: $e');
+    }
+  }
+
   void _listenToUserChanges() {
     if (userId.isEmpty) return;
 
@@ -50,11 +83,10 @@ class HomeController extends GetxController {
         _updateLocalState(user);
       }
     }, onError: (error) {
-      print('❌ Error listening to user changes: $error');
+      print('Error listening to user changes: $error');
     });
   }
 
-  ///  NEW: Update local state from UserModel
   void _updateLocalState(UserModel user) {
     progressPercent.value = user.progress;
     completedLessons.value = user.completedLessons;
@@ -64,8 +96,34 @@ class HomeController extends GetxController {
     targetDaily.value = user.targetDaily;
     dailyStreak.value = user.dailyStreak;
     userName.value = user.name;
+  }
 
-    print('🔄 Home state updated: Daily ${user.dailyCompleted}/${user.targetDaily}, Streak: ${user.dailyStreak}');
+  Future<void> checkAndResetDaily() async {
+    if (userId.isEmpty) return;
+
+    try {
+      final doc = await firestore.collection('users').doc(userId).get();
+      if (!doc.exists) return;
+
+      final data = doc.data()!;
+      final lastResetDate = data['lastResetDate'] as Timestamp?;
+      final today = Timestamp.now();
+
+      if (lastResetDate == null || !_isSameDay(lastResetDate.toDate(), today.toDate())) {
+        await _resetDailyProgress();
+        await firestore.collection('users').doc(userId).update({
+          'lastResetDate': today,
+        });
+      }
+    } catch (e) {
+      print('Error checking daily reset: $e');
+    }
+  }
+
+  bool _isSameDay(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
   }
 
   Future<void> loadUserProgress() async {
@@ -73,32 +131,40 @@ class HomeController extends GetxController {
 
     try {
       final doc = await firestore.collection('users').doc(userId).get();
+
       if (doc.exists) {
         final user = UserModel.fromJson(doc.data()!);
         _updateLocalState(user);
       } else {
-        // Tạo user mới với default
-        final newUser = UserModel(
-          uid: userId,
-          name: _auth.currentUser?.displayName ?? 'User',
-          email: _auth.currentUser?.email ?? '',
-          level: 'A1',
-          progress: 0.0,
-          completedLessons: 0,
-          totalLessons: 100, //
-          score: 0,
-          dailyCompleted: 0,
-          targetDaily: 5,
-          dailyStreak: 0,
-          createdAt: Timestamp.now(),
-          updatedAt: Timestamp.now(),
-        );
-        await firestore.collection('users').doc(userId).set(newUser.toJson());
-        _updateLocalState(newUser);
+        await _createNewUser();
       }
     } catch (e) {
-      print('❌ Error loading user: $e');
+      print('Error loading user: $e');
     }
+  }
+
+  Future<void> _createNewUser() async {
+    final lessonsSnap = await firestore.collection('lessons').get();
+    final actualTotal = lessonsSnap.docs.length;
+
+    final newUser = UserModel(
+      uid: userId,
+      name: _auth.currentUser?.displayName ?? 'User',
+      email: _auth.currentUser?.email ?? '',
+      level: 'A1',
+      progress: 0.0,
+      completedLessons: 0,
+      totalLessons: actualTotal,
+      score: 0,
+      dailyCompleted: 0,
+      targetDaily: 5,
+      dailyStreak: 0,
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
+    );
+
+    await firestore.collection('users').doc(userId).set(newUser.toJson());
+    _updateLocalState(newUser);
   }
 
   Future<void> updateProgress({
@@ -110,7 +176,6 @@ class HomeController extends GetxController {
     if (userId.isEmpty) return;
 
     try {
-      // Kiểm tra nếu đạt daily goal, tăng streak
       int newStreak = dailyStreak.value;
       if (newDailyCompleted >= targetDaily.value) {
         newStreak = dailyStreak.value + 1;
@@ -122,22 +187,18 @@ class HomeController extends GetxController {
         'totalLessons': newTotal,
         'score': newScore,
         'dailyStreak': newStreak,
-        'progress': (newCompleted / newTotal) * 100, // ⭐ Calculate progress %
+        'progress': (newCompleted / newTotal) * 100,
         'updatedAt': FieldValue.serverTimestamp(),
       });
-
-      //  Không cần update local - stream sẽ tự động update
     } catch (e) {
-      print('❌ Error updating progress: $e');
+      print('Error updating progress: $e');
     }
   }
 
-  ///  UPDATED: Reset daily progress (gọi vào 00:00 mỗi ngày)
-  Future<void> resetDailyProgress() async {
+  Future<void> _resetDailyProgress() async {
     if (userId.isEmpty) return;
 
     try {
-      // Lấy data hiện tại
       final doc = await firestore.collection('users').doc(userId).get();
       if (!doc.exists) return;
 
@@ -146,28 +207,23 @@ class HomeController extends GetxController {
       final targetDaily = data['targetDaily'] ?? 5;
       final currentStreak = data['dailyStreak'] ?? 0;
 
-      // Nếu không đạt goal hôm qua → reset streak
       int newStreak = currentStreak;
       if (currentDaily < targetDaily) {
         newStreak = 0;
-        print('⚠️ Streak reset! Did not reach daily goal yesterday.');
       }
 
-      // Reset daily completed
       await firestore.collection('users').doc(userId).update({
         'dailyCompleted': 0,
         'dailyStreak': newStreak,
         'updatedAt': FieldValue.serverTimestamp(),
       });
-
-      print('🔄 Daily progress reset. Streak: $newStreak');
     } catch (e) {
-      print('❌ Error resetting daily progress: $e');
+      print('Error resetting daily progress: $e');
     }
   }
 
-  ///  NEW: Manual refresh (pull-to-refresh)
   Future<void> refresh() async {
+    await syncTotalLessons();
     await loadUserProgress();
   }
 

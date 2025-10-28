@@ -73,22 +73,13 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(lesson!.title),
-        actions: [
-          Chip(
-            label: Text(
-              lesson!.skill.toUpperCase(),
-              style: const TextStyle(color: Colors.white, fontSize: 12),
-            ),
-            backgroundColor: _getSkillColor(lesson!.skill),
-          ),
-          const SizedBox(width: 16),
-        ],
+        backgroundColor: Colors.white,
+
       ),
       body: _buildContentBySkill(),
     );
   }
 
-  /// Route đến widget tương ứng theo skill
   Widget _buildContentBySkill() {
     switch (lesson!.skill) {
       case 'listening':
