@@ -452,10 +452,9 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
 
   Widget _buildLessonCard(LessonModel lesson) {
     return Card(
-      elevation: 2,
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.symmetric(vertical: 4), // Giảm margin để card nhỏ hơn
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        contentPadding: const EdgeInsets.all(8), // Giảm padding để gọn
         title: Text(
           lesson.title,
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -463,39 +462,38 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 2),
-            if (lesson.description.isNotEmpty)
+            if (lesson.description.isNotEmpty) ...[ // Sửa: lesson.description
+              const SizedBox(height: 2),
               Text(
-                lesson.description,
+                lesson.description, // Sửa: lesson.description
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 13, color: Colors.grey),
               ),
-            const SizedBox(height: 8),
+              const SizedBox(height: 4),
+            ],
             Wrap(
-              spacing: 8,
-              runSpacing: 4,
+              spacing: 1 ,// Giảm spacing để ngắn
+              runSpacing: 0, // Không run spacing để sát
               children: [
                 Chip(
                   label: Text(lesson.level, style: const TextStyle(fontSize: 10)),
-                  backgroundColor: Colors.blue[100],
+                  backgroundColor: Colors.transparent, // Xóa màu, chỉ viền
+                  side: const BorderSide(color: AppColors.primary, width: 0.5), // Viền mỏng
                   padding: EdgeInsets.zero,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
                 Chip(
-                  label: Text(
-                    lesson.skill.toUpperCase(),
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                  backgroundColor: Colors.green[100],
+                  label: Text(lesson.skill.toUpperCase(), style: const TextStyle(fontSize: 10)),
+                  backgroundColor: Colors.transparent,
+                  side: const BorderSide(color: AppColors.primary, width: 0.5),
                   padding: EdgeInsets.zero,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
                 if (lesson.topic.isNotEmpty)
                   Chip(
-                    label: Text(lesson.topic, style: const TextStyle(fontSize: 12)),
-                    backgroundColor: Colors.orange[100],
+                    label: Text(lesson.topic, style: const TextStyle(fontSize: 10)),
+                    backgroundColor: Colors.transparent,
+                    side: const BorderSide(color: AppColors.primary, width: 0.5),
                     padding: EdgeInsets.zero,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
               ],
             ),
@@ -505,21 +503,18 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
-              icon: const Icon(Icons.edit, color: Colors.blue),
-              onPressed: () => controller.showEditDialog(context, lesson),
-              tooltip: 'Sửa',
+              icon: Icon(Icons.edit, color: Colors.blue[400], size: 28),
+              onPressed: () => controller.showEditDialog(context, lesson), // Giả sử controller
             ),
             IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
+              icon: Icon(Icons.delete, color: Colors.red[400], size: 28),
               onPressed: () => controller.deleteLesson(context, lesson.id),
-              tooltip: 'Xóa',
             ),
           ],
         ),
       ),
     );
   }
-
   Widget _buildEmptyState() {
     return Center(
       child: Column(
