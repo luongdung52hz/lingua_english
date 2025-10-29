@@ -53,7 +53,6 @@ class LessonDemoData {
       duration: 8,
       difficulty: 1,
       content: {
-        'audioUrl': 'https://example.com/audio/greetings.mp3',
         'transcript': 'Good morning! How are you today? I am fine, thank you.',
         'questions': [
           {
@@ -75,7 +74,6 @@ class LessonDemoData {
       duration: 10,
       difficulty: 1,
       content: {
-        'audioUrl': 'https://example.com/audio/intro.mp3',
         'transcript': 'Hello, my name is John. I am 25 years old. I am from Vietnam.',
         'questions': [
           {
@@ -103,7 +101,6 @@ class LessonDemoData {
       duration: 7,
       difficulty: 1,
       content: {
-        'audioUrl': 'https://example.com/audio/health.mp3',
         'transcript': 'A: How are you feeling today? B: I am very well, thanks!',
         'questions': [
           {
@@ -127,7 +124,6 @@ class LessonDemoData {
       duration: 10,
       difficulty: 1,
       content: {
-        'audioUrl': 'https://example.com/audio/family.mp3',
         'transcript': 'This is my father. He is 45 years old. My mother is a teacher.',
         'questions': [
           {
@@ -149,7 +145,6 @@ class LessonDemoData {
       duration: 9,
       difficulty: 1,
       content: {
-        'audioUrl': 'https://example.com/audio/siblings.mp3',
         'transcript': 'I have one brother and two sisters. My brother is older than me.',
         'questions': [
           {
@@ -173,7 +168,6 @@ class LessonDemoData {
       duration: 10,
       difficulty: 1,
       content: {
-        'audioUrl': 'https://example.com/audio/morning.mp3',
         'transcript': 'I wake up at 7 AM. I brush my teeth and have breakfast.',
         'questions': [
           {
@@ -267,7 +261,6 @@ class LessonDemoData {
           'My mother is a teacher.',
           'I have one sister.',
         ],
-        'audioExample': 'https://example.com/audio/family_speak.mp3',
       },
     ),
 
@@ -474,7 +467,6 @@ Best regards,
       duration: 12,
       difficulty: 2,
       content: {
-        'audioUrl': 'https://example.com/audio/shopping.mp3',
         'transcript': '''
 Customer: How much is this shirt?
 Seller: It's 20 dollars.
@@ -503,7 +495,6 @@ Seller: Yes, we do. Here you are.
       duration: 10,
       difficulty: 2,
       content: {
-        'audioUrl': 'https://example.com/audio/routine.mp3',
         'transcript': 'I wake up at 6 AM. I go to work at 8 AM. I come home at 5 PM.',
         'questions': [
           {
@@ -627,7 +618,6 @@ In the evening, I watch TV or read books. I go to bed at 10 PM.
       duration: 15,
       difficulty: 3,
       content: {
-        'audioUrl': 'https://example.com/audio/news.mp3',
         'transcript': '''
 Good evening. Here is the weather forecast.
 Tomorrow will be sunny in the morning with temperatures around 25 degrees.

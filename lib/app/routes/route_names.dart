@@ -4,6 +4,8 @@ class Routes {
   static const splash = '/';
   static const onboarding = '/onboarding';
   static const home = '/home';
+  static const admin = '/admin';
+
 
   // Auth
   static const login = '/auth/login';

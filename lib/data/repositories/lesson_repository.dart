@@ -113,7 +113,7 @@ class LessonRepository {
       'timeSpent': 0,
       'level': level,
       'skill': skill,
-      if (topic != null) 'topic': topic, // Thêm topic nếu có
+      if (topic != null) 'topic': topic,
       'startedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
   }

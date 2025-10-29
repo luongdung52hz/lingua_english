@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -63,6 +60,18 @@ class DefaultFirebaseOptions {
     messagingSenderId: '982053562617',
     projectId: 'learnenglishapp-50c96',
     storageBucket: 'learnenglishapp-50c96.firebasestorage.app',
+    androidClientId: '982053562617-ieesthu9se3dsqagd2v85i3arikccpun.apps.googleusercontent.com',
+    iosClientId: '982053562617-0elqbte62pv1m8rpr33stism8lh2sudm.apps.googleusercontent.com',
     iosBundleId: 'com.example.learnEnglish',
   );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyB2dhrLnTjkXxSvfbLmCQA_UeT_CaXvLMA',
+    appId: '1:982053562617:web:d11b02e2d3f35ea21a1a28',
+    messagingSenderId: '982053562617',
+    projectId: 'learnenglishapp-50c96',
+    authDomain: 'learnenglishapp-50c96.firebaseapp.com',
+    storageBucket: 'learnenglishapp-50c96.firebasestorage.app',
+  );
+
 }

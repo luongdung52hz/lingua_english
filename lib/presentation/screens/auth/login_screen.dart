@@ -18,37 +18,116 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final emailCtrl = TextEditingController();
+  final emailOrUsernameCtrl = TextEditingController();
   final passCtrl = TextEditingController();
-  bool isPasswordVisible = false;
-  bool isEmailValid = false;
-  bool isPasswordValid = false;
 
-  final FocusNode emailFocus = FocusNode();
+  bool isPasswordVisible = false;
+  bool isInputValid = false;
+  bool isPasswordValid = false;
+  bool isEmailMode = true; // true = Email, false = Username
+
+  final FocusNode emailOrUsernameFocus = FocusNode();
   final FocusNode passFocus = FocusNode();
 
-  Color emailIconColor = const Color(0xffc1d6d3);
+  Color inputIconColor = const Color(0xffc1d6d3);
   Color passIconColor = const Color(0xffc1d6d3);
 
-  bool emailIsFocus = false;
+  bool inputIsFocus = false;
   bool passIsFocus = false;
   bool loading = false;
   bool loadingGoogle = false;
   final FirebaseAuth _auth = GetIt.I<FirebaseAuth>();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  // Check if input is email
+  bool _isEmail(String input) {
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    return emailRegex.hasMatch(input.trim());
+  }
+
+  // Get email from username
+  Future<String?> _getEmailFromUsername(String username) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('users')
+          .where('name', isEqualTo: username.trim())
+          .limit(1)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        return querySnapshot.docs.first.data()['email'] as String?;
+      }
+      return null;
+    } catch (e) {
+      print('Error getting email from username: $e');
+      return null;
+    }
+  }
 
   Future<void> _loginEmail() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => loading = true);
+
     try {
+      String email = emailOrUsernameCtrl.text.trim();
+
+      // If username mode, get email from username
+      if (!isEmailMode) {
+        final emailFromUsername = await _getEmailFromUsername(email);
+        if (emailFromUsername == null) {
+          throw FirebaseAuthException(
+            code: 'user-not-found',
+            message: 'Không tìm thấy tài khoản với tên người dùng này',
+          );
+        }
+        email = emailFromUsername;
+      }
+
       await _auth.signInWithEmailAndPassword(
-        email: emailCtrl.text.trim(),
+        email: email,
         password: passCtrl.text.trim(),
       );
+
       if (mounted) context.go(Routes.home);
     } on FirebaseAuthException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message ?? "Đăng nhập thất bại")),
-      );
+      String errorMessage = "Đăng nhập thất bại";
+
+      switch (e.code) {
+        case 'user-not-found':
+          errorMessage = isEmailMode
+              ? 'Không tìm thấy tài khoản với email này'
+              : 'Không tìm thấy tài khoản với tên người dùng này';
+          break;
+        case 'wrong-password':
+          errorMessage = 'Mật khẩu không đúng';
+          break;
+        case 'invalid-email':
+          errorMessage = 'Email không hợp lệ';
+          break;
+        case 'user-disabled':
+          errorMessage = 'Tài khoản đã bị vô hiệu hóa';
+          break;
+        default:
+          errorMessage = e.message ?? "Đăng nhập thất bại";
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     } finally {
       if (mounted) setState(() => loading = false);
     }
@@ -65,7 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
         final uid = user?.uid ?? '';
 
         if (uid.isNotEmpty) {
-          final userDocRef = FirebaseFirestore.instance.collection('users').doc(uid);
+          final userDocRef = _firestore.collection('users').doc(uid);
           final userDoc = await userDocRef.get();
 
           if (!userDoc.exists) {
@@ -120,19 +199,31 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  void _toggleLoginMode() {
+    setState(() {
+      isEmailMode = !isEmailMode;
+      emailOrUsernameCtrl.clear();
+      isInputValid = false;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
-    emailFocus.addListener(() {
+    emailOrUsernameFocus.addListener(() {
       setState(() {
-        emailIsFocus = emailFocus.hasFocus;
-        emailIconColor = (emailFocus.hasFocus
+        inputIsFocus = emailOrUsernameFocus.hasFocus;
+        inputIconColor = (emailOrUsernameFocus.hasFocus
             ? Colors.blue[200]
             : Colors.grey)!;
-        final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-        isEmailValid =
-            emailRegex.hasMatch(emailCtrl.text.trim()) &&
-                emailCtrl.text.isNotEmpty;
+
+        _validateInput();
+      });
+    });
+
+    emailOrUsernameCtrl.addListener(() {
+      setState(() {
+        _validateInput();
       });
     });
 
@@ -144,13 +235,26 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
+  void _validateInput() {
+    final input = emailOrUsernameCtrl.text.trim();
+    if (input.isEmpty) {
+      isInputValid = false;
+      return;
+    }
+
+    if (isEmailMode) {
+      isInputValid = _isEmail(input);
+    } else {
+      isInputValid = input.length >= 3;
+    }
+  }
+
   @override
   void dispose() {
-    emailCtrl.dispose();
+    emailOrUsernameCtrl.dispose();
     passCtrl.dispose();
-    emailFocus.dispose();
+    emailOrUsernameFocus.dispose();
     passFocus.dispose();
-    emailCtrl.removeListener(() {});
     super.dispose();
   }
 
@@ -190,21 +294,108 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 30),
 
-                  // Email Field
+                  // Toggle Button
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              if (!isEmailMode) _toggleLoginMode();
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              decoration: BoxDecoration(
+                                color: isEmailMode ? AppColors.primary : Colors.transparent,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.email,
+                                    size: 18,
+                                    color: isEmailMode ? Colors.white : Colors.grey[600],
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Email',
+                                    style: TextStyle(
+                                      color: isEmailMode ? Colors.white : Colors.grey[600],
+                                      fontWeight: isEmailMode ? FontWeight.bold : FontWeight.normal,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: () {
+                              if (isEmailMode) _toggleLoginMode();
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              decoration: BoxDecoration(
+                                color: !isEmailMode ? AppColors.primary : Colors.transparent,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.person,
+                                    size: 18,
+                                    color: !isEmailMode ? Colors.white : Colors.grey[600],
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Username',
+                                    style: TextStyle(
+                                      color: !isEmailMode ? Colors.white : Colors.grey[600],
+                                      fontWeight: !isEmailMode ? FontWeight.bold : FontWeight.normal,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Email or Username Field
                   TextFormField(
-                    controller: emailCtrl,
-                    focusNode: emailFocus,
+                    controller: emailOrUsernameCtrl,
+                    focusNode: emailOrUsernameFocus,
                     autovalidateMode: AutovalidateMode.onUserInteraction,
+                    key: ValueKey(isEmailMode), // Reset field when mode changes
                     decoration: InputDecoration(
-                      hintText: "Email của bạn",
-                      prefixIcon: Icon(
-                        Icons.email,
-                        size: 24,
-                        color: emailIconColor,
+                      hintText: isEmailMode ? "Email của bạn" : "Tên người dùng",
+                      helperText: isEmailMode
+                          ? "VD: user@example.com"
+                          : "VD: john_doe (tối thiểu 3 ký tự)",
+                      helperStyle: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
                       ),
-                      suffixIcon: isEmailValid
+                      prefixIcon: Icon(
+                        isEmailMode ? Icons.email : Icons.person,
+                        size: 24,
+                        color: inputIconColor,
+                      ),
+                      suffixIcon: isInputValid
                           ? Icon(Icons.check, color: Colors.green, size: 24)
-                          : (emailCtrl.text.isNotEmpty && !isEmailValid)
+                          : (emailOrUsernameCtrl.text.isNotEmpty && !isInputValid)
                           ? Icon(Icons.error, color: Colors.red, size: 24)
                           : null,
                       border: OutlineInputBorder(
@@ -213,7 +404,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide(
-                          color: isEmailValid ? Colors.blue : Colors.grey,
+                          color: isInputValid ? Colors.blue : Colors.grey,
                           width: 1,
                         ),
                       ),
@@ -230,12 +421,26 @@ class _LoginScreenState extends State<LoginScreen> {
                       fillColor: Colors.grey[50],
                     ),
                     validator: (v) {
-                      if (v == null || v.isEmpty) return "Nhập email";
-                      final emailRegex = RegExp(
-                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                      );
-                      if (!emailRegex.hasMatch(v.trim()))
-                        return "Email không hợp lệ";
+                      if (v == null || v.isEmpty) {
+                        return isEmailMode
+                            ? "Nhập email"
+                            : "Nhập tên người dùng";
+                      }
+
+                      final trimmed = v.trim();
+
+                      if (isEmailMode) {
+                        final emailRegex = RegExp(
+                          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                        );
+                        if (!emailRegex.hasMatch(trimmed)) {
+                          return "Email không hợp lệ";
+                        }
+                      } else {
+                        if (trimmed.length < 3) {
+                          return "Tên người dùng tối thiểu 3 ký tự";
+                        }
+                      }
                       return null;
                     },
                   ),
@@ -387,25 +592,25 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 68),
                   Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Chưa có tài khoản?",
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Chưa có tài khoản?",
+                        style: TextStyle(
+                          color: AppColors.grey,
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () => context.go(Routes.register),
+                        child: const Text(
+                          "Đăng ký",
                           style: TextStyle(
-                            color: AppColors.grey,
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w900,
                           ),
                         ),
-                        TextButton(
-                          onPressed: () => context.go(Routes.register),
-                          child: const Text(
-                            "Đăng ký",
-                            style: TextStyle(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w900
-                            ),
-                          ),
-                        ),
-                      ]
+                      ),
+                    ],
                   )
                 ],
               ),

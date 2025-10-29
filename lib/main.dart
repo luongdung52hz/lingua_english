@@ -14,13 +14,8 @@ import 'firebase_options.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'demo/lesson_demo_data.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-// Thêm imports cho audio upload
-import 'dart:io';
-import 'dart:typed_data';
-import 'package:flutter/services.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:path/path.dart' as path;
-import 'package:flutter/foundation.dart';  // Để check kDebugMode
+import 'package:firebase_auth/firebase_auth.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,10 +33,39 @@ void main() async {
   // Hive.registerAdapter(UserModelAdapter());
   await initDependencies();
   print(' AppRouter.router: ${AppRouter.router.toString()}');
-
+  //await createAdmin();
   // Upload demo lessons to Firestore (bỏ comment để chạy)
   // await uploadDemoLessons();
   runApp(const MyApp());
+
+}
+
+// Trong main.dart hoặc script riêng
+Future<void> createAdmin() async {
+  final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+    email: 'admin@gmail.com',
+    password: '123456',
+  );
+
+  final adminUid = userCredential.user!.uid;
+  await FirebaseFirestore.instance.collection('users').doc(adminUid).set({
+    'uid': adminUid,
+    'email': 'admin@gmail.com',
+    'name': 'Admin',
+    'role': 'admin',
+    'level': 'A1',
+    'progress': 0.0,
+    'completedLessons': 0,
+    'totalLessons': 100,
+    'dailyCompleted': 0,
+    'targetDaily': 5,
+    'dailyStreak': 0,
+    'score': 0,
+    'createdAt': FieldValue.serverTimestamp(),
+    'updatedAt': FieldValue.serverTimestamp(),
+  });
+
+  print('Admin created: UID = $adminUid');
 }
 
 // Future<void> uploadDemoLessons() async {
