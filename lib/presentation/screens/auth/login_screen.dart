@@ -165,7 +165,7 @@ class _LoginScreenState extends State<LoginScreen> {
               'createdAt': FieldValue.serverTimestamp(),
               'updatedAt': FieldValue.serverTimestamp(),
             });
-            print('✅ [Google Login] New user created');
+            print(' [Google Login] New user created');
           } else {
             await userDocRef.update({
               'name': user?.displayName ?? userDoc.data()?['name'],
@@ -175,7 +175,7 @@ class _LoginScreenState extends State<LoginScreen> {
               'updatedAt': FieldValue.serverTimestamp(),
             });
             final progress = userDoc.data()?['completedLessons'] ?? 0;
-            print('✅ [Google Login] Existing user, progress preserved: $progress lessons');
+            print(' [Google Login] Existing user, progress preserved: $progress lessons');
           }
         }
 
@@ -188,7 +188,7 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       }
     } catch (e) {
-      print('❌ [Google Login] Error: $e');
+      print(' [Google Login] Error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Lỗi: $e')),
@@ -264,7 +264,7 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SingleChildScrollView(
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(10),
             child: Form(
               key: _formKey,
               child: Column(
@@ -381,9 +381,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     key: ValueKey(isEmailMode), // Reset field when mode changes
                     decoration: InputDecoration(
                       hintText: isEmailMode ? "Email của bạn" : "Tên người dùng",
-                      helperText: isEmailMode
-                          ? "VD: user@example.com"
-                          : "VD: john_doe (tối thiểu 3 ký tự)",
+
                       helperStyle: TextStyle(
                         fontSize: 12,
                         color: Colors.grey[600],
@@ -590,7 +588,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 68),
+                  const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

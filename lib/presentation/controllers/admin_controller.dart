@@ -395,13 +395,8 @@ class AdminController extends ChangeNotifier {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Trắc nghiệm',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
+
+
             ElevatedButton.icon(
               onPressed: () {
                 setState(() => _addQuestion());
@@ -413,8 +408,7 @@ class AdminController extends ChangeNotifier {
                 foregroundColor: Colors.white,
               ),
             ),
-          ],
-        ),
+
         const SizedBox(height: 12),
         ...List.generate(questionControllers.length, (index) {
           return _buildQuestionCard(index, setState);

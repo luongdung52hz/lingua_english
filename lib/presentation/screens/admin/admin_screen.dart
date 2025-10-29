@@ -97,7 +97,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Admin - Quản Lý Bài Học',
+          ' Quản Lý Bài Học',
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: AppColors.primary,
@@ -107,14 +107,6 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
           onPressed: () => controller.logout(context),
           tooltip: 'Đăng xuất',
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white),
-            onPressed: () => controller.logout(context),
-            tooltip: 'Đăng xuất',
-          ),
-          const SizedBox(width: 8),
-        ],
         bottom: TabBar(
           controller: _tabController,
           labelColor: Colors.white,
@@ -471,7 +463,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
             if (lesson.description.isNotEmpty)
               Text(
                 lesson.description,
@@ -484,7 +476,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
               runSpacing: 4,
               children: [
                 Chip(
-                  label: Text(lesson.level, style: const TextStyle(fontSize: 12)),
+                  label: Text(lesson.level, style: const TextStyle(fontSize: 10)),
                   backgroundColor: Colors.blue[100],
                   padding: EdgeInsets.zero,
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
