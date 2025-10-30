@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:learn_english/presentation/screens/chat/chat_screen.dart';
 import 'package:learn_english/presentation/screens/learn/learn_screen.dart';
+import 'package:learn_english/presentation/screens/pdf/pdf_screen.dart';
 import 'package:learn_english/presentation/screens/profile/profile_screen.dart';
 
 
@@ -131,6 +132,12 @@ class AppRouter {
       GoRoute(
         path: Routes.login,
         builder: (context, state) => const LoginScreen(),
+      ),
+
+      /// PDF
+      GoRoute(
+        path: Routes.pdf,
+        builder: (context, state) => const PdfUploadPage(),
       ),
 
       /// ADMIN

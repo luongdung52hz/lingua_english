@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
+import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../../data/models/lesson_model.dart';
 import './shared/lesson_header.dart';
 import './shared/question_list.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 class ListeningContent extends StatefulWidget {
   final LessonModel lesson;
@@ -21,10 +23,6 @@ class ListeningContent extends StatefulWidget {
 class _ListeningContentState extends State<ListeningContent> {
   FlutterTts? _flutterTts;
   bool _isPlaying = false;
-  bool _isInitializing = false;
-  int _initRetryCount = 0;
-  static const int _maxRetries = 2;
-
   double _speechRate = 0.5;
   final Map<String, double> _speedOptions = {
     'Rất chậm': 0.3,
@@ -35,96 +33,44 @@ class _ListeningContentState extends State<ListeningContent> {
   };
 
   @override
+  void initState() {
+    super.initState();
+    _initTts();
+  }
+
+  @override
   void dispose() {
     _flutterTts?.stop();
     _flutterTts = null;
     super.dispose();
   }
 
-  Future<bool> _ensureTtsInitialized({bool retry = false}) async {
-    if (_flutterTts != null && _initRetryCount < _maxRetries) return true;
+  Future<void> _initTts() async {
+    _flutterTts = FlutterTts();
 
-    if (_isInitializing) {
-      _showMessage('Đang khởi tạo TTS, vui lòng đợi...');
-      return false;
-    }
+    _flutterTts!.setStartHandler(() {
+      if (mounted) setState(() => _isPlaying = true);
+    });
+    _flutterTts!.setCompletionHandler(() {
+      if (mounted) setState(() => _isPlaying = false);
+    });
+    _flutterTts!.setCancelHandler(() {
+      if (mounted) setState(() => _isPlaying = false);
+    });
+    _flutterTts!.setErrorHandler((msg) {
+      if (mounted) setState(() => _isPlaying = false);
+    });
 
-    setState(() => _isInitializing = true);
-
-    try {
-      print(' Initializing TTS (retry: $retry)...');
-
-      if (retry && _flutterTts != null) {
-        await _flutterTts!.stop();
-        _flutterTts = null;
-      }
-
-      _flutterTts = FlutterTts();
-      _initRetryCount = 0;
-
-      _flutterTts!.setStartHandler(() {
-        print(' TTS Started');
-        if (mounted) setState(() => _isPlaying = true);
-      });
-
-      _flutterTts!.setCompletionHandler(() {
-        print(' TTS Completed');
-        if (mounted) setState(() => _isPlaying = false);
-      });
-
-      _flutterTts!.setCancelHandler(() {
-        print(' TTS Cancelled');
-        if (mounted) setState(() => _isPlaying = false);
-      });
-
-      _flutterTts!.setErrorHandler((msg) {
-        print(' TTS Error: $msg');
-        if (mounted) setState(() => _isPlaying = false);
-        if (msg.contains('not bound') || msg.contains('isLanguageAvailable failed')) {
-          _initRetryCount++;
-          _showMessage('TTS chưa bind. Thử lại (lần ${_initRetryCount}/$_maxRetries)');
-        } else {
-          _showMessage('Lỗi TTS: $msg');
-        }
-      });
-
-      final engines = await _flutterTts!.getEngines;
-      print(' Available TTS engines: ${engines.length}');
-      if (engines.isEmpty) {
-        throw Exception('No TTS engine installed. Install Google TTS from Play Store.');
-      }
-
-      await _flutterTts!.setVolume(1.0);
-      await _flutterTts!.setSpeechRate(_speechRate);
-      await _flutterTts!.setPitch(1.0);
-      await _flutterTts!.awaitSpeakCompletion(true);
-
-      print(' TTS initialized successfully');
-      if (mounted) setState(() => _isInitializing = false);
-      return true;
-    } catch (e) {
-      print(' TTS init failed: $e');
-      _initRetryCount++;
-      if (mounted) {
-        setState(() => _isInitializing = false);
-        _showMessage('Khởi tạo TTS fail: $e. Thử lại? (Lần ${_initRetryCount}/$_maxRetries)');
-      }
-      if (_initRetryCount < _maxRetries && retry) {
-        await Future.delayed(const Duration(seconds: 1));
-        return await _ensureTtsInitialized(retry: true);
-      }
-      return false;
-    }
+    await _flutterTts!.setLanguage('en-US');
+    await _flutterTts!.setSpeechRate(_speechRate);
+    await _flutterTts!.setVolume(1.0);
+    await _flutterTts!.setPitch(1.0);
+    await _flutterTts!.awaitSpeakCompletion(true);
   }
 
   Future<void> _changeSpeechRate(double newRate) async {
-    setState(() => _speechRate = newRate);
-
-    if (_flutterTts != null) {
-      await _flutterTts!.setSpeechRate(newRate);
-      print('🎚 Speech rate changed to: $newRate');
-      _showMessage('Đã thay đổi tốc độ đọc');
-    }
+    _speechRate = newRate;
+    await _flutterTts?.setSpeechRate(newRate);
   }
 
   void _showSpeedMenu() {
@@ -138,35 +84,14 @@ class _ListeningContentState extends State<ListeningContent> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              ' Chọn tốc độ đọc',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            const Text('Chọn tốc độ đọc', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
             ..._speedOptions.entries.map((entry) {
               final isSelected = _speechRate == entry.value;
               return ListTile(
-                leading: Icon(
-                  isSelected ? Icons.check_circle : Icons.circle_outlined,
-                  color: isSelected ? Colors.blue : Colors.grey,
-                ),
-                title: Text(
-                  entry.key,
-                  style: TextStyle(
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    color: isSelected ? Colors.blue : Colors.black,
-                  ),
-                ),
-                trailing: Text(
-                  '${entry.value}x',
-                  style: TextStyle(
-                    color: isSelected ? Colors.blue : Colors.grey,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  ),
-                ),
+                leading: Icon(isSelected ? Icons.check_circle : Icons.circle_outlined, color: isSelected ? Colors.blue : Colors.grey),
+                title: Text(entry.key, style: TextStyle(color: isSelected ? Colors.blue : Colors.black)),
+                trailing: Text('${entry.value}x', style: TextStyle(color: isSelected ? Colors.blue : Colors.grey)),
                 onTap: () {
                   _changeSpeechRate(entry.value);
                   Navigator.pop(context);
@@ -180,54 +105,20 @@ class _ListeningContentState extends State<ListeningContent> {
   }
 
   Future<void> _toggleSpeech(String transcript) async {
-    if (transcript.isEmpty) {
-      _showMessage('Không có nội dung để đọc');
-      return;
-    }
-
-    final ready = await _ensureTtsInitialized(retry: true);
-    if (!ready) return;
+    if (transcript.isEmpty) return;
 
     try {
       await _flutterTts!.setLanguage('en-US');
 
       if (_isPlaying) {
-        print(' Stopping TTS...');
         await _flutterTts!.stop();
-        if (mounted) setState(() => _isPlaying = false);
+        setState(() => _isPlaying = false);
       } else {
-        print(' Speaking: ${transcript.substring(0, transcript.length > 50 ? 50 : transcript.length)}...');
-
-        final result = await _flutterTts!.speak(transcript);
-        print(' Speak initiated with result: $result');
-        if (result != 1) {
-          _showMessage('Speak failed (code: $result). Check TTS engine.');
-        }
+        await _flutterTts!.speak(transcript);
+        setState(() => _isPlaying = true);
       }
     } catch (e) {
-      print(' Speech error: $e');
-      if (mounted) {
-        setState(() => _isPlaying = false);
-        _showMessage('Lỗi phát âm: $e');
-      }
-    }
-  }
-
-  void _showMessage(String message) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          duration: const Duration(seconds: 3),
-          action: SnackBarAction(
-            label: 'Thử lại',
-            onPressed: () {
-              _initRetryCount = 0;
-              _toggleSpeech(widget.lesson.content['transcript'] ?? '');
-            },
-          ),
-        ),
-      );
+      setState(() => _isPlaying = false);
     }
   }
 
@@ -237,8 +128,6 @@ class _ListeningContentState extends State<ListeningContent> {
     final transcript = content['transcript'] ?? '';
     final questions = content['questions'] as List? ?? [];
 
-    final isDisabled = _isInitializing || transcript.isEmpty;
-
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -246,16 +135,10 @@ class _ListeningContentState extends State<ListeningContent> {
         children: [
           LessonHeader(lesson: widget.lesson),
           const SizedBox(height: 14),
-
-          // Audio Player
-          _buildTtsPlayer(transcript, isDisabled),
+          _buildTtsPlayer(transcript),
           const SizedBox(height: 10),
-
-          // Transcript
           _buildTranscript(transcript),
           const SizedBox(height: 10),
-
-          // Questions
           if (questions.isNotEmpty)
             QuestionList(
               questions: questions,
@@ -267,21 +150,18 @@ class _ListeningContentState extends State<ListeningContent> {
     );
   }
 
-  Widget _buildTtsPlayer(String transcript, bool isDisabled) {
+  Widget _buildTtsPlayer(String transcript) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: isDisabled
-              ? [Colors.grey.shade400, Colors.grey.shade600]
-              : [Colors.blue.shade400, Colors.blue.shade600],
+          colors: [Colors.blue[400]!, Colors.blue[600]!],
         ),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         children: [
-          // Speed control button
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -296,11 +176,7 @@ class _ListeningContentState extends State<ListeningContent> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
-                        Icons.speed,
-                        color: Colors.white,
-                        size: 14,
-                      ),
+                      const Icon(Icons.speed, color: Colors.white, size: 14),
                       const SizedBox(width: 6),
                       Text(
                         '${_speechRate}x',
@@ -311,18 +187,13 @@ class _ListeningContentState extends State<ListeningContent> {
                         ),
                       ),
                       const SizedBox(width: 4),
-                      const Icon(
-                        Icons.arrow_drop_down,
-                        color: Colors.white,
-                        size: 12,
-                      ),
+                      const Icon(Icons.arrow_drop_down, color: Colors.white, size: 12),
                     ],
                   ),
                 ),
               ),
             ],
           ),
-
           Icon(
             _isPlaying ? Icons.pause : Icons.play_arrow,
             size: 50,
@@ -330,13 +201,7 @@ class _ListeningContentState extends State<ListeningContent> {
           ),
           const SizedBox(height: 6),
           Text(
-            _isPlaying
-                ? ' Đang đọc transcript...'
-                : _isInitializing
-                ? ' Đang khởi tạo TTS...'
-                : transcript.isEmpty
-                ? ' Không có transcript'
-                : ' Nhấn để nghe transcript',
+            _isPlaying ? 'Đang đọc transcript...' : 'Nhấn để nghe transcript',
             style: const TextStyle(color: Colors.white70, fontSize: 14),
             textAlign: TextAlign.center,
           ),
@@ -344,28 +209,17 @@ class _ListeningContentState extends State<ListeningContent> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
-              onPressed: isDisabled ? null : () => _toggleSpeech(transcript),
+              onPressed: () => _toggleSpeech(transcript),
               icon: Icon(_isPlaying ? Icons.pause : Icons.play_arrow),
-              label: Text(_isPlaying ? 'TẠM DỪNG' : 'ĐỌC TRANSCRIPT'),
+              label: Text(_isPlaying ? 'Tạm dừng' : 'Đọc transcript'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
-                foregroundColor: Colors.blue.shade600,
-                disabledBackgroundColor: Colors.white54,
-                disabledForegroundColor: Colors.blue.shade300,
+                foregroundColor: Colors.blue[600],
                 padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               ),
             ),
           ),
-          if (isDisabled && !_isPlaying) ...[
-            const SizedBox(height: 8),
-            TextButton(
-              onPressed: () => _ensureTtsInitialized(retry: true),
-              child: const Text('Khởi tạo lại', style: TextStyle(color: Colors.white)),
-            ),
-          ],
         ],
       ),
     );
@@ -373,12 +227,12 @@ class _ListeningContentState extends State<ListeningContent> {
 
   Widget _buildTranscript(String transcript) {
     return ExpansionTile(
-      title: const Text(' Xem Transcript'),
+      title: const Text('Xem Transcript'),
       children: [
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.grey.shade100,
+            color: Colors.grey[100],
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(

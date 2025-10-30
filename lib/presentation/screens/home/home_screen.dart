@@ -134,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           icon: Icons.book,
                           color: Colors.yellow,
                           onTap: () {
-                            context.go(Routes.chat);
+                            context.go(Routes.pdf);
                           },
                         ),
                         SkillCard(

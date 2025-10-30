@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../../../data/models/lesson_model.dart';
+import '../../../../../../resources/styles/colors.dart';
 import './complete_button.dart';
 
 class QuestionList extends StatefulWidget {
@@ -20,28 +21,108 @@ class QuestionList extends StatefulWidget {
 
 class _QuestionListState extends State<QuestionList> {
   final Map<String, String> userAnswers = {};
+  int currentQuestionIndex = 0;
+
+  void _nextQuestion() {
+    if (currentQuestionIndex < widget.questions.length - 1) {
+      setState(() {
+        currentQuestionIndex++;
+      });
+    }
+  }
+
+  void _previousQuestion() {
+    if (currentQuestionIndex > 0) {
+      setState(() {
+        currentQuestionIndex--;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          ' Câu hỏi',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Câu hỏi',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade100,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                '${currentQuestionIndex + 1}/${widget.questions.length}',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue.shade700,
+                ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 16),
-        ...widget.questions.asMap().entries.map((entry) {
-          final index = entry.key;
-          final question = entry.value as Map;
-          return _buildQuestionCard(index, question);
-        }),
+        _buildQuestionCard(currentQuestionIndex, widget.questions[currentQuestionIndex] as Map),
+        const SizedBox(height: 16),
+        _buildNavigationButtons(),
         const SizedBox(height: 24),
-        CompleteButton(
-          lesson: widget.lesson,
-          startTime: widget.startTime,
-          userAnswers: userAnswers,
-        ),
+        if (currentQuestionIndex == widget.questions.length - 1)
+          CompleteButton(
+            lesson: widget.lesson,
+            startTime: widget.startTime,
+            userAnswers: userAnswers,
+          ),
+      ],
+    );
+  }
+
+  Widget _buildNavigationButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        // Nút Previous
+        if (currentQuestionIndex > 0)
+          ElevatedButton.icon(
+            onPressed: _previousQuestion,
+            icon: const Icon(Icons.arrow_back),
+            label: const Text('Câu trước'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.grey.shade200,
+              foregroundColor: Colors.black87,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          )
+        else
+          const SizedBox.shrink(),
+
+        // Nút Next
+        if (currentQuestionIndex < widget.questions.length - 1)
+          ElevatedButton.icon(
+            onPressed: _nextQuestion,
+            icon: const Icon(Icons.arrow_forward),
+            label: const Text('Câu tiếp'),
+            iconAlignment: IconAlignment.end,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          )
+        else
+          const SizedBox.shrink(),
       ],
     );
   }
@@ -52,7 +133,7 @@ class _QuestionListState extends State<QuestionList> {
     final options = question['options'] as List? ?? [];
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: EdgeInsets.zero,
       elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),

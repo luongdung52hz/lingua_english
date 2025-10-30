@@ -122,6 +122,3 @@ class DeepSeekProvider implements AIProvider {
   }
 }
 
-/// Pricing info (tham khảo)
-/// DeepSeek-Chat: $0.14/1M input tokens, $0.28/1M output tokens
-/// Rẻ hơn Gemini (~70% cheaper) và GPT-4 (~95% cheaper)

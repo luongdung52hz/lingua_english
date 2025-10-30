@@ -127,6 +127,7 @@ class _LearnScreenState extends State<LearnScreen>
                   color: Colors.white,
                   child: TabBar(
                     controller: _levelController,
+
                     onTap: (index) {
                       final level = controller.levels[index];
                       controller.changeLevel(level);
@@ -151,6 +152,7 @@ class _LearnScreenState extends State<LearnScreen>
                       Tab(text: 'B2'),
                       Tab(text: 'C1'),
                       Tab(text: 'C2'),
+
                     ],
                   ),
                 ),

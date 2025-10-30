@@ -109,15 +109,17 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
         ),
         bottom: TabBar(
           controller: _tabController,
+          indicatorWeight:1 ,
+          labelStyle: const TextStyle(fontSize: 12),
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
           indicatorColor: Colors.white,
-          isScrollable: true,
+          isScrollable: false,
           tabs: const [
-            Tab(icon: Icon(Icons.list), text: 'Tất cả'),
-            Tab(icon: Icon(Icons.layers), text: 'Theo Level'),
-            Tab(icon: Icon(Icons.category), text: 'Theo Skill'),
-            Tab(icon: Icon(Icons.topic), text: 'Theo Topic'),
+            Tab(icon: Icon(Icons.list,size: 30,), text: 'Tất cả'),
+            Tab(icon: Icon(Icons.layers), text: 'Level'),
+            Tab(icon: Icon(Icons.category), text: 'Skill'),
+            Tab(icon: Icon(Icons.topic), text: 'Topic'),
           ],
         ),
       ),
@@ -478,21 +480,19 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
               children: [
                 Chip(
                   label: Text(lesson.level, style: const TextStyle(fontSize: 10)),
-                  backgroundColor: Colors.transparent, // Xóa màu, chỉ viền
-                  side: const BorderSide(color: AppColors.primary, width: 0.5), // Viền mỏng
+                  backgroundColor: Colors.transparent,
                   padding: EdgeInsets.zero,
                 ),
                 Chip(
                   label: Text(lesson.skill.toUpperCase(), style: const TextStyle(fontSize: 10)),
                   backgroundColor: Colors.transparent,
-                  side: const BorderSide(color: AppColors.primary, width: 0.5),
                   padding: EdgeInsets.zero,
                 ),
                 if (lesson.topic.isNotEmpty)
                   Chip(
                     label: Text(lesson.topic, style: const TextStyle(fontSize: 10)),
                     backgroundColor: Colors.transparent,
-                    side: const BorderSide(color: AppColors.primary, width: 0.5),
+
                     padding: EdgeInsets.zero,
                   ),
               ],
@@ -504,7 +504,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
           children: [
             IconButton(
               icon: Icon(Icons.edit, color: Colors.blue[400], size: 28),
-              onPressed: () => controller.showEditDialog(context, lesson), // Giả sử controller
+              onPressed: () => controller.showEditDialog(context, lesson),
             ),
             IconButton(
               icon: Icon(Icons.delete, color: Colors.red[400], size: 28),

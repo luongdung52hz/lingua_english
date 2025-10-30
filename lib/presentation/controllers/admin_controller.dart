@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../data/models/lesson_model.dart';
@@ -112,6 +113,8 @@ class AdminController extends ChangeNotifier {
     notifyListeners();
   }
 
+  // ⭐ Thêm cho kIsWeb
+
   Future<void> showAddDialog(BuildContext context) async {
     print('=== showAddDialog called ===');
     _clearAllFields();
@@ -120,52 +123,108 @@ class AdminController extends ChangeNotifier {
 
     final formKey = GlobalKey<FormState>();
 
+    // ⭐ Sửa: Tính size dynamic dựa trên platform/screen
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isWeb = kIsWeb; // Check web
+    final dialogWidth = isWeb
+        ? screenWidth * 0.8 // Web: 80% width (lớn hơn)
+        : screenWidth * 0.9; // Mobile: 90% width
+    final maxHeight = screenHeight * 0.8; // Max 80% height tránh overflow
+
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          title: const Text('Thêm Bài Học'),
-          content: Form(
-            key: formKey,
+          shape:  RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          contentPadding: EdgeInsets.zero,
+          clipBehavior: Clip.antiAlias,
+          insetPadding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+          content: SizedBox(
+            width: dialogWidth,
+            height: maxHeight,
             child: SingleChildScrollView(
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 children: [
-                  _buildBasicInfoFields(),
-                  const Divider(height: 32),
-                  ValueListenableBuilder<String>(
-                    valueListenable: skill,
-                    builder: (context, currentSkill, _) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                  // Header (fixed height 60)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(24),
+                    color: Colors.blue[600], // Màu header
+                    child: Row(
+                      children: [
+                        const Icon(Icons.add, color: Colors.white, size: 28),
+                        const SizedBox(width: 12),
+                        const Text(
+                          'Thêm Bài Học',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                        ),
+                        const Spacer(),
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.close, color: Colors.white),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Form content
+                  Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Form(
+                      key: formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            'Nội dung ${currentSkill.toUpperCase()}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
+                          _buildBasicInfoFields(),
+                          const Divider(height: 32),
+                          ValueListenableBuilder<String>(
+                            valueListenable: skill,
+                            builder: (context, currentSkill, _) {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Nội dung ${currentSkill.toUpperCase()}',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  _buildContentFieldsBySkill(currentSkill, setState),
+                                ],
+                              );
+                            },
                           ),
-                          const SizedBox(height: 12),
-                          _buildContentFieldsBySkill(currentSkill, setState),
                         ],
-                      );
-                    },
+                      ),
+                    ),
+                  ),
+                  // Actions (fixed height 60)
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Hủy'),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () => uploadLesson(context, formKey),
+                            child: const Text('Thêm'),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Hủy'),
-            ),
-            ElevatedButton(
-              onPressed: () => uploadLesson(context, formKey),
-              child: const Text('Thêm'),
-            ),
-          ],
         ),
       ),
     );

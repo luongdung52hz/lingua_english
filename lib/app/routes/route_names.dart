@@ -12,6 +12,9 @@ class Routes {
   static const register = '/auth/register';
   static const forgotPassword = '/auth/forgot-password';
 
+  // PDF
+  static const pdf = '/pdf';
+
   // Learn
   static const learn = '/learn';
   static const learnDetail = '/learn/detail';
