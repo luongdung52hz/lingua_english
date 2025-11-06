@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 class PDFService {
-  /// 🔹 Tách text với layout recognition (giữ nguyên cấu trúc)
+  /// 🔹 Tách text cơ bản (giữ layout)
   Future<String> extractText(File file) async {
     try {
       final PdfDocument document = PdfDocument(
@@ -10,12 +10,9 @@ class PDFService {
       );
 
       final PdfTextExtractor extractor = PdfTextExtractor(document);
-
-      // ✅ Sử dụng extractTextLines() thay vì extractText()
       final List<TextLine> lines = extractor.extractTextLines();
 
-      // Gộp các dòng thành văn bản hoàn chỉnh
-      final StringBuffer buffer = StringBuffer();
+      final buffer = StringBuffer();
       for (final line in lines) {
         buffer.writeln(line.text.trim());
       }
@@ -27,57 +24,24 @@ class PDFService {
     }
   }
 
-  /// 🔹 Tách text theo layout với thông tin vị trí
-  Future<String> extractTextWithLayout(File file) async {
+  /// 🔹 Tách text tối ưu cho AI (giữ layout, remove ký tự thừa)
+  Future<String> extractTextForAI(File file) async {
     try {
-      final PdfDocument document = PdfDocument(
-        inputBytes: await file.readAsBytes(),
-      );
+      final rawText = await extractText(file);
 
-      final StringBuffer buffer = StringBuffer();
+      // Chuẩn hóa text: xóa ký tự đặc biệt, nhiều line break, "Phần A/B"
+      final aiReadyText = rawText
+          .replaceAll(RegExp(r'Phần\s+[A-Z]+', caseSensitive: false), '')
+          .replaceAll(RegExp(r'\n{2,}'), '\n')
+          .trim();
 
-      for (int i = 0; i < document.pages.count; i++) {
-        final PdfPage page = document.pages[i];
-
-        // ✅ Extract với layout mode
-        final String pageText = PdfTextExtractor(document).extractText(
-          startPageIndex: i,
-          endPageIndex: i,
-          layoutText: true, // 🔑 Quan trọng: giữ nguyên layout
-        );
-
-        buffer.writeln(pageText);
-      }
-
-      document.dispose();
-      return _normalizeText(buffer.toString());
+      return aiReadyText;
     } catch (e) {
-      throw Exception('❌ Lỗi đọc file PDF: $e');
+      throw Exception('❌ Lỗi chuẩn hóa text cho AI: $e');
     }
   }
 
-  /// 🧹 Chuẩn hóa văn bản
-  String _normalizeText(String text) {
-    return text
-    // Xóa ký tự đặc biệt
-        .replaceAll('\u0000', '')
-        .replaceAll('\ufeff', '') // BOM
-    // Chuẩn hóa line breaks
-        .replaceAll('\r\n', '\n')
-        .replaceAll('\r', '\n')
-    // Xóa nhiều xuống dòng liên tiếp
-        .replaceAll(RegExp(r'\n{3,}'), '\n\n')
-    // Xóa space thừa trong dòng
-       // .replaceAll(RegExp(r'[ \t]+'), ' ')
-    // Trim từng dòng
-        .split('\n')
-        .map((line) => line.trim())
-        .where((line) => line.isNotEmpty)
-        .join('\n')
-        .trim();
-  }
-}
-  /// 🔹 Lấy thông tin metadata của file PDF
+  /// 🔹 Lấy metadata PDF
   Future<PdfMetadata> getMetadata(File file) async {
     try {
       final PdfDocument document = PdfDocument(
@@ -97,6 +61,20 @@ class PDFService {
     }
   }
 
+  /// 🔧 Chuẩn hóa text cơ bản
+  String _normalizeText(String text) {
+    return text
+        .replaceAll('\u0000', '')
+        .replaceAll('\ufeff', '')
+        .replaceAll('\r\n', '\n')
+        .replaceAll('\r', '\n')
+        .split('\n')
+        .map((line) => line.trim())
+        .where((line) => line.isNotEmpty)
+        .join('\n')
+        .trim();
+  }
+}
 
 class PdfMetadata {
   final int pageCount;

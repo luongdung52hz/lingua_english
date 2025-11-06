@@ -1,211 +1,357 @@
-import 'package:google_generative_ai/google_generative_ai.dart';
-import '../../../models/question_model.dart';
+import 'dart:async';
 import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../../../models/question_model.dart';
+import 'package:uuid/uuid.dart';
 
 class AIQuizService {
-  final GenerativeModel _model;
+  final String _apiKey;
+  final String _model = 'gemini-2.0-flash-exp';
+  final _uuid = const Uuid();
 
-  AIQuizService({required String apiKey})
-      : _model = GenerativeModel(
-    model: 'gemini-1.5-flash',
-    apiKey: apiKey,
-    generationConfig: GenerationConfig(
-      temperature: 0.3,
-      topK: 1,
-      topP: 1,
-      maxOutputTokens: 2048,
-    ),
-  );
+  // ⚙️ Cấu hình tối ưu để tránh rate limit
+  static const int _chunkSize = 8; // Tăng lại vì giờ xử lý tuần tự
+  static const int _maxRetries = 5; // Tăng số retry
+  static const Duration _baseTimeout = Duration(seconds: 60);
+  static const Duration _delayBetweenRequests = Duration(seconds: 3); // Delay giữa mỗi request
+  static const Duration _retryDelay = Duration(seconds: 10); // Delay khi bị 429
 
-  /// Fill missing correct answers for questions
-  Future<List<QuestionModel>> fillMissingAnswers(
-      List<QuestionModel> questions,
-      ) async {
-    final updatedQuestions = <QuestionModel>[];
+  AIQuizService({required String apiKey}) : _apiKey = apiKey;
 
-    for (final question in questions) {
-      if (question.isComplete) {
-        updatedQuestions.add(question);
-      } else {
+  /// 🚀 Parse toàn bộ text bằng AI (SEQUENTIAL để tránh rate limit)
+  Future<List<QuestionModel>> parseTextToJSON(String text) async {
+    try {
+      final cleanedText = _preCleanText(text);
+      final chunks = _splitIntoChunks(cleanedText);
+
+      print('📦 Chia thành ${chunks.length} chunks (${_chunkSize} câu/chunk)');
+      print('⏱️ Ước tính thời gian: ~${(chunks.length * 4)} giây');
+
+      final allQuestions = <QuestionModel>[];
+
+      // XỬ LÝ TUẦN TỰ (sequential) thay vì parallel để tránh rate limit
+      for (var i = 0; i < chunks.length; i++) {
+        print('⚡ Processing chunk ${i + 1}/${chunks.length}');
+
+        final questions = await _parseChunkWithAI(chunks[i], i);
+        allQuestions.addAll(questions);
+
+        // Delay giữa các request (QUAN TRỌNG để tránh 429)
+        if (i < chunks.length - 1) {
+          print('⏳ Chờ ${_delayBetweenRequests.inSeconds}s trước chunk tiếp theo...');
+          await Future.delayed(_delayBetweenRequests);
+        }
+      }
+
+      print('✅ Tổng cộng parse được ${allQuestions.length} câu hỏi');
+
+      if (allQuestions.isEmpty) {
+        throw Exception('Không parse được câu hỏi nào. Vui lòng kiểm tra lại định dạng văn bản.');
+      }
+
+      return allQuestions;
+    } catch (e) {
+      print('❌ Lỗi parse: $e');
+      rethrow;
+    }
+  }
+
+  /// 🔹 Pre-clean text
+  String _preCleanText(String text) {
+    return text
+        .split('\n')
+        .map((line) => line.trim())
+        .where((line) {
+      if (line.isEmpty) return false;
+      if (line.startsWith('Page ')) return false;
+      if (line.toLowerCase().contains('eduquiz')) return false;
+      if (RegExp(r'^\d{1,2}/\d{1,2}/\d{2,4}').hasMatch(line)) return false;
+      return true;
+    })
+        .join('\n')
+        .trim();
+  }
+
+  /// 🔹 Chia text thành chunks
+  List<String> _splitIntoChunks(String text) {
+    final lines = text.split('\n');
+    final chunks = <String>[];
+    final buffer = StringBuffer();
+    int questionCount = 0;
+
+    for (var i = 0; i < lines.length; i++) {
+      final line = lines[i];
+      buffer.writeln(line);
+
+      if (_looksLikeQuestion(line)) {
+        questionCount++;
+      }
+
+      if (questionCount >= _chunkSize || i == lines.length - 1) {
+        if (buffer.toString().trim().isNotEmpty) {
+          chunks.add(buffer.toString().trim());
+          buffer.clear();
+          questionCount = 0;
+        }
+      }
+    }
+
+    return chunks.where((c) => c.isNotEmpty).toList();
+  }
+
+  /// 🔹 Kiểm tra câu hỏi
+  bool _looksLikeQuestion(String line) {
+    return RegExp(r'^\d+[\.).\s]').hasMatch(line) ||
+        RegExp(r'^Câu\s+\d+', caseSensitive: false).hasMatch(line) ||
+        line.endsWith('?');
+  }
+
+  /// 🤖 Parse 1 chunk với exponential backoff cho 429 error
+  Future<List<QuestionModel>> _parseChunkWithAI(String chunk, int chunkIndex) async {
+    for (var attempt = 0; attempt < _maxRetries; attempt++) {
+      try {
+        final timeout = _baseTimeout * (attempt + 1);
+        print('🔄 Chunk ${chunkIndex + 1} - Attempt ${attempt + 1}/${_maxRetries}');
+
+        return await _callAIParseAPI(chunk, chunkIndex).timeout(timeout);
+
+      } on TimeoutException catch (e) {
+        print('⏱️ Chunk ${chunkIndex + 1} timeout');
+
+        if (attempt == _maxRetries - 1) {
+          print('❌ Chunk ${chunkIndex + 1} failed sau ${_maxRetries} lần thử');
+          return [];
+        }
+
+        await Future.delayed(Duration(seconds: 5 * (attempt + 1)));
+
+      } catch (e) {
+        final errorStr = e.toString();
+
+        // XỬ LÝ RIÊNG CHO 429 ERROR
+        if (errorStr.contains('429') || errorStr.contains('RESOURCE_EXHAUSTED')) {
+          print('🚫 Rate limit hit! Chunk ${chunkIndex + 1}');
+
+          if (attempt == _maxRetries - 1) {
+            print('❌ Chunk ${chunkIndex + 1} vẫn bị rate limit sau ${_maxRetries} lần thử');
+            return [];
+          }
+
+          // Exponential backoff: 10s, 20s, 30s, 40s, 50s
+          final delay = _retryDelay * (attempt + 1);
+          print('⏳ Đợi ${delay.inSeconds}s do rate limit...');
+          await Future.delayed(delay);
+
+        } else {
+          // Lỗi khác (network, parsing, etc.)
+          print('⚠️ Chunk ${chunkIndex + 1} error: $e');
+
+          if (attempt == _maxRetries - 1) {
+            return [];
+          }
+
+          await Future.delayed(Duration(seconds: 3 * (attempt + 1)));
+        }
+      }
+    }
+    return [];
+  }
+
+  /// 🌐 Gọi API Gemini
+  Future<List<QuestionModel>> _callAIParseAPI(String chunk, int chunkIndex) async {
+    final url = Uri.parse(
+      'https://generativelanguage.googleapis.com/v1beta/models/$_model:generateContent?key=$_apiKey',
+    );
+
+    final prompt = _buildParsePrompt(chunk);
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'contents': [
+          {
+            'parts': [
+              {'text': prompt}
+            ]
+          }
+        ],
+        'generationConfig': {
+          'temperature': 0.1,
+          'maxOutputTokens': 8000,
+          'topP': 0.95,
+          'topK': 40,
+        }
+      }),
+    );
+
+    // XỬ LÝ CÁC MÃ LỖI
+    if (response.statusCode == 429) {
+      // Rate limit - throw để trigger retry logic
+      throw Exception('API error: 429 - ${response.body}');
+    }
+
+    if (response.statusCode == 503) {
+      // Service unavailable
+      throw Exception('API error: 503 - Service temporarily unavailable');
+    }
+
+    if (response.statusCode != 200) {
+      print('❌ API Error: ${response.statusCode} - ${response.body}');
+      throw Exception('API error: ${response.statusCode}');
+    }
+
+    final data = jsonDecode(response.body);
+
+    if (data['candidates'] == null || (data['candidates'] as List).isEmpty) {
+      throw Exception('Empty candidates from AI');
+    }
+
+    final candidate = data['candidates'][0];
+
+    // Kiểm tra blocked content
+    if (candidate['finishReason'] == 'SAFETY' ||
+        candidate['finishReason'] == 'RECITATION' ||
+        candidate['finishReason'] == 'OTHER') {
+      print('⚠️ Content blocked: ${candidate['finishReason']}');
+      throw Exception('Content blocked by AI safety filters');
+    }
+
+    // Extract text với fallback paths
+    String? jsonText = candidate['content']?['parts']?[0]?['text'];
+
+    if (jsonText == null || jsonText.toString().trim().isEmpty) {
+      jsonText = candidate['output']?['text'] ?? candidate['text'];
+    }
+
+    if (jsonText == null || jsonText.toString().trim().isEmpty) {
+      throw Exception('Empty response from AI');
+    }
+
+    return _parseAIResponse(jsonText);
+  }
+
+  /// 📝 Build prompt
+  String _buildParsePrompt(String chunk) {
+    return '''
+Chuyển đổi các câu hỏi trắc nghiệm tiếng Việt sau thành JSON array.
+
+ĐỊNH DẠNG:
+- Câu hỏi: bắt đầu "Câu X:", "X.", "X)" hoặc kết thúc "?"
+- Đáp án: "A)", "B)", "C)", "D)" (dấu * = đúng)
+- Mỗi câu có 4 đáp án
+
+QUY TẮC:
+1. Xóa số thứ tự câu hỏi
+2. Xóa ký tự đáp án (A), B., v.v.)
+3. Thêm đáp án nếu thiếu
+4. Sửa lỗi chính tả
+
+OUTPUT JSON:
+[
+  {
+    "question": "Nội dung câu hỏi",
+    "options": ["A", "B", "C", "D"],
+    "correctAnswer": "Đáp án đúng hoặc null"
+  }
+]
+
+TEXT:
+$chunk
+
+CHỈ JSON, KHÔNG TEXT KHÁC.
+''';
+  }
+
+  /// 🔍 Parse AI response
+  List<QuestionModel> _parseAIResponse(String jsonText) {
+    try {
+      final cleanJson = jsonText
+          .replaceAll(RegExp(r'```json\s*'), '')
+          .replaceAll(RegExp(r'```\s*'), '')
+          .trim();
+
+      if (cleanJson.isEmpty) return [];
+
+      final List<dynamic> jsonArray = jsonDecode(cleanJson);
+
+      return jsonArray.map((item) {
         try {
-          final answer = await _predictAnswer(question);
-          updatedQuestions.add(question.copyWith(correctAnswer: answer));
-        } catch (e) {
-          print('⚠️ Lỗi AI cho câu "${question.question}": $e');
-          updatedQuestions.add(question);
-        }
-      }
-    }
+          final question = item['question']?.toString().trim() ?? '';
+          final options = (item['options'] as List?)
+              ?.map((o) => o.toString().trim())
+              .toList() ?? [];
+          final correctAnswer = item['correctAnswer']?.toString().trim();
 
-    return updatedQuestions;
-  }
+          if (question.length < 5 || options.length < 2) return null;
 
-  /// Predict correct answer for a single question
-  Future<String> _predictAnswer(QuestionModel question) async {
-    final prompt = _buildAnswerPredictionPrompt(question);
+          while (options.length < 4) {
+            options.add('Không có đáp án này');
+          }
+          if (options.length > 4) {
+            options.removeRange(4, options.length);
+          }
 
-    final response = await _model.generateContent([Content.text(prompt)]);
-    final answer = response.text?.trim() ?? '';
-
-    // Validate answer is in options
-    if (question.options.contains(answer)) {
-      return answer;
-    }
-
-    // Try to find matching option
-    for (final option in question.options) {
-      if (option.toLowerCase().contains(answer.toLowerCase()) ||
-          answer.toLowerCase().contains(option.toLowerCase())) {
-        return option;
-      }
-    }
-
-    // Return first option as fallback
-    return question.options.first;
-  }
-
-  String _buildAnswerPredictionPrompt(QuestionModel question) {
-    return '''
-Bạn là trợ lý AI chuyên về giáo dục. Nhiệm vụ của bạn là xác định đáp án ĐÚNG NHẤT cho câu hỏi dưới đây.
-
-**Câu hỏi:**
-${question.question}
-
-**Các đáp án:**
-${question.options.asMap().entries.map((e) => '${e.key + 1}. ${e.value}').join('\n')}
-
-**Yêu cầu:**
-- Phân tích kỹ câu hỏi và tất cả các đáp án
-- Chọn đáp án CHÍNH XÁC nhất dựa trên kiến thức chuyên môn
-- CHỈ trả về NỘI DUNG CHÍNH XÁC của đáp án đúng (không thêm số thứ tự, không giải thích)
-- Đáp án phải GIỐNG HỆT với một trong các đáp án được cung cấp
-
-**Ví dụ:**
-Nếu đáp án đúng là "2. Java", chỉ trả về: Java
-
-**Đáp án đúng:**''';
-  }
-
-  /// Generate explanation for a question
-  Future<String> generateExplanation(QuestionModel question) async {
-    final prompt = '''
-Hãy giải thích tại sao đáp án "${question.correctAnswer}" là đúng cho câu hỏi sau:
-
-**Câu hỏi:** ${question.question}
-
-**Các đáp án:**
-${question.options.asMap().entries.map((e) => '${String.fromCharCode(65 + e.key)}. ${e.value}').join('\n')}
-
-**Đáp án đúng:** ${question.correctAnswer}
-
-Hãy giải thích ngắn gọn, dễ hiểu (2-3 câu):''';
-
-    try {
-      final response = await _model.generateContent([Content.text(prompt)]);
-      return response.text?.trim() ?? '';
-    } catch (e) {
-      return '';
-    }
-  }
-
-  /// Improve question quality
-  Future<QuestionModel> improveQuestion(QuestionModel question) async {
-    final prompt = '''
-Cải thiện chất lượng câu hỏi sau để rõ ràng và chính xác hơn:
-
-**Câu hỏi gốc:** ${question.question}
-**Các đáp án:** ${question.options.join(', ')}
-
-Hãy:
-1. Viết lại câu hỏi rõ ràng, súc tích hơn
-2. Đảm bảo câu hỏi không mơ hồ
-3. Giữ nguyên ý nghĩa
-
-Chỉ trả về câu hỏi đã cải thiện (không thêm gì khác):''';
-
-    try {
-      final response = await _model.generateContent([Content.text(prompt)]);
-      final improvedQuestion = response.text?.trim() ?? question.question;
-
-      return question.copyWith(question: improvedQuestion);
-    } catch (e) {
-      return question;
-    }
-  }
-
-  /// Generate quiz title from content
-  Future<String> generateQuizTitle(List<QuestionModel> questions) async {
-    if (questions.isEmpty) return 'Quiz không có tiêu đề';
-
-    final sampleQuestions = questions.take(3).map((q) => q.question).join('\n');
-
-    final prompt = '''
-Dựa trên các câu hỏi sau, hãy đặt tên ngắn gọn (tối đa 6 từ) cho bộ quiz:
-
-$sampleQuestions
-
-Chỉ trả về tiêu đề (ví dụ: "Quiz Java Cơ Bản", "Kiến thức Lập trình C++"):''';
-
-    try {
-      final response = await _model.generateContent([Content.text(prompt)]);
-      return response.text?.trim() ?? 'Quiz không có tiêu đề';
-    } catch (e) {
-      return 'Quiz không có tiêu đề';
-    }
-  }
-
-  /// Batch process questions (more efficient)
-  Future<List<QuestionModel>> fillMissingAnswersBatch(
-      List<QuestionModel> questions,
-      ) async {
-    final incompleteQuestions = questions.where((q) => !q.isComplete).toList();
-
-    if (incompleteQuestions.isEmpty) return questions;
-
-    final prompt = _buildBatchPrompt(incompleteQuestions);
-
-    try {
-      final response = await _model.generateContent([Content.text(prompt)]);
-      final answersJson = response.text?.trim() ?? '[]';
-
-      final answers = jsonDecode(answersJson) as List;
-
-      final updatedQuestions = <QuestionModel>[...questions];
-
-      for (int i = 0; i < incompleteQuestions.length; i++) {
-        final originalIndex = questions.indexOf(incompleteQuestions[i]);
-        if (i < answers.length) {
-          updatedQuestions[originalIndex] = incompleteQuestions[i].copyWith(
-            correctAnswer: answers[i].toString(),
+          return QuestionModel(
+            id: _uuid.v4(),
+            question: question,
+            options: options,
+            correctAnswer: correctAnswer?.isNotEmpty == true ? correctAnswer : null,
           );
+        } catch (e) {
+          return null;
         }
-      }
+      }).whereType<QuestionModel>().toList();
 
-      return updatedQuestions;
     } catch (e) {
-      print('⚠️ Lỗi batch AI, fallback về xử lý từng câu: $e');
-      return fillMissingAnswers(questions);
+      print('❌ Parse JSON error: $e');
+      return [];
     }
   }
 
-  String _buildBatchPrompt(List<QuestionModel> questions) {
-    final questionsText = questions.asMap().entries.map((entry) {
-      final i = entry.key;
-      final q = entry.value;
-      return '''
-Câu ${i + 1}:
-${q.question}
-Các đáp án: ${q.options.join(' | ')}''';
-    }).join('\n\n');
+  /// 🎯 Generate quiz title
+  Future<String> generateQuizTitle(String sampleText) async {
+    try {
+      final url = Uri.parse(
+        'https://generativelanguage.googleapis.com/v1beta/models/$_model:generateContent?key=$_apiKey',
+      );
 
-    return '''
-Hãy xác định đáp án đúng cho từng câu hỏi dưới đây. Trả về mảng JSON chứa các đáp án.
+      final prompt = '''
+Tạo tiêu đề ngắn gọn (max 50 ký tự) cho quiz:
 
-$questionsText
+$sampleText
 
-Trả về format JSON array:
-["đáp án 1", "đáp án 2", "đáp án 3"]
+Chỉ tiêu đề.
+''';
 
-CHỈ trả về JSON array, không giải thích gì thêm.''';
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'contents': [
+            {
+              'parts': [
+                {'text': prompt}
+              ]
+            }
+          ],
+          'generationConfig': {
+            'temperature': 0.7,
+            'maxOutputTokens': 100,
+          }
+        }),
+      ).timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final title = data['candidates']?[0]?['content']?['parts']?[0]?['text']
+            ?.toString()
+            .trim() ?? 'Quiz từ PDF';
+        return title.length > 50 ? title.substring(0, 50) : title;
+      }
+    } catch (e) {
+      print('⚠️ Lỗi generate title: $e');
+    }
+    return 'Quiz từ PDF';
   }
 }
