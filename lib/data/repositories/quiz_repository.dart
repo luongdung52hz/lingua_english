@@ -1,6 +1,3 @@
-// ============================================
-// FILE: lib/data/repositories/quiz_repository.dart
-// ============================================
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/quiz_model.dart';

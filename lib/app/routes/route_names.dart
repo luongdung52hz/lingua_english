@@ -24,10 +24,14 @@ class Routes {
   static const writing = '/learn/writing';
 
   // Flashcards
+  // Flashcards
   static const flashcards = '/flashcards';
-  static const flashcardDetail = '/flashcards/detail';
+  static const flashcardDetail = '/flashcards/detail';  // Đã có
+  static const flashcardCreate = '/flashcards/create';  // Mới
+  static const flashcardStudy = '/flashcards/study';    // Mới
+  static const folders = '/flashcards/folders';    // Mới
 
-  // Chat
+  // Chats
   static const chat = '/chat';
   static const chatRoom = '/chat/room';
 

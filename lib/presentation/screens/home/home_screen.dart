@@ -91,7 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         SkillCard(
                           title: "Flashcard",
-                          icon: Icons.sim_card,
+                          icon: Icons.style_outlined,
                           color: Colors.orange,
                           onTap: () {
                             context.go(Routes.flashcards);

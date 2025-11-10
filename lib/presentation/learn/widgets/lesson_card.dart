@@ -1,7 +1,7 @@
 // widgets/lesson_card.dart - Updated to include onTap parameter and simplified design
 import 'package:flutter/material.dart';
-import '../../data/models/lesson_model.dart';
-import '../../resources/styles/colors.dart';
+import '../../../data/models/lesson_model.dart';
+import '../../../resources/styles/colors.dart';
 
 class LessonCard extends StatelessWidget {
   final LessonModel lesson;

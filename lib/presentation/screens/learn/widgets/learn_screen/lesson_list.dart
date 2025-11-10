@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../controllers/lesson_controller.dart';
-import '../../../../widgets/lesson_card.dart';
+import '../../../../learn/widgets/lesson_card.dart';
 
 
 class LessonList extends StatelessWidget {
@@ -39,7 +39,7 @@ class LessonList extends StatelessWidget {
         ),
       )
           : ListView.builder(
-        padding: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.only(bottom: 14),
         itemCount: controller.lessons.length,
         itemBuilder: (context, index) {
           final lesson = controller.lessons[index];
