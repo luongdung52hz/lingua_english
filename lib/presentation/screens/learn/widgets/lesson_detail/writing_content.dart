@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-//import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../../../../data/datasources/remote/ai/ai_service.dart';
 import '../../../../../data/datasources/remote/ai/models/writing_result.dart';
 import '../../../../../data/datasources/remote/ai/providers/ai_provider.dart';
@@ -34,7 +35,7 @@ class _WritingContentState extends State<WritingContent> {
     // Sử dụng factory constructor
     aiService = AIService.create(
       providerType: AIProviderType.gemini,
-      apiKey: 'AIzaSyBl_JBlqSWCh5QcwrnNKW5SjR4sw6InMOM',
+      apiKey: dotenv.env['GEMINI_API_KEY'] ?? '',
       timeout: const Duration(seconds: 30),
       maxRetries: 2,
     );

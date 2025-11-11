@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../../../../data/datasources/remote/ai/ai_service.dart';
 import '../../../../../data/datasources/remote/ai/models/speaking_result.dart';
@@ -26,11 +28,14 @@ class SpeakingContent extends StatefulWidget {
 class _SpeakingContentState extends State<SpeakingContent> {
   late stt.SpeechToText _speech;
   late AIService _aiService;
+  FlutterTts? _flutterTts;
 
   bool _speechInitialized = false;
   bool _checkingPermission = false;
   bool _isListening = false;
   bool _isCheckingSpeaking = false;
+  bool _isSpeaking = false;
+  String? _currentSpeakingWord;
 
   String _spokenText = '';
   String? _errorMessage;
@@ -42,17 +47,125 @@ class _SpeakingContentState extends State<SpeakingContent> {
     _speech = stt.SpeechToText();
     _aiService = AIService.create(
       providerType: AIProviderType.gemini,
-      apiKey: 'AIzaSyBl_JBlqSWCh5QcwrnNKW5SjR4sw6InMOM',
+      apiKey: dotenv.env['GEMINI_API_KEY'] ?? '',
       timeout: const Duration(seconds: 30),
       maxRetries: 2,
     );
+    _flutterTts = FlutterTts();
     _initializeSpeech();
+    _initializeTts();
   }
 
   @override
   void dispose() {
     _speech.stop();
+    _flutterTts?.stop();
     super.dispose();
+  }
+
+  Future<void> _initializeTts() async {
+    if (_flutterTts == null) {
+      print('FlutterTts is null, cannot initialize');
+      return;
+    }
+
+    try {
+      var languages = await _flutterTts!.getLanguages;
+      if (languages.contains("en-US")) {
+        await _flutterTts!.setLanguage("en-US");
+      }
+
+      await _flutterTts!.setSpeechRate(0.5);
+      await _flutterTts!.setVolume(1.0);
+      await _flutterTts!.setPitch(1.0);
+
+      // Cho Android
+      await _flutterTts!.awaitSpeakCompletion(true);
+
+      _flutterTts!.setStartHandler(() {
+        if (mounted) {
+          setState(() => _isSpeaking = true);
+        }
+      });
+
+      _flutterTts!.setCompletionHandler(() {
+        if (mounted) {
+          setState(() {
+            _isSpeaking = false;
+            _currentSpeakingWord = null;
+          });
+        }
+      });
+
+      _flutterTts!.setErrorHandler((msg) {
+        if (mounted) {
+          setState(() {
+            _isSpeaking = false;
+            _currentSpeakingWord = null;
+          });
+          _showError('Lỗi phát âm: $msg');
+        }
+      });
+
+      _flutterTts!.setCancelHandler(() {
+        if (mounted) {
+          setState(() {
+            _isSpeaking = false;
+            _currentSpeakingWord = null;
+          });
+        }
+      });
+
+      print('TTS initialized successfully');
+    } catch (e) {
+      print('TTS initialization error: $e');
+      if (mounted) {
+        _showError('Không thể khởi tạo TTS: $e');
+      }
+    }
+  }
+
+  Future<void> _speak(String text) async {
+    if (_flutterTts == null) {
+      _showError('TTS chưa được khởi tạo');
+      return;
+    }
+
+    if (text.trim().isEmpty) return;
+
+    try {
+      // Dừng TTS hiện tại nếu đang chạy
+      if (_isSpeaking) {
+        await _flutterTts!.stop();
+        await Future.delayed(const Duration(milliseconds: 100));
+      }
+
+      setState(() => _currentSpeakingWord = text);
+
+      // Thử phát âm
+      var result = await _flutterTts!.speak(text);
+
+      print('TTS speak result: $result');
+
+      if (result == 0) {
+        if (mounted) {
+          setState(() {
+            _isSpeaking = false;
+            _currentSpeakingWord = null;
+          });
+
+        }
+      }
+    } catch (e) {
+      print('Speak error: $e');
+      if (mounted) {
+        setState(() {
+          _isSpeaking = false;
+          _currentSpeakingWord = null;
+        });
+        _showError('Lỗi phát âm: ${e.toString()}');
+      }
+    }
   }
 
   Future<void> _initializeSpeech() async {
@@ -141,7 +254,7 @@ class _SpeakingContentState extends State<SpeakingContent> {
         listenFor: const Duration(seconds: 30),
         pauseFor: const Duration(seconds: 5),
         partialResults: true,
-        localeId: 'vi-VN',
+        localeId: 'en-US',
         cancelOnError: true,
         listenMode: stt.ListenMode.confirmation,
       );
@@ -156,7 +269,6 @@ class _SpeakingContentState extends State<SpeakingContent> {
     await _speech.stop();
     setState(() => _isListening = false);
   }
-
 
   Future<void> _checkSpeakingWithAI() async {
     if (_spokenText.trim().isEmpty) {
@@ -184,7 +296,7 @@ class _SpeakingContentState extends State<SpeakingContent> {
       });
 
       if (!result.hasError && mounted) {
-        _showSuccess('🎉 Điểm: ${result.score}/100 - ${_getScoreFeedback(result.score)}');
+        _showSuccess(' Điểm: ${result.score}/100 - ${_getScoreFeedback(result.score)}');
       }
     } catch (e) {
       setState(() => _isCheckingSpeaking = false);
@@ -451,7 +563,7 @@ class _SpeakingContentState extends State<SpeakingContent> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('🎤 Bạn đã nói:', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text('Bạn đã nói:', style: TextStyle(fontWeight: FontWeight.bold)),
               Row(
                 children: [
                   IconButton(
@@ -511,24 +623,56 @@ class _SpeakingContentState extends State<SpeakingContent> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('🗣️ Từ vựng cần luyện', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(' Từ vựng cần luyện', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,
           runSpacing: 8,
           children: words.map((word) {
             final isDetected = _speakingResult?.detectedWords.contains(word) ?? false;
-            return Chip(
-              label: Text(word.toString()),
-              avatar: Icon(
-                isDetected ? Icons.check_circle : Icons.volume_up,
-                size: 18,
-                color: isDetected ? Colors.green : null,
+            final wordStr = word.toString();
+            final isSpeakingThis = _currentSpeakingWord == wordStr;
+
+            return InkWell(
+              onTap: () => _speak(wordStr),
+              borderRadius: BorderRadius.circular(20),
+              child: Chip(
+                label: Text(
+                  wordStr,
+                  style: TextStyle(
+                    fontWeight: isSpeakingThis ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+                avatar: Icon(
+                  isSpeakingThis
+                      ? Icons.volume_up
+                      : (isDetected ? Icons.check_circle : Icons.volume_up),
+                  size: 18,
+                  color: isSpeakingThis
+                      ? Colors.blue
+                      : (isDetected ? Colors.green : Colors.orange),
+                ),
+                backgroundColor: isSpeakingThis
+                    ? Colors.blue.shade100
+                    : (isDetected ? Colors.green.shade50 : Colors.orange.shade50),
+                side: BorderSide(
+                  color: isSpeakingThis
+                      ? Colors.blue.shade400
+                      : (isDetected ? Colors.green.shade300 : Colors.orange.shade300),
+                  width: isSpeakingThis ? 2 : 1,
+                ),
               ),
-              backgroundColor: isDetected ? Colors.green.shade50 : Colors.orange.shade50,
-              side: BorderSide(color: isDetected ? Colors.green.shade300 : Colors.orange.shade300),
             );
           }).toList(),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          ' Nhấn vào từ để nghe phát âm',
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey.shade600,
+            fontStyle: FontStyle.italic,
+          ),
         ),
       ],
     );
@@ -540,17 +684,34 @@ class _SpeakingContentState extends State<SpeakingContent> {
       children: [
         const Text('📚 Từ vựng mở rộng', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
-        ...vocabulary.map((word) => Card(
-          margin: const EdgeInsets.only(bottom: 8),
-          child: ListTile(
-            leading: const Icon(Icons.record_voice_over, color: Colors.orange),
-            title: Text(word.toString()),
-            trailing: IconButton(
-              icon: const Icon(Icons.volume_up),
-              onPressed: () {},
+        ...vocabulary.map((word) {
+          final wordStr = word.toString();
+          final isSpeakingThis = _currentSpeakingWord == wordStr;
+
+          return Card(
+            margin: const EdgeInsets.only(bottom: 8),
+            color: isSpeakingThis ? Colors.blue.shade50 : null,
+            child: ListTile(
+              leading: Icon(
+                Icons.record_voice_over,
+                color: isSpeakingThis ? Colors.blue : Colors.orange,
+              ),
+              title: Text(
+                wordStr,
+                style: TextStyle(
+                  fontWeight: isSpeakingThis ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+              trailing: IconButton(
+                icon: Icon(
+                  isSpeakingThis ? Icons.volume_up : Icons.volume_up_outlined,
+                  color: isSpeakingThis ? Colors.blue : null,
+                ),
+                onPressed: () => _speak(wordStr),
+              ),
             ),
-          ),
-        )),
+          );
+        }),
       ],
     );
   }
@@ -559,24 +720,55 @@ class _SpeakingContentState extends State<SpeakingContent> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('💬 Câu mẫu', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(' Câu mẫu', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
-        ...sentences.map((sentence) => Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.orange.shade50,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.orange.shade200),
+        ...sentences.map((sentence) {
+          final sentenceStr = sentence.toString();
+          final isSpeakingThis = _currentSpeakingWord == sentenceStr;
+
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: isSpeakingThis ? Colors.blue.shade50 : Colors.orange.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isSpeakingThis ? Colors.blue.shade300 : Colors.orange.shade200,
+                width: isSpeakingThis ? 2 : 1,
+              ),
+            ),
+            child: InkWell(
+              onTap: () => _speak(sentenceStr),
+              child: Row(
+                children: [
+                  Icon(
+                    isSpeakingThis ? Icons.volume_up : Icons.volume_up_outlined,
+                    color: isSpeakingThis ? Colors.blue : Colors.orange,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      sentenceStr,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: isSpeakingThis ? FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }),
+        const SizedBox(height: 8),
+        Text(
+          ' Nhấn vào câu để nghe phát âm',
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey.shade600,
+            fontStyle: FontStyle.italic,
           ),
-          child: Row(
-            children: [
-              const Icon(Icons.chat_bubble_outline, color: Colors.orange),
-              const SizedBox(width: 12),
-              Expanded(child: Text(sentence.toString(), style: const TextStyle(fontSize: 16))),
-            ],
-          ),
-        )),
+        ),
       ],
     );
   }
@@ -652,7 +844,7 @@ class _SpeakingContentState extends State<SpeakingContent> {
                   color: Colors.red.shade50,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Text(_errorMessage!, style: TextStyle(color: Colors.red.shade900)),
+                child: Text(_errorMessage!, style: TextStyle(color: Colors.pink)),
               ),
               const SizedBox(height: 16),
             ],

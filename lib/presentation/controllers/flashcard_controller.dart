@@ -1,13 +1,14 @@
 // lib/controllers/flashcard_controller.dart
 
 import 'dart:async';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import '../../data/datasources/remote/translation_service.dart';
 import '../../data/models/flashcard_model.dart';
 import '../../data/repositories/flashcard_repository.dart';
 
 class FlashcardController extends GetxController {
-  final TranslationService _translationService = TranslationService(apiKey: 'AIzaSyBl_JBlqSWCh5QcwrnNKW5SjR4sw6InMOM');
+  final TranslationService _translationService = TranslationService(apiKey: dotenv.env['GEMINI_API_KEY'] ?? '');
   final FlashcardRepository _repository = FlashcardRepository();
 
   // Observable states

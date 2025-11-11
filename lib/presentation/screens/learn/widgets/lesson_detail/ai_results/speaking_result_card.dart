@@ -96,7 +96,7 @@ class SpeakingResultCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          '✅ Điểm mạnh:',
+          ' Điểm mạnh:',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
@@ -120,7 +120,7 @@ class SpeakingResultCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          '💡 Cần cải thiện:',
+          ' Cần cải thiện:',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
@@ -150,7 +150,7 @@ class SpeakingResultCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            '❌ Từ chưa nói:',
+            ' Từ chưa nói:',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),

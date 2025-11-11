@@ -103,18 +103,18 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
             _buildFolderSelector(),
             const SizedBox(height: 16),
 
-            // ✅ NEW: Input card với nút toggle ngôn ngữ
             Card(
               elevation: 4,
+
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(
+
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // ✅ NEW: Header với nút chuyển ngôn ngữ
                     Row(
                       children: [
                         Expanded(
@@ -128,7 +128,6 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
                             ),
                           ),
                         ),
-                        // ✅ NEW: Nút toggle hướng dịch
                         Container(
                           decoration: BoxDecoration(
                             color: Colors.deepPurple[50],
@@ -168,7 +167,6 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
 
                     const SizedBox(height: 20),
 
-                    // NÚT DỊCH SIÊU ĐẸP – DÀI HẾT CỠ + CĂN GIỮA + HIỆU ỨNG CAO CẤP
                     Center(
                       child: Obx(() => SizedBox(
                         width: double.infinity,
@@ -177,13 +175,10 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
                           onPressed: controller.isTranslating.value
                               ? null
                               : () {
-                            // 1. TẮT BÀN PHÍM NGAY LẬP TỨC
                             FocusScope.of(context).unfocus();
 
-                            // 2. RUNG NHẸ NHƯ IPHONE
                             HapticFeedback.mediumImpact();
 
-                            // 3. GỌI DỊCH
                             _translateAndPreview();
                           },
                           icon: controller.isTranslating.value
@@ -204,12 +199,12 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
                             ),
                           ),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.deepPurple,
+                            backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,
                             elevation: controller.isTranslating.value ? 2 : 12,
-                            shadowColor: Colors.deepPurple.withOpacity(0.5),
+                            shadowColor: Colors.deepPurple.withOpacity(0.2),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(28),
+                              borderRadius: BorderRadius.circular(22),
                             ),
                             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                           ),
@@ -226,7 +221,7 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
             // Preview card
             if (previewFlashcard != null) ...[
               const Text(
-                '👀 Xem trước Flashcard',
+                ' Xem trước Flashcard',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -442,28 +437,31 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
                       color: Colors.green,
                     ),
                   ),
-                  if (flashcard.phonetic != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      ' ${flashcard.phonetic}',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                        fontStyle: FontStyle.italic,
+                  Row(children: [
+                    if (flashcard.phonetic != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        ' ${flashcard.phonetic}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                          fontStyle: FontStyle.italic,
+                        ),
                       ),
-                    ),
-                  ],
-                  if (flashcard.partOfSpeech != null) ...[
-                    const SizedBox(height: 8),
-                    Chip(
-                      label: Text(flashcard.partOfSpeech!),
-                      backgroundColor: Colors.orange[100],
-                      labelStyle: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
+                    ],
+                    if (flashcard.partOfSpeech != null) ...[
+                      const SizedBox(width: 8),
+                      Chip(
+                        label: Text(flashcard.partOfSpeech!),
+                        backgroundColor: Colors.blue[50],
+                        labelStyle: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blueAccent,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ],),
                 ],
               ),
             ),
