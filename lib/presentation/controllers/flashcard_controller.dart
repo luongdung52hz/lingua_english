@@ -1,5 +1,3 @@
-// lib/controllers/flashcard_controller.dart
-
 import 'dart:async';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
@@ -47,10 +45,6 @@ class FlashcardController extends GetxController {
       _showError('Không thể khởi tạo ứng dụng', e);
     }
   }
-
-  // ============================================
-  // FLASHCARD OPERATIONS
-  // ============================================
 
   void loadFlashcards() {
     _flashcardSubscription?.cancel();
@@ -122,7 +116,6 @@ class FlashcardController extends GetxController {
     });
   }
 
-  /// ⭐ SỬA: Thêm tham số direction (bắt buộc)
   Future<Flashcard?> createFlashcardFromText(
       String inputText, {
         required TranslationDirection direction, // ✅ NEW: Bắt buộc chọn hướng dịch
@@ -138,7 +131,6 @@ class FlashcardController extends GetxController {
       print('🔍 [CREATE] Starting translation for input: "$inputText"');
       print('🌐 [CREATE] Direction: ${direction == TranslationDirection.viToEn ? "VI→EN" : "EN→VI"}');
 
-      // ✅ SỬA: Truyền direction vào translate()
       final result = await _translationService.translate(
         inputText.trim(),
         direction: direction,
@@ -146,16 +138,13 @@ class FlashcardController extends GetxController {
 
       print('✅ [CREATE] Translation result: vietnamese="${result.vietnamese ?? 'N/A'}", english="${result.english}"');
 
-      // ✅ SỬA: Xử lý theo direction đã chọn
       String vietnameseField;
       String englishField;
 
       if (direction == TranslationDirection.viToEn) {
-        // Việt → Anh: input là Việt, dịch sang Anh
         vietnameseField = inputText.trim();
         englishField = result.english;
       } else {
-        // Anh → Việt: input là Anh, dịch sang Việt
         vietnameseField = result.vietnamese ?? inputText.trim();
         englishField = inputText.trim();
       }
@@ -252,9 +241,6 @@ class FlashcardController extends GetxController {
     }
   }
 
-  // ============================================
-  // FOLDER OPERATIONS
-  // ============================================
 
   void loadFolders() {
     _folderSubscription?.cancel();
@@ -313,9 +299,6 @@ class FlashcardController extends GetxController {
     }
   }
 
-  // ============================================
-  // STATISTICS
-  // ============================================
 
   Future<void> loadStatistics() async {
     try {
@@ -337,9 +320,6 @@ class FlashcardController extends GetxController {
     }
   }
 
-  // ============================================
-  // UTILITY METHODS
-  // ============================================
 
   Flashcard? getNextFlashcard() {
     final toReview = flashcards.where((f) => !f.isMemorized).toList();

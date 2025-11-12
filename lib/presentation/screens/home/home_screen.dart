@@ -54,7 +54,6 @@ class _HomeScreenState extends State<HomeScreen> {
               return const Center(child: CircularProgressIndicator());
             }
 
-            // Parse data từ snapshot
             final data = snapshot.data?.data() as Map<String, dynamic>? ?? {};
             final progressPercent = (data['progress'] ?? 0).toDouble();
             final completedLessons = data['completedLessons'] ?? 0;
@@ -134,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           icon: Icons.book,
                           color: Colors.yellow,
                           onTap: () {
-                            context.go(Routes.pdf);
+                            context.go(Routes.quiz);
                           },
                         ),
                         SkillCard(

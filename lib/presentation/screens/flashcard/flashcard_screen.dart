@@ -1,5 +1,4 @@
-// lib/ui/screens/flashcard_list_screen.dart
-
+// File: lib/presentation/screens/flashcard/flashcard_list_screen.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
@@ -13,7 +12,8 @@ import 'package:learn_english/presentation/screens/flashcard/widgets/search_bar.
 import '../../../data/models/flashcard_model.dart';
 import '../../../resources/styles/colors.dart';
 import '../../controllers/flashcard_controller.dart';
-import '../../widgets/bottom_nav_bar.dart'; //
+import '../../widgets/bottom_nav_bar.dart';
+import '../../widgets/custom_sliver_appbar.dart';
 
 class FlashcardListScreen extends StatefulWidget {
   const FlashcardListScreen({Key? key}) : super(key: key);
@@ -44,114 +44,122 @@ class _FlashcardListScreenState extends State<FlashcardListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        title: const Text('Flashcards'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        actions: [
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'filter') {
-                final selected = !showOnlyUnmemorized;
-                setState(() => showOnlyUnmemorized = selected);
+      body: NestedScrollView(
+        headerSliverBuilder: (context, innerBoxIsScrolled) {
+          return [
+            CustomSliverAppBar(
+              icon: Icons.style_rounded,
+              title: 'Flashcards',
+              subtitle: 'Ôn tập từ vựng của bạn',
+              expandedHeight: 90,
+              actions: [
+                PopupMenuButton<String>(
+                  icon: const Icon(
+                    Icons.more_vert,
+                    color: Colors.white,
+                  ),
+                  onSelected: (value) {
+                    if (value == 'filter') {
+                      final selected = !showOnlyUnmemorized;
+                      setState(() => showOnlyUnmemorized = selected);
 
-                if (selected) {
-                  controller.loadFlashcardsToReview(
-                    folderId: controller.currentFolderId.value != 'default'
-                        ? controller.currentFolderId.value
-                        : null,
-                  );
-                } else {
-                  if (controller.currentFolderId.value == 'default') {
-                    controller.loadFlashcards();
-                  } else {
-                    controller.loadFlashcardsByFolder(
-                      controller.currentFolderId.value,
-                    );
-                  }
-                }
-              } else if (value == 'reset') {
-                _showResetAllDialog();
-              }
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'filter',
-                child: Row(
-                  children: [
-                    Icon(
-                      showOnlyUnmemorized
-                          ? Icons.filter_alt
-                          : Icons.filter_alt_outlined,
-                      size: 20,
-                      color: showOnlyUnmemorized
-                          ? AppColors.primary
-                          : Colors.grey,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      showOnlyUnmemorized
-                          ? 'Hiện tất cả'
-                          : 'Từ chưa thuộc',
-                    ),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'reset',
-                child: Row(
-                  children: [
-                    Icon(Icons.restart_alt, size: 20,color: Colors.grey,),
-                    SizedBox(width: 8),
-                    Text('Reset tất cả'),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Container(
-            color: Colors.white,
-            child: Column(
-              children: [
-            //    const FlashcardStatisticsSection(),
-                const SizedBox(height: 10),
-                SearchBarWidget(
-                  controller: searchController,
-                  onChanged: (value) => controller.searchFlashcards(value),
-                  onClear: () {
-                    if (controller.currentFolderId.value == 'default') {
-                      controller.loadFlashcards();
-                    } else {
-                      controller.loadFlashcardsByFolder(controller.currentFolderId.value);
+                      if (selected) {
+                        controller.loadFlashcardsToReview(
+                          folderId: controller.currentFolderId.value != 'default'
+                              ? controller.currentFolderId.value
+                              : null,
+                        );
+                      } else {
+                        if (controller.currentFolderId.value == 'default') {
+                          controller.loadFlashcards();
+                        } else {
+                          controller.loadFlashcardsByFolder(
+                            controller.currentFolderId.value,
+                          );
+                        }
+                      }
+                    } else if (value == 'reset') {
+                      _showResetAllDialog();
                     }
                   },
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'filter',
+                      child: Row(
+                        children: [
+                          Icon(
+                            showOnlyUnmemorized
+                                ? Icons.filter_alt
+                                : Icons.filter_alt_outlined,
+                            size: 20,
+                            color: showOnlyUnmemorized
+                                ? AppColors.primary
+                                : Colors.grey,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            showOnlyUnmemorized
+                                ? 'Hiện tất cả'
+                                : 'Từ chưa thuộc',
+                          ),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: 'reset',
+                      child: Row(
+                        children: [
+                          Icon(Icons.restart_alt, size: 20, color: Colors.grey),
+                          SizedBox(width: 8),
+                          Text('Reset tất cả'),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                const FlashcardActionButtons(),
-                const FolderChips(),
-                 const SizedBox(height: 2),
               ],
             ),
-          ),
-          Expanded(
-            child: FlashcardList(
-              searchText: searchController.text,
-              showOnlyUnmemorized: showOnlyUnmemorized,
-              onTapFlashcard: (flashcard) =>
-                  context.push('/flashcards/detail/${flashcard.id}'),
-              onToggleMemorized: (id, isMemorized) =>
-                  controller.toggleMemorized(id, !isMemorized),
-              onMoveToFolder: (flashcard) => _showMoveToFolderDialog(flashcard),
-              onDeleteFlashcard: (flashcard) => _showDeleteFlashcardDialog(flashcard),
+          ];
+        },
+        body: Column(
+          children: [
+            Container(
+              color: Colors.white,
+              child: Column(
+                children: [
+                  const SizedBox(height: 10),
+                  SearchBarWidget(
+                    controller: searchController,
+                    onChanged: (value) => controller.searchFlashcards(value),
+                    onClear: () {
+                      if (controller.currentFolderId.value == 'default') {
+                        controller.loadFlashcards();
+                      } else {
+                        controller.loadFlashcardsByFolder(controller.currentFolderId.value);
+                      }
+                    },
+                  ),
+                  const FlashcardActionButtons(),
+                  const FolderChips(),
+                  const SizedBox(height: 2),
+                ],
+              ),
             ),
-          ),
-        ],
+            Expanded(
+              child: FlashcardList(
+                searchText: searchController.text,
+                showOnlyUnmemorized: showOnlyUnmemorized,
+                onTapFlashcard: (flashcard) =>
+                    context.push('/flashcards/detail/${flashcard.id}'),
+                onToggleMemorized: (id, isMemorized) =>
+                    controller.toggleMemorized(id, !isMemorized),
+                onMoveToFolder: (flashcard) => _showMoveToFolderDialog(flashcard),
+                onDeleteFlashcard: (flashcard) => _showDeleteFlashcardDialog(flashcard),
+              ),
+            ),
+          ],
+        ),
       ),
-
       bottomNavigationBar: const BottomNavBar(currentIndex: 2),
     );
   }

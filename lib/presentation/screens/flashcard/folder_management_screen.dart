@@ -3,6 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../data/models/flashcard_model.dart';
+import '../../../resources/styles/colors.dart';
+import '../../../resources/styles/text_styles.dart';
 import '../../controllers/flashcard_controller.dart';
 
 class FolderManagementScreen extends StatelessWidget {
@@ -14,9 +16,9 @@ class FolderManagementScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Quản lý thư mục'),
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
+        title: const Text('Quản lý thư mục',style: AppTextStyles.headline,),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
       ),
       body: Obx(() {
         if (controller.folders.isEmpty) {
@@ -37,13 +39,13 @@ class FolderManagementScreen extends StatelessWidget {
         icon: const Icon(Icons.create_new_folder, color: Colors.white),
         label: const Text('Tạo thư mục mới',
             style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: AppColors.primary,
       ),
     );
   }
 
   void _showCreateFolderDialog(
-      BuildContext context, FlashcardController controller) {
+    BuildContext context, FlashcardController controller) {
     final nameController = TextEditingController();
     final descController = TextEditingController();
     String selectedIcon = '📚';
@@ -59,6 +61,10 @@ class FolderManagementScreen extends StatelessWidget {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
+          backgroundColor: Colors.grey.shade50,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           title: const Text('Tạo thư mục mới'),
           content: SingleChildScrollView(
             child: Column(
@@ -66,30 +72,56 @@ class FolderManagementScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 TextField(
+                  cursorColor: Colors.grey,
                   controller: nameController,
-                  decoration: const InputDecoration(
+                  textCapitalization: TextCapitalization.words,
+                  decoration: InputDecoration(
                     labelText: 'Tên thư mục *',
                     hintText: 'Ví dụ: Từ vựng công việc',
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.grey),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: AppColors.primary, width: 2),
+                    ),
+                    floatingLabelStyle: TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                  textCapitalization: TextCapitalization.words,
                 ),
+
                 const SizedBox(height: 16),
+
                 TextField(
+                  cursorColor: Colors.grey,
                   controller: descController,
-                  decoration: const InputDecoration(
+                  maxLines: 2,
+                  decoration: InputDecoration(
                     labelText: 'Mô tả (tùy chọn)',
                     hintText: 'Mô tả ngắn về thư mục',
-                    border: OutlineInputBorder(),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: Colors.grey),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(color: AppColors.primary, width: 2),
+                    ),
+                    floatingLabelStyle: TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                  maxLines: 2,
                 ),
+
                 const SizedBox(height: 24),
                 const Text('Chọn biểu tượng:',
                     style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
 
-                // ✅ GridView để canh giữa & đều biểu tượng
                 SizedBox(
                   height: 100,
                   child: GridView.count(
@@ -104,12 +136,12 @@ class FolderManagementScreen extends StatelessWidget {
                         child: Container(
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? Colors.deepPurple.withOpacity(0.15)
+                                ? AppColors.primary.withOpacity(0.15)
                                 : Colors.grey[200],
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
                               color: isSelected
-                                  ? Colors.deepPurple
+                                  ? AppColors.primary
                                   : Colors.transparent,
                               width: 2,
                             ),
@@ -162,9 +194,17 @@ class FolderManagementScreen extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Hủy'),
+              child: const Text('Hủy',style: TextStyle(color: AppColors.primary),),
             ),
             ElevatedButton(
+              style:ButtonStyle(
+                backgroundColor: MaterialStateProperty.all(AppColors.primary),
+                shape: MaterialStateProperty.all(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ) ,
               onPressed: () async {
                 if (nameController.text.trim().isEmpty) {
                   Get.snackbar('Lỗi', 'Vui lòng nhập tên thư mục');
@@ -183,7 +223,7 @@ class FolderManagementScreen extends StatelessWidget {
                 await controller.createFolder(folder);
                 Navigator.pop(context);
               },
-              child: const Text('Tạo'),
+              child: const Text('Tạo',style: TextStyle(color: Colors.white),),
             ),
           ],
         ),
@@ -203,7 +243,7 @@ class _FolderCard extends StatelessWidget {
     final color = Color(int.parse('FF${folder.color.substring(1)}', radix: 16));
 
     return Card(
-      elevation: 3,
+      elevation: 1,
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
@@ -216,7 +256,7 @@ class _FolderCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            color: Colors.white, // ✅ bỏ gradient, nền trắng tinh tế
+            color: Colors.white,
           ),
           child: Row(
             children: [
@@ -288,6 +328,7 @@ class _FolderCard extends StatelessWidget {
               ),
               if (!isDefault)
                 PopupMenuButton<String>(
+                  color: Colors.grey.shade50,
                   onSelected: (value) async {
                     if (value == 'edit') {
                       Get.snackbar('Thông báo', 'Tính năng chỉnh sửa sắp ra mắt');
@@ -300,9 +341,9 @@ class _FolderCard extends StatelessWidget {
                       value: 'edit',
                       child: Row(
                         children: [
-                          Icon(Icons.edit, size: 20),
+                          Icon(Icons.edit, size: 20,color: Colors.grey,),
                           SizedBox(width: 8),
-                          Text('Chỉnh sửa'),
+                          Text('Chỉnh sửa',style: TextStyle(color: Colors.grey),),
                         ],
                       ),
                     ),
@@ -327,21 +368,26 @@ class _FolderCard extends StatelessWidget {
 
   void _showDeleteDialog(BuildContext context, FlashcardController controller) {
     showDialog(
+
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey.shade50,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
         title: const Text('Xóa thư mục'),
         content: Text('Bạn có chắc muốn xóa thư mục "${folder.name}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Hủy'),
+            child: const Text('Hủy',style: TextStyle(color: AppColors.primary),),
           ),
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
               await controller.deleteFolder(folder.id!, moveToDefault: true);
             },
-            child: const Text('Chuyển về "Tất cả"'),
+            child: const Text('Chuyển về "Tất cả"',style: TextStyle(color: AppColors.primary)),
           ),
           TextButton(
             onPressed: () async {

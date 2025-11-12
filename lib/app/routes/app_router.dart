@@ -4,9 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:learn_english/presentation/screens/quiz/quiz_create_screen.dart';
+import 'package:learn_english/presentation/screens/quiz/quiz_detail_screen.dart';
+import 'package:learn_english/presentation/screens/quiz/quiz_list_screen.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../presentation/controllers/chat_controller.dart';
+import '../../presentation/controllers/friend_controller.dart';
+import '../../presentation/screens/chat/chat_list_screen.dart';
 import '../../presentation/screens/chat/chat_screen.dart';
+import '../../presentation/screens/chat/friend_screen.dart';
+import '../../presentation/screens/chat/quiz_duel_screen.dart';
 import '../../presentation/screens/flashcard/flash_study_screen.dart';
 import '../../presentation/screens/learn/learn_screen.dart';
 import '../../presentation/screens/pdf/pdf_screen.dart';
@@ -15,6 +24,7 @@ import '../../presentation/screens/flashcard/flash_create_screen.dart';
 import '../../presentation/screens/flashcard/flashcard_detail_screen.dart';
 import '../../presentation/screens/flashcard/folder_management_screen.dart';
 import '../../presentation/screens/learn/lesson_detail_screen.dart';
+import '../../presentation/screens/quiz/widgets/quiz_taking.dart';
 import '../../presentation/screens/splash/splash_screen.dart';
 import '../../presentation/screens/auth/login_screen.dart';
 import '../../presentation/screens/onboading/onboading_screen.dart';
@@ -68,16 +78,13 @@ class AppRouter {
         Routes.onboarding,
       ].contains(state.matchedLocation);
 
-      // Chưa login → chuyển về onboarding/login
       if (user == null && !isAuthRoute && state.matchedLocation != Routes.splash) {
         return hasSeenOnboarding ? Routes.login : Routes.onboarding;
       }
 
-      // Đã login
       if (user != null) {
         final userIsAdmin = await isAdmin();
 
-        // Admin → vào admin dashboard
         if (userIsAdmin && [
           Routes.login,
           Routes.register,
@@ -88,7 +95,6 @@ class AppRouter {
           return Routes.admin;
         }
 
-        // User thường → vào home
         if (!userIsAdmin && [
           Routes.login,
           Routes.register,
@@ -98,7 +104,6 @@ class AppRouter {
           return Routes.home;
         }
 
-        // Chặn user thường vào admin
         if (!userIsAdmin && state.matchedLocation == Routes.admin) {
           return Routes.home;
         }
@@ -139,29 +144,48 @@ class AppRouter {
         ],
       ),
 
-      // FLASHCARDS – ĐÃ SỬA HOÀN HẢO!
+      // QUIZ
+      GoRoute(
+        path: Routes.quiz,
+        builder: (context, state) => QuizListScreen(),
+        routes: [
+          GoRoute(
+            path: 'detail/:id',
+            builder: (context, state) => QuizDetailScreen(
+              quizId: state.pathParameters['id']!,
+            ),
+          ),
+          GoRoute(
+            path: 'taking/:id',
+            builder: (context, state) => QuizTakingScreen(quizId: state.pathParameters['id']!),
+          ),
+          GoRoute(
+            path: 'create',
+            builder: (context, state) => const CreateQuizScreen(),
+          ),
+
+        ],
+      ),
+
+      // FLASHCARDS
       GoRoute(
         path: Routes.flashcards,
         builder: (context, state) => const FlashcardListScreen(),
         routes: [
-          // Chi tiết 1 thẻ
           GoRoute(
             path: 'detail/:id',
             builder: (context, state) => FlashcardDetailScreen(
               id: state.pathParameters['id']!,
             ),
           ),
-          // Tạo thẻ mới
           GoRoute(
             path: 'create',
             builder: (context, state) => const FlashcardCreateScreen(),
           ),
-          // HỌC HÀNG LOẠT – MỚI!
           GoRoute(
             path: 'study',
             builder: (context, state) => const FlashcardStudyScreen(),
           ),
-          // Quản lý thư mục
           GoRoute(
             path: 'folders',
             builder: (context, state) => const FolderManagementScreen(),
@@ -169,12 +193,34 @@ class AppRouter {
         ],
       ),
 
-      // CHAT
+      // CHAT - CHỈ GIỮ CHATCONTROLLER VỚI PROVIDER
       GoRoute(
         path: Routes.chat,
-        builder: (context, state) => const ChatScreen(),
+        builder: (context, state) => ChangeNotifierProvider(
+          create: (_) => ChatController(),
+          child: const ChatListScreen(),
+        ),
         routes: [
-          GoRoute(path: 'room', builder: (context, state) => const Placeholder()),
+          GoRoute(
+            path: 'friends',
+            builder: (context, state) => ChangeNotifierProvider<FriendController>(
+              create: (_) => FriendController(),
+              child: FriendsScreen(
+                currentUid: FirebaseAuth.instance.currentUser?.uid ?? '',
+              ),
+            ),
+          ),
+          // ✅ FIX: Bỏ QuizController khỏi Provider
+          GoRoute(
+            path: 'room/:roomId',
+            builder: (context, state) => ChangeNotifierProvider(
+              create: (_) => ChatController(),
+              child: ChatScreen(
+                roomId: state.pathParameters['roomId']!,
+                currentUid: FirebaseAuth.instance.currentUser?.uid ?? '',
+              ),
+            ),
+          ),
         ],
       ),
 

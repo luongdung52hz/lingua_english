@@ -6,7 +6,6 @@ class QuizRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final String _collection = 'quizzes';
 
-  /// Save quiz to Firebase
   Future<String> saveQuiz(QuizModel quiz) async {
     try {
       final docRef = _firestore.collection(_collection).doc(quiz.id);
@@ -17,7 +16,6 @@ class QuizRepository {
     }
   }
 
-  /// Get quiz by ID
   Future<QuizModel?> getQuizById(String id) async {
     try {
       final doc = await _firestore.collection(_collection).doc(id).get();
@@ -33,7 +31,6 @@ class QuizRepository {
     }
   }
 
-  /// Get all quizzes
   Future<List<QuizModel>> getAllQuizzes() async {
     try {
       final snapshot = await _firestore
@@ -52,7 +49,6 @@ class QuizRepository {
     }
   }
 
-  /// Get quizzes by status
   Future<List<QuizModel>> getQuizzesByStatus(QuizStatus status) async {
     try {
       final snapshot = await _firestore
@@ -72,7 +68,6 @@ class QuizRepository {
     }
   }
 
-  /// Update quiz
   Future<void> updateQuiz(QuizModel quiz) async {
     try {
       await _firestore
@@ -84,7 +79,6 @@ class QuizRepository {
     }
   }
 
-  /// Delete quiz
   Future<void> deleteQuiz(String id) async {
     try {
       await _firestore.collection(_collection).doc(id).delete();
@@ -93,7 +87,6 @@ class QuizRepository {
     }
   }
 
-  /// Search quizzes by title
   Future<List<QuizModel>> searchQuizzes(String query) async {
     try {
       final snapshot = await _firestore
@@ -113,7 +106,6 @@ class QuizRepository {
     }
   }
 
-  /// Get quiz count
   Future<int?> getQuizCount() async {
     try {
       final snapshot = await _firestore.collection(_collection).count().get();

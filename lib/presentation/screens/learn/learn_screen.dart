@@ -1,3 +1,4 @@
+// File: lib/presentation/screens/learn/learn_screen.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
@@ -10,7 +11,7 @@ import '../../controllers/lesson_controller.dart';
 import '../../widgets/bottom_nav_bar.dart';
 import '../../../app/routes/route_names.dart';
 import '../../../resources/styles/colors.dart';
-
+import '../../widgets/custom_sliver_appbar.dart';
 
 class LearnScreen extends StatefulWidget {
   const LearnScreen({super.key});
@@ -43,91 +44,16 @@ class _LearnScreenState extends State<LearnScreen>
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
-            SliverAppBar(
-              expandedHeight: 140,
-              floating: false,
-              pinned: true,
-              elevation: 0,
-              backgroundColor: AppColors.primary,
-              flexibleSpace: FlexibleSpaceBar(
-                background: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        AppColors.primary,
-                        AppColors.primary.withOpacity(0.8),
-                      ],
-                    ),
-                  ),
-                  child: SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: const Icon(
-                                  Icons.school_rounded,
-                                  color: Colors.white,
-                                  size: 28,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              const Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Học Tập',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Text(
-                                      'Chọn cấp độ và kỹ năng',
-                                      style: TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              // IconButton(
-                              //   onPressed: () {
-                              //
-                              //   },
-                              //   icon: const Icon(
-                              //     Icons.insights_rounded,
-                              //     color: Colors.white,
-                              //   ),
-                              // ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+            CustomSliverAppBar(
+              icon: Icons.school_rounded,
+              title: 'Học Tập',
+              subtitle: 'Chọn cấp độ và kỹ năng',
               bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(10),
                 child: Container(
                   color: Colors.white,
                   child: TabBar(
                     controller: _levelController,
-
                     onTap: (index) {
                       final level = controller.levels[index];
                       controller.changeLevel(level);
@@ -152,7 +78,6 @@ class _LearnScreenState extends State<LearnScreen>
                       Tab(text: 'B2'),
                       Tab(text: 'C1'),
                       Tab(text: 'C2'),
-
                     ],
                   ),
                 ),

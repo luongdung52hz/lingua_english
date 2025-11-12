@@ -60,7 +60,6 @@ class QuizModel {
     );
   }
 
-  // Calculate completion percentage
   double get completionPercentage {
     if (questions.isEmpty) return 0;
     final completeQuestions = questions.where((q) => q.isComplete).length;

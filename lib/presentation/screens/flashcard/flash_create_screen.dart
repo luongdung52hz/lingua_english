@@ -23,7 +23,6 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
   Flashcard? previewFlashcard;
   String? selectedFolderId;
 
-  // ✅ NEW: State cho hướng dịch (mặc định Việt → Anh)
   TranslationDirection translationDirection = TranslationDirection.viToEn;
 
   @override
@@ -49,10 +48,9 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
       return;
     }
 
-    // ✅ SỬA: Truyền direction vào
     final flashcard = await controller.createFlashcardFromText(
       inputText,
-      direction: translationDirection, // ✅ Dùng state
+      direction: translationDirection,
       folderId: selectedFolderId,
     );
 
@@ -69,7 +67,6 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
     }
   }
 
-  // ✅ NEW: Toggle hướng dịch
   void _toggleTranslationDirection() {
     setState(() {
       translationDirection = translationDirection == TranslationDirection.viToEn
@@ -105,7 +102,7 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
 
             Card(
               elevation: 4,
-
+              color: Colors.grey.shade50,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -130,13 +127,13 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
                         ),
                         Container(
                           decoration: BoxDecoration(
-                            color: Colors.deepPurple[50],
+                            color: Colors.transparent,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: IconButton(
                             icon: Icon(
                               Icons.swap_horiz,
-                              color: Colors.deepPurple,
+                              color: Colors.black,
                               size: 28,
                             ),
                             tooltip: 'Đổi hướng dịch',
@@ -154,11 +151,23 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
                         hintText: translationDirection == TranslationDirection.viToEn
                             ? 'Ví dụ: Xin chào'
                             : 'Example: Hello',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
                         filled: true,
                         fillColor: Colors.grey[100],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade400),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade400),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: AppColors.primary,
+                            width: 2,
+                          ),
+                        ),
                       ),
                       maxLines: 3,
                       textInputAction: TextInputAction.done,
@@ -282,6 +291,7 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
 
       return Card(
         elevation: 2,
+        color: Colors.grey.shade50,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: ListTile(
           leading: Text(
@@ -313,7 +323,7 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: Colors.grey.shade50,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
