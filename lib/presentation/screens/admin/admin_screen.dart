@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../data/models/lesson_model.dart';
+import '../../../app/routes/route_names.dart';
 import '../../controllers/admin_controller.dart';
 import '../../../resources/styles/colors.dart';
 
@@ -97,7 +99,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          ' Quản Lý Bài Học',
+          'Quản Lý Bài Học',
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: AppColors.primary,
@@ -107,16 +109,41 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
           onPressed: () => controller.logout(context),
           tooltip: 'Đăng xuất',
         ),
+        actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(
+              Icons.more_vert,
+              color: Colors.white,
+            ),
+            onSelected: (value) {
+              if (value == 'pdf') {
+                context.go(Routes.pdf);
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'pdf',
+                child: Row(
+                  children: [
+                    Icon(Icons.picture_as_pdf, size: 20, color: Colors.grey),
+                    SizedBox(width: 8),
+                    Text('Chuyển đổi dữ liệu'),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
         bottom: TabBar(
           controller: _tabController,
-          indicatorWeight:1 ,
+          indicatorWeight: 1,
           labelStyle: const TextStyle(fontSize: 12),
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
           indicatorColor: Colors.white,
           isScrollable: false,
           tabs: const [
-            Tab(icon: Icon(Icons.list,size: 30,), text: 'Tất cả'),
+            Tab(icon: Icon(Icons.list, size: 30), text: 'Tất cả'),
             Tab(icon: Icon(Icons.layers), text: 'Level'),
             Tab(icon: Icon(Icons.category), text: 'Skill'),
             Tab(icon: Icon(Icons.topic), text: 'Topic'),
@@ -454,9 +481,9 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
 
   Widget _buildLessonCard(LessonModel lesson) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 4), // Giảm margin để card nhỏ hơn
+      margin: const EdgeInsets.symmetric(vertical: 4),
       child: ListTile(
-        contentPadding: const EdgeInsets.all(8), // Giảm padding để gọn
+        contentPadding: const EdgeInsets.all(8),
         title: Text(
           lesson.title,
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -464,10 +491,10 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (lesson.description.isNotEmpty) ...[ // Sửa: lesson.description
+            if (lesson.description.isNotEmpty) ...[
               const SizedBox(height: 2),
               Text(
-                lesson.description, // Sửa: lesson.description
+                lesson.description,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontSize: 13, color: Colors.grey),
@@ -475,8 +502,8 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
               const SizedBox(height: 4),
             ],
             Wrap(
-              spacing: 1 ,// Giảm spacing để ngắn
-              runSpacing: 0, // Không run spacing để sát
+              spacing: 1,
+              runSpacing: 0,
               children: [
                 Chip(
                   label: Text(lesson.level, style: const TextStyle(fontSize: 10)),
@@ -492,7 +519,6 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
                   Chip(
                     label: Text(lesson.topic, style: const TextStyle(fontSize: 10)),
                     backgroundColor: Colors.transparent,
-
                     padding: EdgeInsets.zero,
                   ),
               ],
@@ -515,6 +541,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
       ),
     );
   }
+
   Widget _buildEmptyState() {
     return Center(
       child: Column(

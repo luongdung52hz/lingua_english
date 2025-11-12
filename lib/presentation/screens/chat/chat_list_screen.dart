@@ -8,6 +8,7 @@ import '../../../app/routes/route_names.dart';
 import '../../../data/models/chat_room_model.dart';
 import '../../../data/models/user_model.dart';
 import '../../controllers/chat_controller.dart';
+import '../../widgets/bottom_nav_bar.dart';
 
 class ChatListScreen extends StatefulWidget {
   const ChatListScreen({super.key});
@@ -77,10 +78,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
           );
         },
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () => context.go(Routes.chatFriends),
-      //   child: const Icon(Icons.add),
-     // ),
+      bottomNavigationBar: const BottomNavBar(currentIndex: 3),
+
     );
   }
 }

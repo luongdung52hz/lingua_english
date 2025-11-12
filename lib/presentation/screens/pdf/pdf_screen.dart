@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../controllers/pdf_controller.dart';
 
@@ -52,7 +53,11 @@ class _PdfUploadPageState extends State<PdfUploadPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('📚 Tạo Quiz từ PDF'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => context.go('/admin'),
+        ),
+        title: const Text(' Tạo Quiz từ PDF'),
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
       ),
@@ -279,7 +284,7 @@ class _PdfUploadPageState extends State<PdfUploadPage> {
             label: Text(
               controller.isProcessing.value
                   ? 'Đang xử lý...'
-                  : '🚀 Tạo Quiz từ PDF',
+                  : ' Tạo Quiz từ PDF',
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,
