@@ -65,6 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+
                   const SizedBox(height: 10),
                   const Text(
                     "Chào mừng bạn trở lại",
@@ -129,29 +130,15 @@ class _HomeScreenState extends State<HomeScreen> {
                           },
                         ),
                         SkillCard(
-                          title: "Tài liệu",
-                          icon: Icons.book,
+                          title: "Quiz",
+                          icon: Icons.quiz,
                           color: Colors.yellow,
                           onTap: () {
                             context.go(Routes.quiz);
                           },
                         ),
-                        SkillCard(
-                          title: "Từ vựng",
-                          icon: Icons.abc,
-                          color: Colors.purple,
-                          onTap: () {
-                            context.go(Routes.chat);
-                          },
-                        ),
-                        SkillCard(
-                          title: "Ngữ pháp",
-                          icon: Icons.abc,
-                          color: Colors.purple,
-                          onTap: () {
-                            context.go(Routes.chat);
-                          },
-                        ),
+
+
                       ],
                     ),
                   ),

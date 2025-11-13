@@ -11,6 +11,7 @@ import '../../../data/models/chat_room_model.dart';
 import '../../../data/models/message_model.dart';
 import '../../../data/models/user_model.dart';
 import '../../controllers/chat_controller.dart';
+import '../../../resources/styles/colors.dart';
 
 class ChatScreen extends StatefulWidget {
   final String roomId;
@@ -38,7 +39,6 @@ class _ChatScreenState extends State<ChatScreen> {
   String friendName = '';
 
   List<MessageModel> _messages = [];
-  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
   StreamSubscription<List<MessageModel>>? _messagesSubscription;
 
   @override
@@ -77,66 +77,28 @@ class _ChatScreenState extends State<ChatScreen> {
 
     final oldLength = _messages.length;
     final newLength = newMessages.length;
+    final hasNewMessages = newLength > oldLength;
 
-    // Sort ASC (cũ dưới, mới trên)
-    if (oldLength == 0) {
-      setState(() {
-        _messages = List<MessageModel>.from(newMessages);
-        _previousMessageCount = newLength;
-      });
+    setState(() {
+      _messages = List<MessageModel>.from(newMessages);
+      _previousMessageCount = newLength;
+    });
+
+    // Auto-scroll khi có tin mới và đang ở gần đầu
+    if (hasNewMessages && _shouldAutoScroll) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
+        if (mounted && _scrollController.hasClients) {
           _scrollToTop(animate: true);
         }
       });
-      return;
     }
 
-    if (newLength <= oldLength) {
-      setState(() {
-        _messages = List<MessageModel>.from(newMessages);
-        _previousMessageCount = newLength;
-      });
-      return;
-    }
-
-    bool onlyAppended = true;
-    for (int i = 0; i < oldLength; i++) {
-      if (_messages[i].id != newMessages[i].id ||
-          _messages[i].content != newMessages[i].content) {
-        onlyAppended = false;
-        break;
-      }
-    }
-
-    if (onlyAppended) {
-      final addedCount = newLength - oldLength;
-      final animateCount = addedCount > 3 ? 1 : addedCount;
-      for (int i = 0; i < addedCount; i++) {
-        final newIndex = 0; // Thêm ở đầu danh sách
-        _messages.insert(newIndex, newMessages[i]);
-        if (i >= addedCount - animateCount) {
-          _listKey.currentState!.insertItem(
-            newIndex,
-            duration: const Duration(milliseconds: 400),
-          );
+    // Lần đầu load → scroll lên đầu
+    if (oldLength == 0 && newLength > 0) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _scrollController.hasClients) {
+          _scrollToTop(animate: false);
         }
-      }
-
-      _previousMessageCount = newLength;
-
-      // Auto-scroll lên nếu đang ở gần đầu
-      if (_shouldAutoScroll) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted && _scrollController.hasClients) {
-            _scrollToTop(animate: false);
-          }
-        });
-      }
-    } else {
-      setState(() {
-        _messages = List<MessageModel>.from(newMessages);
-        _previousMessageCount = newLength;
       });
     }
   }
@@ -158,7 +120,7 @@ class _ChatScreenState extends State<ChatScreen> {
     }
 
     final currentPixels = _scrollController.position.pixels;
-    final isNearTop = currentPixels <= 200;
+    final isNearTop = currentPixels <= 100;
 
     if (_shouldAutoScroll != isNearTop) {
       setState(() {
@@ -221,8 +183,18 @@ class _ChatScreenState extends State<ChatScreen> {
     final chatController = Provider.of<ChatController>(context);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(friendName),
+        title: Text(
+          friendName,
+          style: const TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: Column(
         children: [
@@ -230,87 +202,76 @@ class _ChatScreenState extends State<ChatScreen> {
             child: Stack(
               children: [
                 if (_messages.isEmpty)
-                  const Center(child: Text('Chưa có tin nhắn nào')),
+                  const Center(
+                    child: Text(
+                      'Chưa có tin nhắn nào',
+                      style: TextStyle(
+                        color: Color(0xFF757575),
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
 
                 if (_messages.isNotEmpty)
-                  AnimatedList(
-                    key: _listKey,
+                  ListView.builder(
                     controller: _scrollController,
                     reverse: true, // Tin mới ở trên
                     padding: const EdgeInsets.all(8).copyWith(top: 70),
                     physics: const AlwaysScrollableScrollPhysics(),
-                    initialItemCount: _messages.length,
-                    itemBuilder: (context, index, animation) {
+                    itemCount: _messages.length,
+                    itemBuilder: (context, index) {
                       final msg = _messages[index];
                       final isMe = msg.senderUid == currentUid;
 
-                      return SlideTransition(
-                        position: Tween<Offset>(
-                          begin: const Offset(0, -0.2),
-                          end: Offset.zero,
-                        ).animate(CurvedAnimation(
-                          parent: animation,
-                          curve: Curves.easeOut,
-                        )),
-                        child: Align(
-                          alignment: isMe
-                              ? Alignment.centerRight
-                              : Alignment.centerLeft,
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(
-                                vertical: 4, horizontal: 8),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 10),
-                            constraints: BoxConstraints(
-                              maxWidth:
-                              MediaQuery.of(context).size.width * 0.7,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isMe
-                                  ? Colors.blue[600]
-                                  : Colors.grey[300],
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (index == 0 ||
-                                    _messages[index].sentAt
-                                        .toDate()
-                                        .day !=
-                                        _messages[index == 0
-                                            ? index
-                                            : index - 1]
-                                            .sentAt
-                                            .toDate()
-                                            .day)
-                                  Padding(
-                                    padding:
-                                    const EdgeInsets.only(bottom: 8),
-                                    child: Text(
-                                      _formatTime(msg.sentAt),
-                                      style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.grey[500]),
-                                    ),
-                                  ),
-                                Text(
-                                  msg.content,
-                                  style: TextStyle(
-                                    color: isMe
-                                        ? Colors.white
-                                        : Colors.black87,
-                                    fontSize: 15,
+                      return Align(
+                        alignment: isMe
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 2, horizontal: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 10),
+                          constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width * 0.75,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isMe
+                                ? AppColors.primary
+                                : Colors.grey[200],
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (index == _messages.length - 1 ||
+                                  (index < _messages.length - 1 &&
+                                      _messages[index].sentAt.toDate().day !=
+                                          _messages[index + 1].sentAt.toDate().day))
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 8),
+                                  child: Text(
+                                    _formatTime(msg.sentAt),
+                                    style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey[500]),
                                   ),
                                 ),
-                              ],
-                            ),
+                              Text(
+                                msg.content,
+                                style: TextStyle(
+                                  color: isMe ? Colors.white : Colors.black87,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       );
                     },
                   ),
 
+                // Nút scroll lên đầu
                 if (!_isUserScrolling && !_shouldAutoScroll)
                   Positioned(
                     top: 90,
@@ -318,12 +279,12 @@ class _ChatScreenState extends State<ChatScreen> {
                     child: FloatingActionButton.small(
                       onPressed: () {
                         setState(() {
-                          _shouldAutoScroll = false;
+                          _shouldAutoScroll = true;
                           _isUserScrolling = false;
                         });
-                        _scrollToTop(animate: false);
+                        _scrollToTop(animate: true);
                       },
-                      backgroundColor: Colors.blue,
+                      backgroundColor: AppColors.primary,
                       child: const Icon(Icons.arrow_downward,
                           color: Colors.white, size: 20),
                     ),
@@ -339,7 +300,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Widget _buildInputBar(ChatController chatController) {
     return Container(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -358,6 +319,10 @@ class _ChatScreenState extends State<ChatScreen> {
                 controller: _messageController,
                 decoration: InputDecoration(
                   hintText: 'Nhập tin nhắn...',
+                  hintStyle: TextStyle(
+                    color: Colors.grey[500],
+                    fontSize: 16,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(24),
                     borderSide: BorderSide.none,
@@ -369,16 +334,29 @@ class _ChatScreenState extends State<ChatScreen> {
                     vertical: 8,
                   ),
                 ),
+                style: const TextStyle(
+                  color: Colors.black87,
+                  fontSize: 16,
+                ),
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => _sendMessage(chatController),
               ),
             ),
             const SizedBox(width: 8),
-            CircleAvatar(
-              backgroundColor: Colors.blue,
-              child: IconButton(
-                icon: const Icon(Icons.send, color: Colors.white),
-                onPressed: () => _sendMessage(chatController),
+            Material(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(20),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(20),
+                onTap: () => _sendMessage(chatController),
+                child: const Padding(
+                  padding: EdgeInsets.all(12),
+                  child: Icon(
+                    Icons.send,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
               ),
             ),
           ],
@@ -401,13 +379,13 @@ class _ChatScreenState extends State<ChatScreen> {
       _messageController.clear();
 
       setState(() {
-        _shouldAutoScroll = false;
-        _isUserScrolling = true;
+        _shouldAutoScroll = true;
+        _isUserScrolling = false;
       });
 
       Future.delayed(const Duration(milliseconds: 50), () {
         if (mounted) {
-          _scrollToTop(animate: false);
+          _scrollToTop(animate: true);
         }
       });
     } catch (e) {

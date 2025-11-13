@@ -16,10 +16,12 @@ class FlashcardController extends GetxController {
   final isTranslating = false.obs;
   final statistics = <String, int>{}.obs;
   final currentFolderId = 'default'.obs;
+  final hasUnmemorized = false.obs;
 
   StreamSubscription<List<Flashcard>>? _flashcardSubscription;
   StreamSubscription<List<FlashcardFolder>>? _folderSubscription;
   Timer? _searchDebounce;
+
 
   @override
   void onInit() {
@@ -46,11 +48,16 @@ class FlashcardController extends GetxController {
     }
   }
 
+  void _updateHasUnmemorized() {
+    hasUnmemorized.value = flashcards.any((f) => !f.isMemorized);
+  }
+
   void loadFlashcards() {
     _flashcardSubscription?.cancel();
     _flashcardSubscription = _repository.getFlashcards().listen(
           (cards) {
         flashcards.value = cards;
+        _updateHasUnmemorized();
         loadStatistics();
       },
       onError: (e) => _showError('Không thể tải flashcards', e),
@@ -67,6 +74,7 @@ class FlashcardController extends GetxController {
       _flashcardSubscription = _repository.getFlashcardsByFolder(folderId).listen(
             (cards) {
           flashcards.value = cards;
+          _updateHasUnmemorized();
           loadStatisticsByFolder(folderId);
         },
         onError: (e) => _showError('Không thể tải flashcards', e),
@@ -82,7 +90,10 @@ class FlashcardController extends GetxController {
         : _repository.getFlashcardsToReview();
 
     _flashcardSubscription = stream.listen(
-          (cards) => flashcards.value = cards,
+          (cards) {
+        flashcards.value = cards;
+        _updateHasUnmemorized();
+      },
       onError: (e) => _showError('Không thể tải flashcards cần học', e),
     );
   }
@@ -110,6 +121,7 @@ class FlashcardController extends GetxController {
           } else {
             flashcards.value = cards;
           }
+          _updateHasUnmemorized();
         },
         onError: (e) => _showError('Không thể tìm kiếm', e),
       );
@@ -188,6 +200,7 @@ class FlashcardController extends GetxController {
     try {
       isLoading.value = true;
       await _repository.updateFlashcard(flashcard);
+      _updateHasUnmemorized();
       Get.snackbar('Thành công', 'Đã cập nhật flashcard!',
           snackPosition: SnackPosition.BOTTOM,
           duration: const Duration(seconds: 2));
@@ -201,6 +214,7 @@ class FlashcardController extends GetxController {
   Future<void> deleteFlashcard(String flashcardId) async {
     try {
       await _repository.deleteFlashcard(flashcardId);
+      _updateHasUnmemorized();
       Get.snackbar('Đã xóa', 'Flashcard đã được xóa',
           snackPosition: SnackPosition.BOTTOM,
           duration: const Duration(seconds: 2));
@@ -212,6 +226,7 @@ class FlashcardController extends GetxController {
   Future<void> toggleMemorized(String flashcardId, bool isMemorized) async {
     try {
       await _repository.markAsMemorized(flashcardId, isMemorized);
+      _updateHasUnmemorized();
     } catch (e) {
       _showError('Không thể cập nhật trạng thái', e);
     }
@@ -221,6 +236,7 @@ class FlashcardController extends GetxController {
     try {
       isLoading.value = true;
       await _repository.resetAllFlashcards();
+      _updateHasUnmemorized();
       Get.snackbar('Đã reset', 'Tất cả flashcard đã được đặt lại',
           snackPosition: SnackPosition.BOTTOM);
     } catch (e) {
@@ -233,6 +249,7 @@ class FlashcardController extends GetxController {
   Future<void> moveToFolder(String flashcardId, String newFolderId) async {
     try {
       await _repository.moveToFolder(flashcardId, newFolderId);
+      _updateHasUnmemorized();
       Get.snackbar('Thành công', 'Đã chuyển flashcard',
           snackPosition: SnackPosition.BOTTOM,
           duration: const Duration(seconds: 2));

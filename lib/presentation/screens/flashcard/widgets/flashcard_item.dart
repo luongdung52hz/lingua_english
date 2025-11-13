@@ -1,4 +1,7 @@
+// lib/ui/widgets/flashcard_item.dart (assuming path)
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // For HapticFeedback
 import 'package:flutter_tts/flutter_tts.dart';
 import '../../../../data/models/flashcard_model.dart';
 
@@ -138,7 +141,7 @@ class _FlashcardItemState extends State<FlashcardItem> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      color: isThisCardSpeaking ? Colors.blue.shade50 : Colors.grey.shade100,
+      color: Colors.grey.shade50,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: widget.onTap,
@@ -170,52 +173,64 @@ class _FlashcardItemState extends State<FlashcardItem> {
                             ? FontWeight.bold
                             : FontWeight.w600,
                       ),
+                      maxLines: 2, // NEW: Limit lines to prevent vertical overflow
+                      overflow: TextOverflow.ellipsis, // NEW: Ellipsis if too long
                     ),
+                    const SizedBox(height: 4), // Add small space for better layout
+                    // FIXED: Wrap inner Row with Flexible children to prevent horizontal overflow
                     Row(
                       children: [
-                        Text(
-                          widget.flashcard.english,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[700],
-                            fontWeight: isThisCardSpeaking
-                                ? FontWeight.w600
-                                : FontWeight.normal,
+                        Flexible( // NEW: Flexible for english text
+                          child: Text(
+                            widget.flashcard.english,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[700],
+                              fontWeight: isThisCardSpeaking
+                                  ? FontWeight.w600
+                                  : FontWeight.normal,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis, // Ensure ellipsis
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
                         if (widget.flashcard.phonetic != null &&
                             widget.flashcard.phonetic!.isNotEmpty) ...[
-                          const SizedBox(width: 8),
-                          Text(
-                            widget.flashcard.phonetic!,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey[600],
-                              fontStyle: FontStyle.italic,
+                          const SizedBox(width: 4), // Reduce space
+                          Flexible( // NEW: Flexible for phonetic
+                            child: Text(
+                              widget.flashcard.phonetic!,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey[600],
+                                fontStyle: FontStyle.italic,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                         if (widget.flashcard.partOfSpeech != null) ...[
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 2
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.blue[50],
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: Text(
-                              widget.flashcard.partOfSpeech!,
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.blue[700],
-                                fontWeight: FontWeight.w500,
+                          const SizedBox(width: 4), // Reduce space
+                          Flexible( // NEW: Flexible for partOfSpeech container
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 6, // Reduce padding
+                                  vertical: 2
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.blue[50],
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(
+                                widget.flashcard.partOfSpeech!,
+                                style: TextStyle(
+                                  fontSize: 11, // Slightly smaller
+                                  color: Colors.blue[700],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                overflow: TextOverflow.ellipsis, // NEW: Ellipsis for chip text
+                                maxLines: 1,
                               ),
                             ),
                           ),

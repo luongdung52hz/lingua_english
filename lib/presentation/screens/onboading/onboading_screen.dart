@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/routes/route_names.dart';
-import '../../../core/widgets/app_button.dart'; // Giả sử bạn có route này
+import '../../widgets/app_button.dart'; // Giả sử bạn có route này
 import '../../../resources/styles/colors.dart';
 
 class OnboardingScreen extends StatefulWidget {

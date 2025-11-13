@@ -46,7 +46,7 @@ class AppColors {
   static final OutlineInputBorder successBorder = OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
       borderSide: const BorderSide(
-        color: Colors.blue,
+        color: AppColors.primary,
         width: 1,
       )
   );

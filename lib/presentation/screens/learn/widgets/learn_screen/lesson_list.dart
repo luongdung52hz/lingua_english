@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../../controllers/lesson_controller.dart';
-import '../../../../learn/widgets/lesson_card.dart';
-
+import '../../../../widgets/info_card.dart';
 
 class LessonList extends StatelessWidget {
   final LearnController controller;
@@ -43,8 +42,16 @@ class LessonList extends StatelessWidget {
         itemCount: controller.lessons.length,
         itemBuilder: (context, index) {
           final lesson = controller.lessons[index];
-          return LessonCard(
-            lesson: lesson,
+
+
+          return InfoCard(
+            title: lesson.title,
+            subtitle: lesson.description,
+            infoPairs: [
+              IconTextPair(Icons.access_time, '${lesson.duration} phút'),
+              IconTextPair(Icons.stars, 'Độ khó: ${lesson.difficulty}/5'),
+            ],
+
             onTap: () => onLessonTap(lesson),
           );
         },

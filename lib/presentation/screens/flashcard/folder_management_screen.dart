@@ -84,7 +84,7 @@ class FolderManagementScreen extends StatelessWidget {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: AppColors.primary, width: 2),
+                      borderSide: BorderSide(color: AppColors.primary, width: 1),
                     ),
                     floatingLabelStyle: TextStyle(
                       color: AppColors.primary,
@@ -108,7 +108,7 @@ class FolderManagementScreen extends StatelessWidget {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: AppColors.primary, width: 2),
+                      borderSide: BorderSide(color: AppColors.primary, width: 1),
                     ),
                     floatingLabelStyle: TextStyle(
                       color: AppColors.primary,

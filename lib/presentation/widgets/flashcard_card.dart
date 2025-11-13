@@ -33,7 +33,7 @@ class FlashcardCard extends StatelessWidget {
       ],
     ),
     child: Column(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: MainAxisSize.max,
       children: [
         Text(
           flashcard.vietnamese,

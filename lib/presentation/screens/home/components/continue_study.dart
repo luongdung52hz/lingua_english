@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:get/get.dart';
+import '../../../widgets/app_button.dart';
 import '../../../../resources/styles/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../controllers/home_controller.dart';
@@ -123,23 +124,14 @@ class ContinueStudyWidget extends StatelessWidget {
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
+              child: CustomButton(
                 onPressed: onContinueTap,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                ),
-                child: Text(
-                  dailyGoalReached ? "Mục tiêu hôm nay đạt!" : "Tiếp tục học",
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                text: dailyGoalReached ? "Mục tiêu hôm nay đạt!" : "Tiếp tục học",
+                fontWeight: FontWeight.w900,
+                isLoading: false,
+                height: 50,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                borderRadius: BorderRadius.circular(8),
               ),
             ),
           ],

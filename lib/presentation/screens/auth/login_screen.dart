@@ -4,10 +4,11 @@ import 'package:get_it/get_it.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
+import 'package:learn_english/presentation/screens/auth/widgets/text_form_field.dart';
 import '../../../app/routes/route_names.dart';
 import '../../../data/datasources/remote/google_signin_service.dart';
 import '../../../resources/styles/colors.dart';
-import '../../../core/widgets/app_button.dart';
+import '../../widgets/app_button.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -29,11 +30,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final FocusNode emailOrUsernameFocus = FocusNode();
   final FocusNode passFocus = FocusNode();
 
-  Color inputIconColor = const Color(0xffc1d6d3);
-  Color passIconColor = const Color(0xffc1d6d3);
-
-  bool inputIsFocus = false;
-  bool passIsFocus = false;
   bool loading = false;
   bool loadingGoogle = false;
   final FirebaseAuth _auth = GetIt.I<FirebaseAuth>();
@@ -210,43 +206,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    emailOrUsernameFocus.addListener(() {
-      setState(() {
-        inputIsFocus = emailOrUsernameFocus.hasFocus;
-        inputIconColor = (emailOrUsernameFocus.hasFocus
-            ? Colors.blue[200]
-            : Colors.grey)!;
-
-        _validateInput();
-      });
-    });
-
-    emailOrUsernameCtrl.addListener(() {
-      setState(() {
-        _validateInput();
-      });
-    });
-
-    passFocus.addListener(() {
-      setState(() {
-        passIsFocus = passFocus.hasFocus;
-        passIconColor = (passFocus.hasFocus ? Colors.blue[200] : Colors.grey)!;
-      });
-    });
-  }
-
-  void _validateInput() {
-    final input = emailOrUsernameCtrl.text.trim();
-    if (input.isEmpty) {
-      isInputValid = false;
-      return;
-    }
-
-    if (isEmailMode) {
-      isInputValid = _isEmail(input);
-    } else {
-      isInputValid = input.length >= 3;
-    }
+    // Listeners removed - handled internally by ValidatedTextFormField
   }
 
   @override
@@ -260,6 +220,19 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Custom suffix for password visibility
+    final passwordSuffixIcon = IconButton(
+      icon: Icon(
+        isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+        color: Colors.grey, // Simplified; widget handles focus color internally for prefix
+      ),
+      onPressed: () {
+        setState(() {
+          isPasswordVisible = !isPasswordVisible;
+        });
+      },
+    );
+
     return Scaffold(
       body: SingleChildScrollView(
         child: SafeArea(
@@ -270,18 +243,18 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    child: Image.asset(
-                      'lib/resources/assets/images/logo_2.png',
-                      height: 124,
-                      width: 124,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(Icons.image_not_supported, size: 20, color: Colors.white);
-                      },
-                    ),
+                  // ... (unchanged: logo comment, texts, toggle button)
+                  const SizedBox(height: 30),
+                  Image.asset(
+                    'lib/resources/assets/images/logo_L_final.png',
+                    height: 70,
+                    width: 70,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(Icons.image_not_supported, size: 20, color: Colors.white);
+                    },
                   ),
 
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 10),
 
                   const Text(
                     "Chào mừng trở lại! ",
@@ -294,7 +267,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 30),
 
-                  // Toggle Button
+                  // Toggle Button (unchanged)
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.grey[200],
@@ -373,64 +346,20 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Email or Username Field
-                  TextFormField(
+                  // Email or Username Field - Replaced with ValidatedTextFormField
+                  ValidatedTextFormField(
                     controller: emailOrUsernameCtrl,
                     focusNode: emailOrUsernameFocus,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    key: ValueKey(isEmailMode), // Reset field when mode changes
-                    decoration: InputDecoration(
-                      hintText: isEmailMode ? "Email của bạn" : "Tên người dùng",
-
-                      helperStyle: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
-                      prefixIcon: Icon(
-                        isEmailMode ? Icons.email : Icons.person,
-                        size: 24,
-                        color: inputIconColor,
-                      ),
-                      suffixIcon: isInputValid
-                          ? Icon(Icons.check, color: Colors.green, size: 24)
-                          : (emailOrUsernameCtrl.text.isNotEmpty && !isInputValid)
-                          ? Icon(Icons.error, color: Colors.red, size: 24)
-                          : null,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: isInputValid ? Colors.blue : Colors.grey,
-                          width: 1,
-                        ),
-                      ),
-                      focusedBorder: AppColors.successBorder,
-                      errorBorder: AppColors.errorBorder,
-                      focusedErrorBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: Colors.red,
-                          width: 2,
-                        ),
-                      ),
-                      filled: true,
-                      fillColor: Colors.grey[50],
-                    ),
+                    key: ValueKey(isEmailMode), // Reset when mode changes
+                    hintText: isEmailMode ? "Email của bạn" : "Tên người dùng",
+                    prefixIcon: isEmailMode ? Icons.email : Icons.person,
                     validator: (v) {
                       if (v == null || v.isEmpty) {
-                        return isEmailMode
-                            ? "Nhập email"
-                            : "Nhập tên người dùng";
+                        return isEmailMode ? "Nhập email" : "Nhập tên người dùng";
                       }
-
                       final trimmed = v.trim();
-
                       if (isEmailMode) {
-                        final emailRegex = RegExp(
-                          r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                        );
+                        final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
                         if (!emailRegex.hasMatch(trimmed)) {
                           return "Email không hợp lệ";
                         }
@@ -441,55 +370,27 @@ class _LoginScreenState extends State<LoginScreen> {
                       }
                       return null;
                     },
+                    onValidationChanged: (valid) => setState(() => isInputValid = valid),
+                    validationLogic: (text) {
+                      if (text.isEmpty) return false;
+                      return isEmailMode ? _isEmail(text) : text.length >= 3;
+                    },
+                    // Note: Border uses green for consistency; adjust widget if needed for primary
                   ),
                   const SizedBox(height: 16),
 
-                  // Password Field
-                  TextFormField(
+                  // Password Field - Replaced with ValidatedTextFormField
+                  ValidatedTextFormField(
                     controller: passCtrl,
                     focusNode: passFocus,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    decoration: InputDecoration(
-                      hintText: "Mật khẩu",
-                      prefixIcon: Icon(Icons.lock, color: passIconColor),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          isPasswordVisible
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                          color: passIconColor,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            isPasswordVisible = !isPasswordVisible;
-                          });
-                        },
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: isPasswordValid ? Colors.green : Colors.grey,
-                          width: 1,
-                        ),
-                      ),
-                      focusedBorder: AppColors.successBorder,
-                      errorBorder: AppColors.errorBorder,
-                      focusedErrorBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: Colors.red,
-                          width: 2,
-                        ),
-                      ),
-                      filled: true,
-                      fillColor: Colors.grey[50],
-                    ),
-                    obscureText: !isPasswordVisible,
-                    validator: (v) =>
-                    v!.length < 6 ? "Tối thiểu 6 ký tự" : null,
+                    hintText: "Mật khẩu",
+                    prefixIcon: Icons.lock,
+                    validator: (v) => v!.length < 6 ? "Tối thiểu 6 ký tự" : null,
+                    onValidationChanged: (valid) => setState(() => isPasswordValid = valid),
+                    validationLogic: (text) => text.length >= 6,
+                    isObscure: !isPasswordVisible,
+                    suffixIcon: passwordSuffixIcon,
+                    // Note: Visibility toggle handled in parent; obscure updates on setState
                   ),
 
                   Align(

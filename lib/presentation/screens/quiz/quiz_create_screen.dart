@@ -89,7 +89,7 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: AppColors.primary, width: 2),
+                            borderSide: BorderSide(color: AppColors.primary, width: 1),
                           ),
                           filled: true,
                           fillColor: Colors.white,
@@ -118,7 +118,7 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
-                            borderSide: BorderSide(color: AppColors.primary, width: 2),
+                            borderSide: BorderSide(color: AppColors.primary, width: 1),
                           ),
                           filled: true,
                           fillColor: Colors.white,
@@ -149,7 +149,7 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(8),
-                                  borderSide: BorderSide(color: AppColors.primary, width: 2),
+                                  borderSide: BorderSide(color: AppColors.primary, width: 1),
                                 ),
                                 filled: true,
                                 fillColor: Colors.white,
@@ -167,10 +167,10 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
                           const SizedBox(width: 12),
                           ElevatedButton.icon(
                             onPressed: _generateQuestions,
-                            icon: const Icon(Icons.add, color: Colors.white),
+                            icon: const Icon(Icons.add, color: Colors.white,size: 20,),
                             label: const Text(
                               'Tạo',
-                              style: TextStyle(color: Colors.white),
+                              style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),
                             ),
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(
@@ -292,7 +292,7 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          '${q.options.where((o) => o.isNotEmpty).length} lựa chọn',
+                                          '${q.options.where((o) => o.trim().isNotEmpty).length} lựa chọn',
                                           style: TextStyle(
                                             fontSize: 13,
                                             color: Colors.grey[600],
@@ -351,6 +351,7 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
                         'Lưu Quiz',
                         style: TextStyle(
                           fontSize: 16,
+                          fontWeight: FontWeight.bold,
                           color: isQuizComplete ? Colors.white : Colors.grey[600],
                         ),
                       ),
@@ -431,7 +432,7 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: AppColors.primary, width: 2),
+              borderSide: BorderSide(color: AppColors.primary, width: 1),
             ),
             filled: true,
             fillColor: Colors.white,
@@ -461,18 +462,23 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
               ? displayOptions[optIndex]
               : '';
 
+          // So sánh bằng trim để tránh lỗi khoảng trắng
+          final isSelected = currentValue.trim().isNotEmpty &&
+              question.correctAnswer?.trim() == currentValue.trim();
+
           return Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Row(
               children: [
                 Radio<String>(
-                  value: currentValue,
-                  groupValue: question.correctAnswer ?? '',
+                  value: currentValue.trim(),
+                  groupValue: question.correctAnswer?.trim() ?? '',
                   activeColor: AppColors.primary,
                   onChanged: (val) {
-                    if (currentValue.isNotEmpty) {
+                    if (currentValue.trim().isNotEmpty) {
+                      // LƯU Ý: Lưu giá trị ĐÃ TRIM
                       _questions[index] = _questions[index].copyWith(
-                        correctAnswer: currentValue,
+                        correctAnswer: currentValue.trim(),
                       );
                       _updateState();
                     }
@@ -498,7 +504,7 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(color: AppColors.primary, width: 2),
+                        borderSide: BorderSide(color: AppColors.primary, width: 1),
                       ),
                       filled: true,
                       fillColor: Colors.white,
@@ -508,18 +514,17 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
                       ),
                     ),
                     onChanged: (newText) {
-                      final trimmedText = newText;
                       final currentOptions = List<String>.from(question.options);
 
                       while (currentOptions.length <= optIndex) {
                         currentOptions.add('');
                       }
 
-                      final oldValue = currentOptions[optIndex];
-                      currentOptions[optIndex] = trimmedText;
+                      final oldValue = currentOptions[optIndex].trim();
+                      currentOptions[optIndex] = newText;
 
                       while (currentOptions.isNotEmpty &&
-                          currentOptions.last.isEmpty &&
+                          currentOptions.last.trim().isEmpty &&
                           currentOptions.length > 4) {
                         final lastIndex = currentOptions.length - 1;
                         if (lastIndex >= 4) {
@@ -529,9 +534,10 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
                         }
                       }
 
+                      // Cập nhật correctAnswer nếu đang chỉnh sửa option được chọn
                       String? newCorrectAnswer = question.correctAnswer;
-                      if (question.correctAnswer?.trim() == oldValue.trim()) {
-                        newCorrectAnswer = trimmedText.isNotEmpty ? trimmedText : null;
+                      if (question.correctAnswer?.trim() == oldValue) {
+                        newCorrectAnswer = newText.trim().isNotEmpty ? newText.trim() : null;
                       }
 
                       _questions[index] = _questions[index].copyWith(
@@ -545,7 +551,7 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
                 ),
                 if (question.options.length > 2 &&
                     optIndex < question.options.length &&
-                    currentValue.isNotEmpty)
+                    currentValue.trim().isNotEmpty)
                   IconButton(
                     icon: const Icon(Icons.close, size: 20),
                     color: Colors.black,
@@ -554,12 +560,12 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
                       String? removedValue;
 
                       if (optIndex < newOptions.length) {
-                        removedValue = newOptions.removeAt(optIndex);
+                        removedValue = newOptions.removeAt(optIndex).trim();
                       }
 
                       String? newCorrectAnswer = question.correctAnswer;
                       if (removedValue != null &&
-                          question.correctAnswer?.trim() == removedValue.trim()) {
+                          question.correctAnswer?.trim() == removedValue) {
                         newCorrectAnswer = null;
                       }
 
@@ -638,7 +644,8 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
     if (uniqueOptions.length != nonEmptyOptions.length) return false;
 
     // Kiểm tra đáp án đúng có trong danh sách
-    return nonEmptyOptions.contains(question.correctAnswer?.trim());
+    return question.correctAnswer?.trim().isNotEmpty == true &&
+        nonEmptyOptions.contains(question.correctAnswer!.trim());
   }
 
   void _generateQuestions() {

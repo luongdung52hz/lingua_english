@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../../widgets/app_button.dart';
 import '../../../../../../data/models/lesson_model.dart';
 import '../../../../../controllers/lesson_controller.dart';
 import '../../../../../../resources/styles/colors.dart';
@@ -23,33 +24,16 @@ class CompleteButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: () => _handleComplete(context),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          elevation: 4,
-        ),
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.check_circle, color: Colors.white),
-            SizedBox(width: 8),
-            Text(
-              'HOÀN THÀNH BÀI HỌC',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ],
-        ),
-      ),
+        width: double.infinity,
+        child: CustomButton(
+          onPressed: () => _handleComplete(context),
+          text: 'HOÀN THÀNH BÀI HỌC',
+          icon: Icons.check_circle,
+          iconSize: 20,
+          height: 52,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          borderRadius: BorderRadius.circular(12),
+        )
     );
   }
 

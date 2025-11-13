@@ -134,6 +134,7 @@ class _QuestionListState extends State<QuestionList> {
 
     return Card(
       margin: EdgeInsets.zero,
+      color: Colors.grey.shade50,
       elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),

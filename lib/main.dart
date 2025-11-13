@@ -43,34 +43,6 @@ void main() async {
 
 }
 
-// Trong main.dart hoặc script riêng
-Future<void> createAdmin() async {
-  final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-    email: 'admin@gmail.com',
-    password: '123456',
-  );
-
-  final adminUid = userCredential.user!.uid;
-  await FirebaseFirestore.instance.collection('users').doc(adminUid).set({
-    'uid': adminUid,
-    'email': 'admin@gmail.com',
-    'name': 'Admin',
-    'role': 'admin',
-    'level': 'A1',
-    'progress': 0.0,
-    'completedLessons': 0,
-    'totalLessons': 100,
-    'dailyCompleted': 0,
-    'targetDaily': 5,
-    'dailyStreak': 0,
-    'score': 0,
-    'createdAt': FieldValue.serverTimestamp(),
-    'updatedAt': FieldValue.serverTimestamp(),
-  });
-
-  print('Admin created: UID = $adminUid');
-}
-
 // Future<void> uploadDemoLessons() async {
 //   final firestore = FirebaseFirestore.instance;
 //   final batch = firestore.batch();

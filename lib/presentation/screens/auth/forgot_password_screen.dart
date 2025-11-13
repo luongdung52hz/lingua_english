@@ -3,9 +3,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get_it/get_it.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
+import 'package:learn_english/presentation/screens/auth/widgets/text_form_field.dart';
 import '../../../app/routes/route_names.dart';
 import '../../../resources/styles/colors.dart';
-import '../../../core/widgets/app_button.dart';
+import '../../widgets/app_button.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -22,11 +23,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   // FocusNode để theo dõi focus
   final emailFocus = FocusNode();
 
-  // Màu icon
-  Color emailIconColor = const Color(0xffc1d6d3);
-
-  // Status Focus
-  bool emailIsFocus = false;
   bool loading = false;
   final FirebaseAuth _auth = GetIt.I<FirebaseAuth>();
 
@@ -80,15 +76,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   @override
   void initState() {
     super.initState();
-    // Listener cho email
-    emailFocus.addListener(() {
-      setState(() {
-        emailIsFocus = emailFocus.hasFocus;
-        emailIconColor = (emailFocus.hasFocus ? Colors.blue[200]! : Colors.grey);
-        final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-        isEmailValid = emailRegex.hasMatch(emailCtrl.text.trim()) && emailCtrl.text.isNotEmpty;
-      });
-    });
+    // Listener removed - handled internally by ValidatedTextFormField
   }
 
   @override
@@ -110,16 +98,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                      child: Image.asset(
-                        'lib/resources/assets/images/logo_2.png',
-                        height: 124,
-                        width: 124,
-                        errorBuilder: (context, error, stackTrace) {
-                          return const Icon(Icons.image_not_supported, size: 20, color: Colors.white);
-                        },
-                      )),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 30),
+                  Image.asset(
+                    'lib/resources/assets/images/logo_L_final.png',
+                    height: 70,
+                    width: 70,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(Icons.image_not_supported, size: 20, color: Colors.white);
+                    },
+                  ),
+                  const SizedBox(height: 10),
                   const Text(
                     "Quên mật khẩu? ",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
@@ -131,50 +119,22 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   ),
                   const SizedBox(height: 30),
 
-                  // Email Field (giữ nguyên)
-                  TextFormField(
+                  // Email Field - Replaced with ValidatedTextFormField
+                  ValidatedTextFormField(
                     controller: emailCtrl,
                     focusNode: emailFocus,
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    decoration: InputDecoration(
-                      hintText: "Email của bạn",
-                      prefixIcon: Icon(
-                        Icons.email,
-                        size: 24,
-                        color: emailIconColor,
-                      ),
-                      suffixIcon: isEmailValid
-                          ? const Icon(Icons.check, color: Colors.green, size: 24)
-                          : (emailCtrl.text.isNotEmpty && !isEmailValid)
-                          ? const Icon(Icons.error, color: Colors.red, size: 24)
-                          : null,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: isEmailValid ? Colors.green : Colors.grey,
-                          width: 1,
-                        ),
-                      ),
-                      focusedBorder: AppColors.successBorder,
-                      errorBorder: AppColors.errorBorder,
-                      focusedErrorBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: Colors.red,
-                          width: 2,
-                        ),
-                      ),
-                      filled: true,
-                      fillColor: Colors.grey[50],
-                    ),
+                    hintText: "Email của bạn",
+                    prefixIcon: Icons.email,
                     validator: (v) {
                       if (v == null || v.isEmpty) return "Nhập email";
                       final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
                       if (!emailRegex.hasMatch(v.trim())) return "Email không hợp lệ";
                       return null;
+                    },
+                    onValidationChanged: (valid) => setState(() => isEmailValid = valid),
+                    validationLogic: (text) {
+                      final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                      return emailRegex.hasMatch(text.trim()) && text.isNotEmpty;
                     },
                   ),
                   const SizedBox(height: 24),

@@ -8,7 +8,7 @@ import 'package:learn_english/presentation/screens/flashcard/widgets/flashcard_l
 import 'package:learn_english/presentation/screens/flashcard/widgets/folder_chips.dart';
 import 'package:learn_english/presentation/screens/flashcard/widgets/move_to_folder_dialog.dart';
 import 'package:learn_english/presentation/screens/flashcard/widgets/reset_all_dialog.dart';
-import 'package:learn_english/presentation/screens/flashcard/widgets/search_bar.dart';
+import 'package:learn_english/presentation/widgets/search_bar.dart';
 import '../../../data/models/flashcard_model.dart';
 import '../../../resources/styles/colors.dart';
 import '../../controllers/flashcard_controller.dart';
@@ -139,7 +139,11 @@ class _FlashcardListScreenState extends State<FlashcardListScreen> {
                       }
                     },
                   ),
-                  const FlashcardActionButtons(),
+                  Obx(() => ActionButtons(
+                    onCreatePressed: () => context.push('/flashcards/create'),
+                    onStudyPressed: () => context.push('/flashcards/study'),
+                    studyEnabled: controller.hasUnmemorized.value,
+                  )),
                   const FolderChips(),
                   const SizedBox(height: 2),
                 ],

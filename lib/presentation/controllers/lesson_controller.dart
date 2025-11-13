@@ -62,18 +62,25 @@ class LearnController extends GetxController {
     }
   }
 
-  Future<void> loadLessonsByTopic(String level, String skill, String topic) async {
+  Future<void> loadLessonsByTopic(String level, String skill, String? topic) async { // Add ? for null 'All'
     currentLevel.value = level;
     currentSkill.value = skill;
-    currentTopic.value = topic; // Update RxString topic
+    // Remove: currentTopic.value = topic; // Widget handles
 
-    // Load lessons theo topic
-    _repo.getLessonsByTopic(level, skill, topic).listen((data) {
+    // Branch: Handle null/empty topic as "All" (full stream, no filter)
+    Stream<List<LessonModel>> lessonsStream;
+    if (topic == null || topic.isEmpty) {
+      lessonsStream = _repo.getLessonsStream(level, skill);
+    } else {
+      lessonsStream = _repo.getLessonsByTopic(level, skill, topic);
+    }
+
+    // Load lessons stream
+    lessonsStream.listen((data) {
       lessons.value = data;
       totalLessons.value = data.length;
     });
 
-    // Sửa: Gọi getProgressStats với param topic (repo đã hỗ trợ {String? topic})
     final stats = await _repo.getProgressStats(level, skill, topic: topic);
     completedLessons.value = stats['completed'] ?? 0;
   }

@@ -72,6 +72,8 @@ class QuizModel {
   // Count incomplete questions
   int get incompleteCount => questions.where((q) => !q.isComplete).length;
 
+  get difficulty => null;
+
   QuizModel copyWith({
     String? id,
     String? title,

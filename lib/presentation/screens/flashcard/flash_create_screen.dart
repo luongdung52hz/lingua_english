@@ -9,6 +9,7 @@ import '../../../data/models/flashcard_model.dart';
 import '../../../data/datasources/remote/translation_service.dart'; // ✅ Import để dùng enum
 import '../../../resources/styles/colors.dart';
 import '../../controllers/flashcard_controller.dart';
+import '../../widgets/app_button.dart'; // Import CustomButton
 
 class FlashcardCreateScreen extends StatefulWidget {
   const FlashcardCreateScreen({Key? key}) : super(key: key);
@@ -177,47 +178,26 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
                     const SizedBox(height: 20),
 
                     Center(
-                      child: Obx(() => SizedBox(
-                        width: double.infinity,
+                      child: Obx(() => CustomButton(
+                        onPressed: controller.isTranslating.value
+                            ? null
+                            : () {
+                          FocusScope.of(context).unfocus();
+
+                          HapticFeedback.mediumImpact();
+
+                          _translateAndPreview();
+                        },
+                        text: controller.isTranslating.value
+                            ? 'Đang dịch ...'
+                            : 'Dịch ngay ',
+                        icon: controller.isTranslating.value
+                            ? null  // Spinner handled by isLoading, but since no isLoading, use custom icon if needed
+                            : Icons.auto_awesome,
+                        iconSize: 20,
                         height: 56,
-                        child: ElevatedButton.icon(
-                          onPressed: controller.isTranslating.value
-                              ? null
-                              : () {
-                            FocusScope.of(context).unfocus();
-
-                            HapticFeedback.mediumImpact();
-
-                            _translateAndPreview();
-                          },
-                          icon: controller.isTranslating.value
-                              ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(strokeWidth: 3, color: Colors.white),
-                          )
-                              : const Icon(Icons.auto_awesome, size: 20),
-                          label: Text(
-                            controller.isTranslating.value
-                                ? 'Đang dịch ...'
-                                : 'Dịch ngay ',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                             // letterSpacing: 0.5,
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            elevation: controller.isTranslating.value ? 2 : 12,
-                            shadowColor: Colors.deepPurple.withOpacity(0.2),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(22),
-                            ),
-                            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                          ),
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16), // Giảm horizontal padding để tránh overflow
+                        buttonColor: AppColors.primary,
                       )),
                     ),
                   ],
@@ -242,36 +222,32 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton.icon(
+                    child: CustomButton(
                       onPressed: () {
                         setState(() => previewFlashcard = null);
                       },
-                      icon: const Icon(Icons.cancel),
-                      label: const Text('Hủy'),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
+                      text: 'Hủy',
+                      icon: Icons.cancel,
+                      iconSize: 18, // Giảm icon size để tiết kiệm space
+                      height: 52,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16), // Giảm horizontal padding
+                      borderRadius: BorderRadius.circular(12),
+                      buttonColor: Colors.grey.shade300, // Light color for outlined-like effect
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 8), // Giảm width giữa hai nút để cân bằng
                   Expanded(
-                    child: Obx(() => ElevatedButton.icon(
+                    child: Obx(() => CustomButton(
                       onPressed: controller.isLoading.value
                           ? null
                           : _saveFlashcard,
-                      icon: const Icon(Icons.save),
-                      label: const Text('Lưu Flashcard'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
+                      text: 'Lưu', // Rút gọn text để tránh overflow (hoặc dùng 'Lưu FC' nếu cần)
+                      icon: Icons.save,
+                      iconSize: 18, // Giảm icon size
+                      height: 52,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16), // Giảm horizontal padding
+                      borderRadius: BorderRadius.circular(12),
+                      buttonColor: Colors.green,
                     )),
                   ),
                 ],
@@ -447,31 +423,42 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
                       color: Colors.green,
                     ),
                   ),
-                  Row(children: [
-                    if (flashcard.phonetic != null) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        ' ${flashcard.phonetic}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                    ],
-                    if (flashcard.partOfSpeech != null) ...[
-                      const SizedBox(width: 8),
-                      Chip(
-                        label: Text(flashcard.partOfSpeech!),
-                        backgroundColor: Colors.blue[50],
-                        labelStyle: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blueAccent,
-                        ),
-                      ),
-                    ],
-                  ],),
+                  // FIXED: Wrap Row with Flexible to prevent overflow
+                  if (flashcard.phonetic != null || flashcard.partOfSpeech != null) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        if (flashcard.phonetic != null) ...[
+                          Flexible( // NEW: Flexible to allow wrap/ellipsis
+                            child: Text(
+                              ' ${flashcard.phonetic}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[600],
+                                fontStyle: FontStyle.italic,
+                              ),
+                              overflow: TextOverflow.ellipsis, // NEW: Ellipsis if too long
+                              maxLines: 1,
+                            ),
+                          ),
+                        ],
+                        if (flashcard.partOfSpeech != null) ...[
+                          const SizedBox(width: 8),
+                          Flexible( // NEW: Flexible for Chip
+                            child: Chip(
+                              label: Text(flashcard.partOfSpeech!),
+                              backgroundColor: Colors.blue[50],
+                              labelStyle: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blueAccent,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -494,7 +481,7 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text('• ', style: TextStyle(fontSize: 16)),
-                      Expanded(
+                      Expanded( // NEW: Expanded to prevent overflow in examples
                         child: Text(
                           example,
                           style: TextStyle(
@@ -502,6 +489,8 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
                             color: Colors.grey[700],
                             fontStyle: FontStyle.italic,
                           ),
+                          overflow: TextOverflow.ellipsis, // NEW: Ellipsis if long
+                          maxLines: 2, // Limit lines
                         ),
                       ),
                     ],

@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:async';
 import '../../../../data/models/quiz_model.dart';
+import '../../../../resources/styles/colors.dart';
 import '../../../controllers/quiz_controller.dart';
+import '../../../widgets/result_dialog.dart';
 
 class QuizTakingScreen extends StatefulWidget {
   final String quizId;
@@ -58,7 +60,7 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
     }
   }
 
-  // Method hiển thị mục lục câu hỏi
+  // Method hiển thị mục lục câu hỏi - SIMPLE
   void _showQuestionIndex() {
     if (_quiz == null) return;
 
@@ -70,7 +72,7 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
         height: MediaQuery.of(context).size.height * 0.7,
         decoration: const BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
         ),
         child: Column(
           children: [
@@ -78,18 +80,25 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.blue[50],
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                color: Colors.white,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                border: Border(
+                  bottom: BorderSide(color: Colors.grey.shade200),
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
                     'Danh sách câu hỏi',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                    ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close),
+                    icon: const Icon(Icons.close, color: Colors.black),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],
@@ -98,15 +107,15 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
 
             // Legend
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _buildLegendItem(Colors.green, 'Đã trả lời'),
-                  const SizedBox(width: 16),
-                  _buildLegendItem(Colors.grey[300]!, 'Chưa trả lời'),
-                  const SizedBox(width: 16),
-                  _buildLegendItem(Colors.blue, 'Câu hiện tại'),
+                  const SizedBox(width: 12),
+                  _buildLegendItem(Colors.grey.shade300, 'Chưa trả lời'),
+                  const SizedBox(width: 12),
+                  _buildLegendItem(AppColors.primary, 'Câu hiện tại'),
                 ],
               ),
             ),
@@ -117,8 +126,8 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
                 padding: const EdgeInsets.all(16),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 5,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 8,
+                  mainAxisSpacing: 8,
                   childAspectRatio: 1,
                 ),
                 itemCount: _quiz!.questions.length,
@@ -131,13 +140,13 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
                   Color textColor;
 
                   if (isCurrent) {
-                    backgroundColor = Colors.blue;
+                    backgroundColor = AppColors.primary;
                     textColor = Colors.white;
                   } else if (isAnswered) {
                     backgroundColor = Colors.green;
                     textColor = Colors.white;
                   } else {
-                    backgroundColor = Colors.grey[300]!;
+                    backgroundColor = Colors.grey.shade300;
                     textColor = Colors.black87;
                   }
 
@@ -151,15 +160,15 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
                     child: Container(
                       decoration: BoxDecoration(
                         color: backgroundColor,
-                        shape: BoxShape.circle,
+                        borderRadius: BorderRadius.circular(8),
                       ),
                       child: Center(
                         child: Text(
                           '${index + 1}',
                           style: TextStyle(
                             color: textColor,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
                           ),
                         ),
                       ),
@@ -178,17 +187,20 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
     return Row(
       children: [
         Container(
-          width: 16,
-          height: 16,
+          width: 12,
+          height: 12,
           decoration: BoxDecoration(
             color: color,
-            shape: BoxShape.circle,
+            borderRadius: BorderRadius.circular(2),
           ),
         ),
         const SizedBox(width: 4),
         Text(
           label,
-          style: const TextStyle(fontSize: 12),
+          style: const TextStyle(
+            fontSize: 12,
+            color: Colors.black87,
+          ),
         ),
       ],
     );
@@ -243,15 +255,25 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const Scaffold(
+        backgroundColor: Colors.white,
         body: Center(
-          child: CircularProgressIndicator(),
+          child: CircularProgressIndicator(color: AppColors.primary),
         ),
       );
     }
 
     if (_errorMessage != null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Lỗi')),
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          iconTheme: const IconThemeData(color: Colors.black),
+          title: const Text(
+            'Lỗi',
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
+          ),
+        ),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -260,6 +282,15 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _loadQuiz,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  elevation: 0,
+                ),
                 child: const Text('Thử lại'),
               ),
             ],
@@ -270,16 +301,23 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
 
     if (_quiz == null || _quiz!.questions.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Quiz không hợp lệ')),
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          iconTheme: const IconThemeData(color: Colors.black),
+          title: const Text(
+            'Quiz không hợp lệ',
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
+          ),
+        ),
         body: const Center(
           child: Text('Không tìm thấy câu hỏi'),
         ),
       );
     }
 
-    return _showResult
-        ? _buildResultScreen(_quiz!)
-        : _buildQuizScreen(_quiz!);
+    return _buildQuizScreen(_quiz!);
   }
 
   void _selectAnswer(String questionId, String answer) {
@@ -333,14 +371,38 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
     if (unanswered > 0) {
       Get.dialog(
         AlertDialog(
-          title: const Text('Chưa hoàn thành'),
-          content: Text('Bạn còn $unanswered câu chưa trả lời. Bạn có muốn nộp bài không?'),
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          title: const Text(
+            'Chưa hoàn thành',
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+            ),
+          ),
+          content: Text(
+            'Bạn còn $unanswered câu chưa trả lời. Bạn có muốn nộp bài không?',
+            style: TextStyle(color: Colors.grey[700]),
+          ),
           actions: [
             TextButton(
               onPressed: () => Get.back(),
-              child: const Text('Hủy'),
+              child: const Text(
+                'Hủy',
+                style: TextStyle(color: AppColors.primary),
+              ),
             ),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                elevation: 0,
+              ),
               onPressed: () {
                 Get.back();
                 _showResults();
@@ -356,10 +418,90 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
   }
 
   void _showResults() {
-    setState(() {
-      _isTimerRunning = false;
-      _showResult = true;
-    });
+    final quiz = _quiz;
+    if (quiz == null) return;
+
+    final score = _calculateScore(quiz);
+    final totalQuestions = quiz.questions.length;
+    final percentage = (score / totalQuestions * 100).round();
+    final isPassed = (score / totalQuestions) >= 0.7;
+    final timeSpent = _formatTime(_secondsElapsed);
+
+    final correctCount = score;
+    final stats = <StatItem>[
+      StatItem(
+        icon: Icons.quiz_outlined,
+        label: 'Câu trả lời đúng',
+        value: '$correctCount/$totalQuestions',
+        color: const Color(0xFF3B82F6),
+      ),
+      StatItem(
+        icon: Icons.access_time_rounded,
+        label: 'Thời gian',
+        value: timeSpent,
+        color: const Color(0xFF8B5CF6),
+      ),
+      if (quiz.difficulty != null)
+        StatItem(
+          icon: Icons.trending_up_rounded,
+          label: 'Độ khó',
+          value: _getDifficultyText(quiz.difficulty),
+          color: const Color(0xFFEC4899),
+        ),
+    ];
+
+    final buttons = <ButtonConfig>[
+      ButtonConfig(
+        text: 'Làm lại',
+        onPressed: () {
+          Navigator.of(context).pop();
+          _retakeQuiz();
+        },
+        isPrimary: false,
+        secondaryColor: const Color(0xFFFF9500),
+      ),
+      ButtonConfig(
+        text: isPassed ? 'Hoàn thành' : 'Về trang chủ',
+        onPressed: () {
+          Navigator.of(context).pop();
+          if (context.mounted) context.pop();
+        },
+        isPrimary: true,
+        primaryColor: AppColors.primary,
+      ),
+    ];
+
+    _isTimerRunning = false;
+
+    GenericResultDialog.show(
+      context,
+      isSuccess: isPassed,
+      successTitle: 'Xuất sắc!',
+      failTitle: 'Cố gắng thêm!',
+      subtitle: 'Kết quả quiz',
+      successMessage: 'Chúc mừng! Bạn đã hoàn thành quiz',
+      failMessage: 'Cần đạt 70% để hoàn thành',
+      scoreLabel: 'Điểm số',
+      score: percentage,
+      totalScore: 100,
+      successIcon: Icons.emoji_events,
+      failIcon: Icons.sentiment_neutral,
+      successColor: Colors.green,
+      failColor: Colors.orange,
+      stats: stats,
+      buttons: buttons,
+      successAnimationPath: 'lib/resources/assets/lottie/success.json',
+      failAnimationPath: 'lib/resources/assets/lottie/fail.json',
+    );
+  }
+
+  static String _getDifficultyText(dynamic difficulty) {
+    if (difficulty == null) return 'Trung bình';
+    final level = difficulty.toString().toLowerCase();
+    if (level.contains('easy') || level == '1') return 'Dễ';
+    if (level.contains('medium') || level == '2') return 'Trung bình';
+    if (level.contains('hard') || level == '3') return 'Khó';
+    return difficulty.toString();
   }
 
   void _retakeQuiz() {
@@ -372,8 +514,6 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
       _isTimerRunning = true;
       _timer?.cancel();
       _startTimer();
-      _isLoading = true;
-      _loadQuiz();
     });
   }
 
@@ -400,15 +540,45 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
     final isQuestionAnswered = _answeredQuestions[question.id] ?? false;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(quiz.title),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black),
+        title: Text(
+          quiz.title,
+          style: const TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         actions: [
           Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                _formatTime(_secondsElapsed),
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            child: Container(
+              margin: const EdgeInsets.only(right: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.access_time_rounded,
+                    size: 16,
+                    color: AppColors.primary,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    _formatTime(_secondsElapsed),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -416,24 +586,44 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
       ),
       body: Column(
         children: [
-          LinearProgressIndicator(value: progress, minHeight: 6),
-          Padding(
+          // Progress bar
+          LinearProgressIndicator(
+            value: progress,
+            minHeight: 4,
+            backgroundColor: Colors.grey.shade200,
+            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+          ),
+
+          // Progress info
+          Container(
             padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border(
+                bottom: BorderSide(color: Colors.grey.shade200),
+              ),
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   'Câu ${_currentQuestionIndex + 1}/$totalQuestions',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                    color: Colors.black,
+                  ),
                 ),
                 Text(
                   '${_userAnswers.length}/$totalQuestions đã trả lời',
-                  style: TextStyle(color: Colors.grey[600]),
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 13,
+                  ),
                 ),
               ],
             ),
           ),
-          const Divider(height: 1),
 
           Expanded(
             child: SingleChildScrollView(
@@ -441,79 +631,87 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Card(
-                    color: Colors.blue[50],
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Text(
-                        question.question,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w500,
-                        ),
+                  // Question card
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      question.question,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
 
+                  // Options - BASIC & GREEN for correct
                   ...question.options.asMap().entries.map((entry) {
                     final index = entry.key;
                     final option = entry.value;
                     final isSelected = _userAnswers[question.id] == option;
                     final isCorrectAnswer = option == question.correctAnswer;
 
-                    Color borderColor = Colors.grey[300]!;
+                    Color borderColor = Colors.grey.shade300;
                     Color backgroundColor = Colors.white;
 
                     if (isQuestionAnswered) {
                       if (isCorrectAnswer) {
+                        // Đáp án đúng = màu xanh lá
                         borderColor = Colors.green;
-                        backgroundColor = Colors.green[50]!;
+                        backgroundColor = Colors.green.shade50;
                       } else if (isSelected && !isCorrectAnswer) {
+                        // Đáp án sai được chọn = màu đỏ
                         borderColor = Colors.red;
-                        backgroundColor = Colors.red[50]!;
+                        backgroundColor = Colors.red.shade50;
                       }
                     } else if (isSelected) {
-                      borderColor = Colors.blue;
-                      backgroundColor = Colors.blue[50]!;
+                      // Chưa submit, đang chọn
+                      borderColor = AppColors.primary;
+                      backgroundColor = Colors.white;
                     }
 
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: InkWell(
                         onTap: () => _selectAnswer(question.id, option),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(8),
                         child: Container(
                           decoration: BoxDecoration(
-                            border: Border.all(
-                              color: borderColor,
-                              width: isSelected || (isQuestionAnswered && isCorrectAnswer) ? 2 : 1,
-                            ),
-                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: borderColor, width: 1.5),
+                            borderRadius: BorderRadius.circular(8),
                             color: backgroundColor,
                           ),
                           padding: const EdgeInsets.all(16),
                           child: Row(
                             children: [
                               Container(
-                                width: 32,
-                                height: 32,
+                                width: 28,
+                                height: 28,
                                 decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
+                                  borderRadius: BorderRadius.circular(4),
                                   color: isQuestionAnswered
                                       ? (isCorrectAnswer
                                       ? Colors.green
-                                      : (isSelected ? Colors.red : Colors.grey[200]))
-                                      : (isSelected ? Colors.blue : Colors.grey[200]),
+                                      : (isSelected ? Colors.red : Colors.grey.shade200))
+                                      : (isSelected ? AppColors.primary : Colors.grey.shade200),
                                 ),
                                 child: Center(
                                   child: Text(
                                     String.fromCharCode(65 + index),
                                     style: TextStyle(
                                       color: isQuestionAnswered
-                                          ? (isCorrectAnswer || isSelected ? Colors.white : Colors.black)
-                                          : (isSelected ? Colors.white : Colors.black),
-                                      fontWeight: FontWeight.bold,
+                                          ? (isCorrectAnswer || isSelected
+                                          ? Colors.white
+                                          : Colors.black87)
+                                          : (isSelected ? Colors.white : Colors.black87),
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
                                     ),
                                   ),
                                 ),
@@ -522,21 +720,23 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
                               Expanded(
                                 child: Text(
                                   option,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
-                                    color: isQuestionAnswered && isCorrectAnswer ? Colors.green : null,
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    color: Colors.black87,
                                   ),
                                 ),
                               ),
-                              if (isSelected || (isQuestionAnswered && isCorrectAnswer))
-                                Icon(
-                                  isQuestionAnswered
-                                      ? (isCorrectAnswer ? Icons.check_circle : Icons.cancel)
-                                      : Icons.check_circle,
-                                  color: isQuestionAnswered
-                                      ? (isCorrectAnswer ? Colors.green : Colors.red)
-                                      : Colors.blue,
+                              if (isQuestionAnswered && isCorrectAnswer)
+                                const Icon(
+                                  Icons.check_circle,
+                                  color: Colors.green,
+                                  size: 20,
+                                ),
+                              if (isQuestionAnswered && isSelected && !isCorrectAnswer)
+                                const Icon(
+                                  Icons.cancel,
+                                  color: Colors.red,
+                                  size: 20,
                                 ),
                             ],
                           ),
@@ -545,32 +745,35 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
                     );
                   }).toList(),
 
+                  // Explanation
                   if (isQuestionAnswered && question.explanation != null) ...[
                     const SizedBox(height: 16),
-                    Card(
-                      color: Colors.orange[50],
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Giải thích:',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.orange[800],
-                                fontSize: 16,
-                              ),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Giải thích:',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                              fontSize: 14,
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              question.explanation!,
-                              style: TextStyle(
-                                color: Colors.orange[700],
-                              ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            question.explanation!,
+                            style: TextStyle(
+                              color: Colors.grey[700],
+                              fontSize: 14,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -579,232 +782,66 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
             ),
           ),
 
+          // Bottom navigation
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.white,
               border: Border(
-                top: BorderSide(color: Colors.grey[300]!, width: 1),
+                top: BorderSide(color: Colors.grey.shade200),
               ),
             ),
             child: Row(
               children: [
                 OutlinedButton.icon(
                   onPressed: _showQuestionIndex,
-                  icon: const Icon(Icons.grid_view),
-                  label: Text('${_currentQuestionIndex + 1}/$totalQuestions'),
+                  icon: const Icon(Icons.grid_view, size: 18),
+                  label: Text('${_currentQuestionIndex + 1}/${_quiz!.questions.length}'),
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                    foregroundColor: AppColors.primary,
+                    side: BorderSide(color: Colors.grey.shade300),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 8),
                 if (_currentQuestionIndex > 0)
                   Expanded(
-                    child: OutlinedButton.icon(
+                    child: OutlinedButton(
                       onPressed: _previousQuestion,
-                      icon: const Icon(Icons.arrow_back),
-                      label: const Text('Trước'),
                       style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        foregroundColor: AppColors.primary,
+                        side: BorderSide(color: Colors.grey.shade300),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
+                      child: const Text('Trước'),
                     ),
                   ),
-                if (_currentQuestionIndex > 0) const SizedBox(width: 12),
+                if (_currentQuestionIndex > 0) const SizedBox(width: 8),
                 Expanded(
-                  child: ElevatedButton.icon(
+                  child: ElevatedButton(
                     onPressed: _isLastQuestion ? _submitQuiz : _nextQuestion,
-                    icon: Icon(_isLastQuestion ? Icons.check : Icons.arrow_forward),
-                    label: Text(_isLastQuestion ? 'Nộp bài' : 'Tiếp'),
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      elevation: 0,
                     ),
+                    child: Text(_isLastQuestion ? 'Nộp bài' : 'Tiếp'),
                   ),
                 ),
               ],
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildResultScreen(QuizModel quiz) {
-    final score = _calculateScore(quiz);
-    final totalQuestions = quiz.questions.length;
-    final percentage = (score / totalQuestions * 100).toStringAsFixed(1);
-    final isPassed = (score / totalQuestions) >= 0.7;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Kết quả'),
-        automaticallyImplyLeading: false,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Card(
-              color: isPassed ? Colors.green[50] : Colors.orange[50],
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  children: [
-                    Icon(
-                      isPassed ? Icons.emoji_events : Icons.sentiment_neutral,
-                      size: 64,
-                      color: isPassed ? Colors.green : Colors.orange,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      isPassed ? 'Xuất sắc!' : 'Cố gắng thêm!',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '$score/$totalQuestions câu đúng',
-                      style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      '$percentage%',
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Thời gian: ${_formatTime(_secondsElapsed)}',
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            const Text(
-              'Chi tiết câu trả lời:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-
-            ...quiz.questions.asMap().entries.map((entry) {
-              final index = entry.key;
-              final question = entry.value;
-              final userAnswer = _userAnswers[question.id];
-              final isCorrect = userAnswer == question.correctAnswer;
-
-              return Card(
-                margin: const EdgeInsets.only(bottom: 12),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 32,
-                            height: 32,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: isCorrect ? Colors.green : Colors.red,
-                            ),
-                            child: Center(
-                              child: Text(
-                                '${index + 1}',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              question.question,
-                              style: const TextStyle(fontWeight: FontWeight.w500),
-                            ),
-                          ),
-                          Icon(
-                            isCorrect ? Icons.check_circle : Icons.cancel,
-                            color: isCorrect ? Colors.green : Colors.red,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-
-                      if (userAnswer != null) ...[
-                        Text(
-                          'Câu trả lời của bạn: $userAnswer',
-                          style: TextStyle(
-                            color: isCorrect ? Colors.green : Colors.red,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                      ],
-
-                      if (!isCorrect && question.correctAnswer != null) ...[
-                        Text(
-                          'Đáp án đúng: ${question.correctAnswer}',
-                          style: const TextStyle(
-                            color: Colors.green,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                      ],
-
-                      if (question.explanation != null) ...[
-                        const Divider(height: 16),
-                        Text(
-                          'Giải thích:',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            color: Colors.grey[700],
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          question.explanation!,
-                          style: TextStyle(color: Colors.grey[600]),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              );
-            }).toList(),
-
-            const SizedBox(height: 24),
-
-            ElevatedButton.icon(
-              onPressed: _retakeQuiz,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Làm lại'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-            ),
-            const SizedBox(height: 12),
-            OutlinedButton.icon(
-              onPressed: () {
-                if (context.mounted) context.pop();
-              },
-              icon: const Icon(Icons.home),
-              label: const Text('Về trang chủ'),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

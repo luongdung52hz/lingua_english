@@ -20,9 +20,9 @@ class AppBarHome extends StatelessWidget implements PreferredSizeWidget {
       title: Obx(() => Row(
         children: [
           Image.asset(
-            'lib/resources/assets/images/logo_2.png',
-            height: 60,
-            width: 60,
+            'lib/resources/assets/images/logo_L_final.png',
+            height: 54,
+            width: 54,
             errorBuilder: (context, error, stackTrace) {
               return const Icon(Icons.image_not_supported, size: 20, color: Colors.white);
             },
