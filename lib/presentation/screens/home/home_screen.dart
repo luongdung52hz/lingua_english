@@ -32,113 +32,128 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Tự động reload mỗi khi quay lại trang
     homeCtrl.loadUserProgress();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: const AppBarHome(),
       body: RefreshIndicator(
         onRefresh: () async {
           await homeCtrl.loadUserProgress();
         },
+        color: Colors.blue,
         child: StreamBuilder<DocumentSnapshot>(
           stream: firestore.collection('users').doc(homeCtrl.userId).snapshots(),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              return const Center(child: Text('Lỗi load data: Kiểm tra kết nối'));
+              return const Center(
+                child: Text(
+                  'Lỗi load data: Kiểm tra kết nối',
+                  style: TextStyle(color: Colors.red),
+                ),
+              );
             }
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
             }
-
             final data = snapshot.data?.data() as Map<String, dynamic>? ?? {};
             final progressPercent = (data['progress'] ?? 0).toDouble();
             final completedLessons = data['completedLessons'] ?? 0;
             final totalLessons = data['totalLessons'] ?? 5;
             final score = data['score'] ?? 0;
-
             return SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              physics: const AlwaysScrollableScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
-                  const SizedBox(height: 10),
-                  const Text(
-                    "Chào mừng bạn trở lại",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  const SizedBox(height: 30),
+                  // Continue Study Card
+                  Transform.translate(
+                    offset: const Offset(0, -16),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: ContinueStudyWidget(
+                        onContinueTap: () {
+                          context.go(Routes.learn);
+                        },
+                      ),
+                    ),
                   ),
-                  ContinueStudyWidget(
-                    onContinueTap: () {
-                      context.go(Routes.learn);
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    "Tính năng nhanh",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    height: 240,
-                    child: GridView.count(
-                      crossAxisCount: 3,
-                      crossAxisSpacing: 14,
-                      mainAxisSpacing: 14,
+                  // Quick Features Section
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SkillCard(
-                          title: "Flashcard",
-                          icon: Icons.style_outlined,
-                          color: Colors.orange,
-                          onTap: () {
-                            context.go(Routes.flashcards);
-                          },
+                        const Text(
+                          "Tính năng nhanh",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
                         ),
-                        SkillCard(
-                          title: "AI",
-                          icon: Icons.mic,
-                          color: Colors.redAccent,
-                          onTap: () {
-                            context.go(Routes.profile);
-                          },
+                        const SizedBox(height: 16),
+                        // Grid Features
+                        GridView.count(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          crossAxisCount: 3,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 1,
+                          children: [
+                            _buildFeatureCard(
+                              title: "Flashcard",
+                              icon: Icons.style_outlined,
+                              color: Colors.orange.shade200,
+                              onTap: () => context.go(Routes.flashcards),
+                            ),
+                            _buildFeatureCard(
+                              title: "AI Chat",
+                              icon: Icons.mic_rounded,
+                              color: Colors.red.shade200,
+                              onTap: () => context.go(Routes.profile),
+                            ),
+                            _buildFeatureCard(
+                              title: "4 Skill",
+                              icon: Icons.menu_book_rounded,
+                              color: Colors.blue.shade200,
+                              onTap: () => context.go(Routes.learn),
+                            ),
+                            _buildFeatureCard(
+                              title: "Friend",
+                              icon: Icons.chat_rounded,
+                              color: Colors.green.shade200,
+                              onTap: () => context.go(Routes.chat),
+                            ),
+                            _buildFeatureCard(
+                              title: "Ngữ pháp",
+                              icon: Icons.abc_rounded,
+                              color: Colors.purple.shade200,
+                              onTap: () => context.go(Routes.chat),
+                            ),
+                            _buildFeatureCard(
+                              title: "Quiz",
+                              icon: Icons.quiz_rounded,
+                              color: Colors.amber.shade200,
+                              onTap: () => context.go(Routes.quiz),
+                            ),
+                            // Thêm: YouTube Feature Card
+                            _buildFeatureCard(
+                              title: "YouTube",
+                              icon: Icons.play_circle_outline,
+                              color: Colors.teal.shade200,
+                              onTap: () => context.go(Routes.youtubeChannels),
+                            ),
+                          ],
                         ),
-                        SkillCard(
-                          title: "4 Skill",
-                          icon: Icons.menu_book,
-                          color: Colors.blueAccent,
-                          onTap: () {
-                            context.go(Routes.learn);
-                          },
-                        ),
-                        SkillCard(
-                          title: "Friend",
-                          icon: Icons.chat,
-                          color: Colors.greenAccent,
-                          onTap: () {
-                            context.go(Routes.chat);
-                          },
-                        ),
-                        SkillCard(
-                          title: "Ngữ pháp",
-                          icon: Icons.abc,
-                          color: Colors.purple,
-                          onTap: () {
-                            context.go(Routes.chat);
-                          },
-                        ),
-                        SkillCard(
-                          title: "Quiz",
-                          icon: Icons.quiz,
-                          color: Colors.yellow,
-                          onTap: () {
-                            context.go(Routes.quiz);
-                          },
-                        ),
-
-
+                        const SizedBox(height: 20),
                       ],
                     ),
                   ),
@@ -149,6 +164,61 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       bottomNavigationBar: const BottomNavBar(currentIndex: 0),
+    );
+  }
+
+  Widget _buildFeatureCard({
+    required String title,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.02),
+                blurRadius: 4,
+                offset: const Offset(0, 1),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  icon,
+                  size: 32,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

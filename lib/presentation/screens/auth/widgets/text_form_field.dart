@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../resources/styles/colors.dart';
 
 class ValidatedTextFormField extends StatefulWidget {
   final TextEditingController controller;
@@ -13,7 +12,7 @@ class ValidatedTextFormField extends StatefulWidget {
   final VoidCallback? onVisibilityToggle;
   final Widget? suffixIcon;
   final TextInputType keyboardType;
-  final bool Function(String)? validationLogic; // Cho real-time
+  final bool Function(String)? validationLogic;
 
   const ValidatedTextFormField({
     super.key,
@@ -37,21 +36,12 @@ class ValidatedTextFormField extends StatefulWidget {
 
 class _ValidatedTextFormFieldState extends State<ValidatedTextFormField> {
   late bool isValid;
-  late Color iconColor;
 
   @override
   void initState() {
     super.initState();
     isValid = widget.initialValid;
-    iconColor = Colors.grey;
-    widget.focusNode.addListener(_onFocusChanged);
     widget.controller.addListener(_onTextChanged);
-  }
-
-  void _onFocusChanged() {
-    setState(() {
-      iconColor = widget.focusNode.hasFocus ? Colors.blue[200]! : Colors.grey;
-    });
   }
 
   void _onTextChanged() {
@@ -65,7 +55,6 @@ class _ValidatedTextFormFieldState extends State<ValidatedTextFormField> {
 
   @override
   void dispose() {
-    widget.focusNode.removeListener(_onFocusChanged);
     widget.controller.removeListener(_onTextChanged);
     super.dispose();
   }
@@ -81,35 +70,46 @@ class _ValidatedTextFormFieldState extends State<ValidatedTextFormField> {
       decoration: InputDecoration(
         hintText: widget.hintText,
         prefixIcon: widget.prefixIcon != null
-            ? Icon(widget.prefixIcon, size: 24, color: iconColor)
+            ? Icon(widget.prefixIcon, size: 24)
             : null,
         suffixIcon: widget.suffixIcon ?? _buildValidationIcon(),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: isValid ? Colors.green : Colors.grey, width: 1),
+          borderSide: BorderSide(
+            color: isValid ? Colors.grey : Colors.grey.shade300,
+            width: 1,
+          ),
         ),
-        focusedBorder: AppColors.successBorder,
-        errorBorder: AppColors.errorBorder,
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: isValid ? Colors.grey : Colors.blue,
+            width: 1,
+          ),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.red, width: 1),
+        ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Colors.red, width: 2),
+          borderSide: const BorderSide(color: Colors.red, width: 1),
         ),
         filled: true,
         fillColor: Colors.grey[50],
       ),
       validator: widget.validator,
-      onChanged: (_) => _onTextChanged(), // Trigger real-time
     );
   }
 
   Widget? _buildValidationIcon() {
     final text = widget.controller.text;
     if (text.isEmpty) return null;
-    if (isValid) {
-      return const Icon(Icons.check, color: Colors.green, size: 24);
-    } else {
-      return const Icon(Icons.error, color: Colors.red, size: 24);
-    }
+    return Icon(
+      isValid ? Icons.check_circle : Icons.error,
+      color: isValid ? Colors.grey : Colors.red,
+      size: 24,
+    );
   }
 }

@@ -18,11 +18,10 @@ class TopicFilterBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 40,
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      height: 36,
+      margin: const EdgeInsets.symmetric(horizontal: 10),
       child: Obx(
             () {
-          // Luôn có "Tất cả" làm default chip đầu, ngay cả khi topics empty
           final displayTopics = ['Tất cả', ...controller.topics];
           return ListView.separated(
             scrollDirection: Axis.horizontal,
@@ -31,22 +30,19 @@ class TopicFilterBar extends StatelessWidget {
             itemBuilder: (context, index) {
               final displayName = displayTopics[index];
               final topic = displayName == 'Tất cả' ? '' : displayName; // '' cho "All"
-              return Obx(() { // Per-chip Obx cho reactive isolated
+              return Obx(() {
                 final isSelected = controller.currentTopic.value == topic;
                 return GestureDetector(
                   onTap: () {
                     if (controller.currentTopic.value != topic) {
                       HapticFeedback.lightImpact();
-                      // ⭐ Optimistic: Set sync cho color immediate
                       controller.currentTopic.value = topic;
-                      // Branch: "Tất cả" → load full (no topic filter)
                       if (topic.isEmpty) {
                         controller.loadLessons(
                           controller.currentLevel.value,
                           skill,
                         );
                       } else {
-                        // Topic cụ thể: Load filtered (non-null safe)
                         controller.loadLessonsByTopic(
                           controller.currentLevel.value,
                           skill,
@@ -76,7 +72,7 @@ class TopicFilterBar extends StatelessWidget {
                           : null,
                     ),
                     child: Text(
-                      displayName, // Hiển thị 'Tất cả' thay ''
+                      displayName,
                       style: TextStyle(
                         color: isSelected ? Colors.white : Colors.black87,
                         fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,

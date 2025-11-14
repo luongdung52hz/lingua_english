@@ -5,6 +5,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import '../../../data/models/flashcard_model.dart';
 import '../../../resources/styles/colors.dart';
 import '../../controllers/flashcard_controller.dart';
+import '../../widgets/flashcard_card.dart';
 import 'widgets/move_to_folder_dialog.dart';
 import 'package:flutter/services.dart';
 
@@ -220,6 +221,10 @@ class _FlashcardStudyScreenState extends State<FlashcardStudyScreen>
         ),
         actions: [
           PopupMenuButton<String>(
+            color: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             onSelected: _handleMenu,
             itemBuilder: (_) => [
               PopupMenuItem(
@@ -288,7 +293,6 @@ class _FlashcardStudyScreenState extends State<FlashcardStudyScreen>
                                 ? FlashcardCard(
                               flashcard: card,
                               isFront: true,
-                              onSpeak: () => _speak(card.english),
                             )
                                 : Transform(
                               alignment: Alignment.center,
@@ -308,7 +312,7 @@ class _FlashcardStudyScreenState extends State<FlashcardStudyScreen>
                 child: Column(children: [
                   const Icon(Icons.touch_app, color: Colors.grey),
                   const SizedBox(height: 8),
-                  Text('Nhấn để lật thẻ • Vuốt để đổi thẻ ',
+                  Text('Nhấn để lật thẻ • Vuốt để đổi thẻ',
                       style: TextStyle(color: Colors.grey[600]))
                 ])),
         ]),
@@ -347,110 +351,5 @@ class _FlashcardStudyScreenState extends State<FlashcardStudyScreen>
                         borderRadius: BorderRadius.circular(12))))),
       ]),
     ]),
-  );
-}
-
-class FlashcardCard extends StatelessWidget {
-  final Flashcard flashcard;
-  final bool isFront;
-  final VoidCallback onSpeak;
-
-  const FlashcardCard(
-      {Key? key,
-        required this.flashcard,
-        required this.isFront,
-        required this.onSpeak})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return isFront
-        ? _buildFront(flashcard)
-        : _buildBack(flashcard, onSpeak);
-  }
-
-  Widget _buildFront(Flashcard card) => Container(
-    margin: const EdgeInsets.all(24),
-    padding: const EdgeInsets.all(40),
-    decoration: BoxDecoration(
-      color: Colors.blue[50],
-      borderRadius: BorderRadius.circular(28),
-      boxShadow: const [
-        BoxShadow(color: Colors.black26, blurRadius: 20, offset: Offset(0, 10)),
-      ],
-    ),
-    child: Column(mainAxisSize: MainAxisSize.min, children: [
-      Text(card.vietnamese,
-          style: const TextStyle(fontSize: 38, fontWeight: FontWeight.bold),
-          textAlign: TextAlign.center),
-      const SizedBox(height: 32),
-      Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration:
-          BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
-          child: const Text('Tiếng Việt',
-              style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold))),
-    ]),
-  );
-
-  Widget _buildBack(Flashcard f, VoidCallback onSpeak) => Container(
-    margin: const EdgeInsets.all(24),
-    padding: const EdgeInsets.all(32),
-    decoration: BoxDecoration(
-        color: Colors.green[50],
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 10))
-        ]),
-    child: SingleChildScrollView(
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        GestureDetector(
-            onTap: onSpeak,
-            child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.1),
-                    shape: BoxShape.circle),
-                child: const Icon(Icons.volume_up, color: Colors.green, size: 28))),
-        const SizedBox(height: 8),
-        Text(f.english,
-            style: const TextStyle(
-                fontSize: 32, fontWeight: FontWeight.bold, color: Colors.green),
-            textAlign: TextAlign.center),
-        if (f.phonetic?.isNotEmpty == true) ...[
-          const SizedBox(height: 12),
-          Text(f.phonetic!,
-              style: const TextStyle(
-                  fontSize: 16, color: Colors.grey, fontStyle: FontStyle.italic))
-        ],
-        if (f.examples.isNotEmpty) ...[
-          const SizedBox(height: 24),
-          Container(
-              padding: const EdgeInsets.all(16),
-              decoration:
-              BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Text('Ví dụ:',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                ...f.examples.take(2).map((e) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Text('• $e',
-                        style: const TextStyle(
-                            fontSize: 13, fontStyle: FontStyle.italic))))
-              ]))
-        ],
-        const SizedBox(height: 16),
-        Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration:
-            BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
-            child: const Text('English',
-                style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold))),
-      ]),
-    ),
   );
 }

@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:learn_english/data/datasources/remote/google_signin_service.dart';
 import 'package:learn_english/presentation/controllers/quiz_controller.dart';
+import 'demo/demon_quiz_uploader.dart';
 import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -39,7 +41,8 @@ void main() async {
   //await createAdmin();
   // Upload demo lessons to Firestore (bỏ comment để chạy)
   // await uploadDemoLessons();
-  runApp(const MyApp());
+  //await uploadDemoQuiz();
+  runApp(Phoenix(child: MyApp()));
 
 }
 

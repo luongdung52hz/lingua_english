@@ -1,0 +1,180 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:get/get.dart';
+import 'package:http/http.dart' as http;  // Để download sub text
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import '../../../data/models/youtube_video_model.dart';
+import '../../../resources/styles/colors.dart';
+import '../../controllers/youtube_controller.dart';
+
+class YoutubePlayerScreen extends StatefulWidget {
+  const YoutubePlayerScreen({Key? key, required this.videoId}) : super(key: key);
+
+  final String videoId;  // Sử dụng videoId từ constructor
+
+  @override
+  State<YoutubePlayerScreen> createState() => _YoutubePlayerScreenState();
+}
+
+class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
+  late YoutubePlayerController _playerController;
+  YoutubeVideo? video;
+  List<SubtitleTrack>? subtitles;
+  String? selectedSubtitleLang;  // Bỏ = 'en' mặc định, set động sau
+  String? subtitleText;  // Raw sub text để display
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _initializePlayer();
+  }
+
+  void _initializePlayer() {
+    try {
+      video = GoRouterState.of(context).extra as YoutubeVideo?;
+      if (video == null) {
+        print('DEBUG Player: No extra video - Use videoId from widget/route');
+        // Fallback: Lấy videoId từ widget hoặc path
+        final state = GoRouterState.of(context);
+        final videoId = widget.videoId.isNotEmpty ? widget.videoId : (state.pathParameters['videoId'] ?? '');
+        video = YoutubeVideo(
+          id: videoId,
+          title: 'Video',
+          thumbnailUrl: '',
+          channelTitle: '',
+          publishedAt: DateTime.now(),
+
+        );
+      }
+      print('DEBUG Player: Loaded video ${video!.id} (title: ${video!.title})');
+
+      _playerController = YoutubePlayerController(
+        initialVideoId: video!.id,
+        flags: const YoutubePlayerFlags(
+          autoPlay: true,  // Tự play (default true)
+          mute: false,     // Không mute
+          enableCaption: true,  // Bật sub built-in
+          isLive: false,
+        ),
+      );
+
+      // Load subtitles từ video object (đã preload)
+      subtitles = video!.subtitles;
+      if (subtitles != null && subtitles!.isNotEmpty) {
+        // Fix: Set default lang dựa trên tracks có sẵn (ưu tiên 'en', fallback first)
+        selectedSubtitleLang = subtitles!.firstWhereOrNull((s) => s.languageCode == 'en')?.languageCode ?? subtitles!.first.languageCode;
+        print('DEBUG Player: Set default sub lang: $selectedSubtitleLang');
+        _loadSubtitleText(selectedSubtitleLang!);
+      } else {
+        print('DEBUG Player: No subtitles available');
+        selectedSubtitleLang = null;
+      }
+    } catch (e) {
+      print('DEBUG Player: Error loading video: $e');
+      // Fallback dummy video
+      video = YoutubeVideo(
+        id: widget.videoId,
+        title: 'Error loading video',
+        thumbnailUrl: '',
+        channelTitle: '',
+        publishedAt: DateTime.now(),
+      );
+      _playerController = YoutubePlayerController(
+        initialVideoId: video!.id,
+        flags: const YoutubePlayerFlags(
+          autoPlay: true,
+          mute: false,
+          enableCaption: true,
+        ),
+      );
+    }
+  }
+
+  Future<void> _loadSubtitleText(String lang) async {
+    final controller = Get.find<YoutubeController>();
+    final track = subtitles!.firstWhereOrNull((s) => s.languageCode == lang);
+    if (track != null) {
+      subtitleText = await controller.downloadSubtitleText(track.url);
+      setState(() {});
+    } else {
+      print('DEBUG Player: No track for lang $lang');
+    }
+  }
+
+  @override
+  void dispose() {
+    _playerController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(video?.title ?? 'Video'),
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.fullscreen),
+            onPressed: () => _playerController.toggleFullScreenMode(),
+          ),
+        ],
+        bottom: subtitles != null && subtitles!.isNotEmpty
+            ? PreferredSize(
+          preferredSize: const Size.fromHeight(50),
+          child: Container(
+            color: Colors.white,
+            padding: const EdgeInsets.all(8),
+            child: Row(
+              children: [
+                const Text('Phụ đề tùy chỉnh: '),
+                DropdownButton<String>(
+                  value: selectedSubtitleLang,  // Có thể null nếu no match
+                  hint: const Text('Chọn ngôn ngữ'),  // Fallback nếu value null
+                  items: subtitles!.map((s) => DropdownMenuItem(
+                    value: s.languageCode,
+                    child: Text('${s.languageCode.toUpperCase()} ${s.isAutoGenerated ? '(Tự động)' : ''}'),
+                  )).toList(),
+                  onChanged: (lang) async {
+                    if (lang != null) {
+                      setState(() => selectedSubtitleLang = lang);
+                      await _loadSubtitleText(lang);
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+        )
+            : null,
+      ),
+      body: Column(
+        children: [
+          YoutubePlayer(
+            controller: _playerController,
+            showVideoProgressIndicator: true,
+            progressIndicatorColor: AppColors.primary,
+          ),
+          if (subtitleText != null) ...[
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  subtitleText!,
+                  style: const TextStyle(fontSize: 16, height: 1.5),
+                ),
+              ),
+            ),
+          ] else if (subtitles != null && subtitleText == null) ...[
+            const Expanded(child: Center(child: CircularProgressIndicator())),
+          ] else ...[
+            const Expanded(
+              child: Center(child: Text('Video không có phụ đề tùy chỉnh\n(Built-in captions được bật mặc định)')),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}

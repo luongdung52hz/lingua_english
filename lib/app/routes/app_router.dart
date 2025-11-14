@@ -10,6 +10,7 @@ import 'package:learn_english/presentation/screens/quiz/quiz_list_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../data/models/youtube_video_model.dart';
 import '../../presentation/controllers/chat_controller.dart';
 import '../../presentation/controllers/friend_controller.dart';
 import '../../presentation/screens/chat/chat_list_screen.dart';
@@ -33,6 +34,12 @@ import '../../presentation/screens/auth/forgot_password_screen.dart';
 import '../../presentation/screens/home/home_screen.dart';
 import '../../presentation/screens/flashcard/flashcard_screen.dart';
 import '../../presentation/screens/admin/admin_screen.dart';
+
+// Thêm imports cho YouTube module
+import '../../presentation/screens/youtube/video_play_screen.dart';
+import '../../presentation/screens/youtube/youtube_channel_screen.dart';
+import '../../presentation/screens/youtube/youtube_playlists_video_screen.dart';
+import '../../presentation/screens/youtube/youtube_videos_screen.dart';
 
 import 'route_names.dart';
 
@@ -210,7 +217,7 @@ class AppRouter {
               ),
             ),
           ),
-          // ✅ FIX: Bỏ QuizController khỏi Provider
+          //  FIX: Bỏ QuizController khỏi Provider
           GoRoute(
             path: 'room/:roomId',
             builder: (context, state) => ChangeNotifierProvider(
@@ -220,6 +227,33 @@ class AppRouter {
                 currentUid: FirebaseAuth.instance.currentUser?.uid ?? '',
               ),
             ),
+          ),
+        ],
+      ),
+
+      // YOUTUBE MODULE - THÊM MỚI
+      // Trong routes, thêm sub-route cho playlists dưới /youtube/channels
+      GoRoute(
+        path: '/youtube/channels',
+        builder: (context, state) => const YoutubeChannelsScreen(),
+        routes: [
+          GoRoute(
+            path: 'playlists',  // New: /youtube/channels/playlists
+            builder: (context, state) => const YoutubePlaylistsScreen(),
+            routes: [
+              GoRoute(
+                path: 'videos',  // /youtube/channels/playlists/videos
+                builder: (context, state) => const YoutubeVideosScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'player/:videoId',
+                    builder: (context, state) => YoutubePlayerScreen(
+                      videoId: state.pathParameters['videoId']!,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ],
       ),

@@ -25,7 +25,7 @@ class Routes {
   static const quiz = '/quiz';
   static const quizDetail = '/quiz/detail';
   static const quizTaking = '/quiz/taking';
-  static const quizCreate = '/quiz/create'; // Sửa typo từ 'quizCreat' và 'creat'
+  static const quizCreate = '/quiz/create';
 
   // Thêm: Route cho quiz đấu với bạn (duel)
   static const quizDuel = '/quiz/duel';
@@ -43,6 +43,11 @@ class Routes {
 
   // Thêm: Route cho tìm kiếm bạn bè trong chat
   static const chatFriends = '/chat/friends';
+
+  // YOUTUBE MODULE - THÊM MỚI
+  static const youtubeChannels = '/youtube/channels';
+  static const youtubeVideos = '/youtube/channels/videos';
+  static const youtubePlayer = '/youtube/channels/videos/player';
 
   // AI
   static const aiChat = '/ai/chat';

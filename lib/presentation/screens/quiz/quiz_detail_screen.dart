@@ -225,13 +225,13 @@ class QuizDetailScreen extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: AppColors.primary),
+          Icon(icon, size: 16, color: Colors.black),
           const SizedBox(width: 6),
           Text(
             label,
             style: const TextStyle(
               fontSize: 13,
-              color: AppColors.primary,
+              color: Colors.black,
               fontWeight: FontWeight.w500,
             ),
           ),

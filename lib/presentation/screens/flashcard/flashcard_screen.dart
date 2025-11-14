@@ -1,4 +1,3 @@
-// File: lib/presentation/screens/flashcard/flashcard_list_screen.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
@@ -35,6 +34,31 @@ class _FlashcardListScreenState extends State<FlashcardListScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Tự động reload mỗi khi quay lại trang
+    _reloadData();
+  }
+
+  void _reloadData() {
+    if (showOnlyUnmemorized) {
+      controller.loadFlashcardsToReview(
+        folderId: controller.currentFolderId.value != 'default'
+            ? controller.currentFolderId.value
+            : null,
+      );
+    } else {
+      if (controller.currentFolderId.value == 'default') {
+        controller.loadFlashcards();
+      } else {
+        controller.loadFlashcardsByFolder(
+          controller.currentFolderId.value,
+        );
+      }
+    }
+  }
+
+  @override
   void dispose() {
     searchController.dispose();
     super.dispose();
@@ -57,6 +81,10 @@ class _FlashcardListScreenState extends State<FlashcardListScreen> {
                   icon: const Icon(
                     Icons.more_vert,
                     color: Colors.white,
+                  ),
+                  color: Colors.grey[100],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   onSelected: (value) {
                     if (value == 'filter') {
@@ -94,24 +122,28 @@ class _FlashcardListScreenState extends State<FlashcardListScreen> {
                             size: 20,
                             color: showOnlyUnmemorized
                                 ? AppColors.primary
-                                : Colors.grey,
+                                : Colors.grey[600],
                           ),
                           const SizedBox(width: 8),
                           Text(
                             showOnlyUnmemorized
                                 ? 'Hiện tất cả'
                                 : 'Từ chưa thuộc',
+                            style: TextStyle(color: Colors.grey[800]),
                           ),
                         ],
                       ),
                     ),
-                    const PopupMenuItem(
+                    PopupMenuItem(
                       value: 'reset',
                       child: Row(
                         children: [
-                          Icon(Icons.restart_alt, size: 20, color: Colors.grey),
-                          SizedBox(width: 8),
-                          Text('Reset tất cả'),
+                          Icon(Icons.restart_alt, size: 20, color: Colors.grey[600]),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Reset tất cả',
+                            style: TextStyle(color: Colors.grey[800]),
+                          ),
                         ],
                       ),
                     ),

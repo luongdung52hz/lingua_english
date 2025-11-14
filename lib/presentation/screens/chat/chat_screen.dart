@@ -244,19 +244,19 @@ class _ChatScreenState extends State<ChatScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              if (index == _messages.length - 1 ||
-                                  (index < _messages.length - 1 &&
-                                      _messages[index].sentAt.toDate().day !=
-                                          _messages[index + 1].sentAt.toDate().day))
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 8),
-                                  child: Text(
-                                    _formatTime(msg.sentAt),
-                                    style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey[500]),
-                                  ),
-                                ),
+                              // if (index == _messages.length - 1 ||
+                              //     (index < _messages.length - 1 &&
+                              //         _messages[index].sentAt.toDate().day !=
+                              //             _messages[index + 1].sentAt.toDate().day))
+                              // Padding(
+                                 // padding: const EdgeInsets.only(bottom: 8),
+                                  // child: Text(
+                                  //   _formatTime(msg.sentAt),
+                                  //   style: TextStyle(
+                                  //       fontSize: 12,
+                                  //       color: Colors.grey[500]),
+                                  // ),
+                              //  ),
                               Text(
                                 msg.content,
                                 style: TextStyle(

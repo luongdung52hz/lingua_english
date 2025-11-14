@@ -14,7 +14,7 @@ class Flashcard {
   final DateTime createdAt;
   final DateTime lastReviewed;
   final int reviewCount;
-  final String folderId; // ✅ NEW: Folder reference
+  final String folderId;
 
   Flashcard({
     this.id,
@@ -28,7 +28,7 @@ class Flashcard {
     DateTime? createdAt,
     DateTime? lastReviewed,
     this.reviewCount = 0,
-    this.folderId = 'default', // ✅ NEW: Default folder
+    this.folderId = 'default',
   })  : createdAt = createdAt ?? DateTime.now(),
         lastReviewed = lastReviewed ?? DateTime.now();
 
@@ -39,12 +39,11 @@ class Flashcard {
       'phonetic': phonetic,
       'partOfSpeech': partOfSpeech,
       'examples': examples,
-      'imageUrl': imageUrl,
       'isMemorized': isMemorized,
       'createdAt': Timestamp.fromDate(createdAt),
       'lastReviewed': Timestamp.fromDate(lastReviewed),
       'reviewCount': reviewCount,
-      'folderId': folderId, // ✅ NEW
+      'folderId': folderId,
     };
   }
 
@@ -56,12 +55,11 @@ class Flashcard {
       phonetic: json['phonetic'],
       partOfSpeech: json['partOfSpeech'],
       examples: List<String>.from(json['examples'] ?? []),
-      imageUrl: json['imageUrl'],
       isMemorized: json['isMemorized'] ?? false,
       createdAt: (json['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       lastReviewed: (json['lastReviewed'] as Timestamp?)?.toDate() ?? DateTime.now(),
       reviewCount: json['reviewCount'] ?? 0,
-      folderId: json['folderId'] ?? 'default', // ✅ NEW
+      folderId: json['folderId'] ?? 'default',
     );
   }
 
@@ -77,7 +75,7 @@ class Flashcard {
     DateTime? createdAt,
     DateTime? lastReviewed,
     int? reviewCount,
-    String? folderId, // ✅ NEW
+    String? folderId,
   }) {
     return Flashcard(
       id: id ?? this.id,
@@ -86,25 +84,23 @@ class Flashcard {
       phonetic: phonetic ?? this.phonetic,
       partOfSpeech: partOfSpeech ?? this.partOfSpeech,
       examples: examples ?? this.examples,
-      imageUrl: imageUrl ?? this.imageUrl,
       isMemorized: isMemorized ?? this.isMemorized,
       createdAt: createdAt ?? this.createdAt,
       lastReviewed: lastReviewed ?? this.lastReviewed,
       reviewCount: reviewCount ?? this.reviewCount,
-      folderId: folderId ?? this.folderId, // ✅ NEW
+      folderId: folderId ?? this.folderId,
     );
   }
 }
 
-// ✅ NEW: Folder Model
 class FlashcardFolder {
   final String? id;
   final String name;
   final String? description;
-  final String icon; // Emoji icon
-  final String color; // Hex color code
+  final String icon;
+  final String color;
   final DateTime createdAt;
-  final int cardCount; // Cached count for performance
+  final int cardCount;
 
   FlashcardFolder({
     this.id,

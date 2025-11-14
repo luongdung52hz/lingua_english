@@ -185,8 +185,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 30),
                   Image.asset(
                     'lib/resources/assets/images/logo_L_final.png',
-                    height: 70,
-                    width: 70,
+                    height: 100,
+                    width: 100,
                     errorBuilder: (context, error, stackTrace) {
                       return const Icon(Icons.image_not_supported, size: 20, color: Colors.white);
                     },

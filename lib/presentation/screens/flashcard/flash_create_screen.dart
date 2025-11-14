@@ -5,11 +5,12 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:collection/collection.dart';
 import 'package:go_router/go_router.dart';
+import 'package:uuid/uuid.dart';
 import '../../../data/models/flashcard_model.dart';
-import '../../../data/datasources/remote/translation_service.dart'; // ✅ Import để dùng enum
+import '../../../data/datasources/remote/translation_service.dart';
 import '../../../resources/styles/colors.dart';
 import '../../controllers/flashcard_controller.dart';
-import '../../widgets/app_button.dart'; // Import CustomButton
+import '../../widgets/app_button.dart';
 
 class FlashcardCreateScreen extends StatefulWidget {
   const FlashcardCreateScreen({Key? key}) : super(key: key);
@@ -21,29 +22,69 @@ class FlashcardCreateScreen extends StatefulWidget {
 class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
   final FlashcardController controller = Get.find<FlashcardController>();
   final TextEditingController textController = TextEditingController();
+
+  // Controllers for manual input
+  final TextEditingController vietnameseController = TextEditingController();
+  final TextEditingController englishController = TextEditingController();
+  final TextEditingController phoneticController = TextEditingController();
+  // Removed unused partOfSpeechController
+  final TextEditingController examplesController = TextEditingController();
+
+  final List<String> partOfSpeechOptions = [
+    'noun',
+    'verb',
+    'adjective',
+    'adverb',
+    'pronoun',
+    'preposition',
+    'conjunction',
+    'interjection',
+    'other',
+  ];
+
   Flashcard? previewFlashcard;
   String? selectedFolderId;
+  bool isManualMode = false;
+  String? selectedPartOfSpeech;
 
   TranslationDirection translationDirection = TranslationDirection.viToEn;
 
   @override
   void initState() {
     super.initState();
-    selectedFolderId = controller.currentFolderId.value;
+    // Set default folder if current is empty/null
+    selectedFolderId = controller.currentFolderId.value.isNotEmpty
+        ? controller.currentFolderId.value
+        : 'default';
   }
 
   @override
   void dispose() {
     textController.dispose();
+    vietnameseController.dispose();
+    englishController.dispose();
+    phoneticController.dispose();
+    // Removed partOfSpeechController.dispose()
+    examplesController.dispose();
     super.dispose();
   }
 
   Future<void> _translateAndPreview() async {
-    final inputText = textController.text.trim();
+    final inputText = textController.text;
     if (inputText.isEmpty) {
       Get.snackbar(
         'Lỗi',
         'Vui lòng nhập từ/câu cần dịch',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    // Added null check for folder
+    if (selectedFolderId == null) {
+      Get.snackbar(
+        'Lỗi',
+        'Vui lòng chọn thư mục',
         snackPosition: SnackPosition.BOTTOM,
       );
       return;
@@ -60,10 +101,57 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
     }
   }
 
+  void _createManualFlashcard() {
+    if (vietnameseController.text.isEmpty || englishController.text.isEmpty) {
+      Get.snackbar(
+        'Lỗi',
+        'Vui lòng nhập đầy đủ mặt trước và mặt sau',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    // Added null check for folder
+    if (selectedFolderId == null) {
+      Get.snackbar(
+        'Lỗi',
+        'Vui lòng chọn thư mục',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    final examples = examplesController.text.isEmpty
+        ? <String>[]
+        : examplesController.text
+        .split('\n')
+        .where((line) => line.isNotEmpty)
+        .toList();
+
+    final flashcard = Flashcard(
+      id: const Uuid().v4(),
+      vietnamese: vietnameseController.text,
+      english: englishController.text,
+      phonetic: phoneticController.text.isEmpty ? null : phoneticController.text,
+      partOfSpeech: selectedPartOfSpeech,
+      createdAt: DateTime.now(),
+      examples: examples,
+      folderId: selectedFolderId!, // Safe now due to check above
+      isMemorized: false,
+    );
+
+    setState(() => previewFlashcard = flashcard);
+  }
+
   Future<void> _saveFlashcard() async {
     if (previewFlashcard != null) {
       await controller.saveFlashcard(previewFlashcard!);
       textController.clear();
+      vietnameseController.clear();
+      englishController.clear();
+      phoneticController.clear();
+      // Removed partOfSpeechController.clear()
+      examplesController.clear();
       setState(() => previewFlashcard = null);
     }
   }
@@ -73,6 +161,30 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
       translationDirection = translationDirection == TranslationDirection.viToEn
           ? TranslationDirection.enToVi
           : TranslationDirection.viToEn;
+      // Clear text when changing direction
+      textController.clear();
+    });
+  }
+
+  void _toggleInputMode() {
+    // Unfocus any active text field first
+    FocusScope.of(context).unfocus();
+
+    // Add haptic feedback for better UX
+    HapticFeedback.lightImpact();
+
+    // Update state - this will trigger immediate rebuild
+    setState(() {
+      isManualMode = !isManualMode;
+      previewFlashcard = null;
+
+      // Clear all input fields
+      textController.clear();
+      vietnameseController.clear();
+      englishController.clear();
+      phoneticController.clear();
+      // Removed partOfSpeechController.clear()
+      examplesController.clear();
     });
   }
 
@@ -80,20 +192,20 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tạo Flashcard Mới'),
+        title: Text(isManualMode ? 'Tạo Flashcard (Thủ công)' : 'Tạo Flashcard (AI)'),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: const Icon(Icons.folder_open),
-            tooltip: 'Quản lý thư mục',
-            onPressed: () {
-              GoRouter.of(context).push('/flashcards/folders');
-            },
+            icon: Icon(isManualMode ? Icons.auto_awesome : Icons.edit),
+            tooltip: isManualMode ? 'Chế độ AI' : 'Chế độ thủ công',
+            onPressed: _toggleInputMode,
           ),
         ],
       ),
       body: SingleChildScrollView(
+        // Add key to force rebuild when mode changes
+        key: ValueKey('input_mode_$isManualMode'),
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -101,108 +213,24 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
             _buildFolderSelector(),
             const SizedBox(height: 16),
 
-            Card(
-              elevation: 4,
-              color: Colors.grey.shade50,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            translationDirection == TranslationDirection.viToEn
-                                ? ' Dịch tiếng Việt → Anh'
-                                : ' Dịch tiếng Anh → Việt',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.transparent,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.swap_horiz,
-                              color: Colors.black,
-                              size: 28,
-                            ),
-                            tooltip: 'Đổi hướng dịch',
-                            onPressed: _toggleTranslationDirection,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    TextField(
-                      controller: textController,
-                      decoration: InputDecoration(
-                        hintText: translationDirection == TranslationDirection.viToEn
-                            ? 'Ví dụ: Xin chào'
-                            : 'Example: Hello',
-                        filled: true,
-                        fillColor: Colors.grey[100],
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade400),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade400),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(
-                            color: AppColors.primary,
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                      maxLines: 3,
-                      textInputAction: TextInputAction.done,
-                      onSubmitted: (_) => _translateAndPreview(),
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    Center(
-                      child: Obx(() => CustomButton(
-                        onPressed: controller.isTranslating.value
-                            ? null
-                            : () {
-                          FocusScope.of(context).unfocus();
-
-                          HapticFeedback.mediumImpact();
-
-                          _translateAndPreview();
-                        },
-                        text: controller.isTranslating.value
-                            ? 'Đang dịch ...'
-                            : 'Dịch ngay ',
-                        icon: controller.isTranslating.value
-                            ? null  // Spinner handled by isLoading, but since no isLoading, use custom icon if needed
-                            : Icons.auto_awesome,
-                        iconSize: 20,
-                        height: 56,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16), // Giảm horizontal padding để tránh overflow
-                        buttonColor: AppColors.primary,
-                      )),
-                    ),
-                  ],
-                ),
-              ),
+            // Input Section - will rebuild based on isManualMode
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0.0, 0.1),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: child,
+                  ),
+                );
+              },
+              child: isManualMode
+                  ? _buildManualInputSection()
+                  : _buildAIInputSection(),
             ),
 
             const SizedBox(height: 24),
@@ -210,7 +238,7 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
             // Preview card
             if (previewFlashcard != null) ...[
               const Text(
-                ' Xem trước Flashcard',
+                'Xem trước Flashcard',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -228,24 +256,24 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
                       },
                       text: 'Hủy',
                       icon: Icons.cancel,
-                      iconSize: 18, // Giảm icon size để tiết kiệm space
+                      iconSize: 18,
                       height: 52,
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16), // Giảm horizontal padding
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
                       borderRadius: BorderRadius.circular(12),
-                      buttonColor: Colors.grey.shade300, // Light color for outlined-like effect
+                      buttonColor: Colors.grey.shade300,
                     ),
                   ),
-                  const SizedBox(width: 8), // Giảm width giữa hai nút để cân bằng
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Obx(() => CustomButton(
                       onPressed: controller.isLoading.value
                           ? null
                           : _saveFlashcard,
-                      text: 'Lưu', // Rút gọn text để tránh overflow (hoặc dùng 'Lưu FC' nếu cần)
+                      text: 'Lưu',
                       icon: Icons.save,
-                      iconSize: 18, // Giảm icon size
+                      iconSize: 18,
                       height: 52,
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16), // Giảm horizontal padding
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
                       borderRadius: BorderRadius.circular(12),
                       buttonColor: Colors.green,
                     )),
@@ -253,6 +281,259 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
                 ],
               ),
             ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAIInputSection() {
+    return Card(
+      // Add unique key for AnimatedSwitcher
+      key: const ValueKey('ai_mode'),
+      elevation: 4,
+      color: Colors.grey.shade50,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    translationDirection == TranslationDirection.viToEn
+                        ? 'Dịch tiếng Việt → Anh'
+                        : 'Dịch tiếng Anh → Việt',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.swap_horiz,
+                      color: Colors.black,
+                      size: 28,
+                    ),
+                    tooltip: 'Đổi hướng dịch',
+                    onPressed: _toggleTranslationDirection,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: textController,
+              decoration: InputDecoration(
+                hintText: translationDirection == TranslationDirection.viToEn
+                    ? 'Ví dụ: Xin chào'
+                    : 'Example: Hello',
+                filled: true,
+                fillColor: Colors.grey[100],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.shade400),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.shade400),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: AppColors.primary,
+                    width: 1,
+                  ),
+                ),
+              ),
+              maxLines: 3,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => _translateAndPreview(),
+            ),
+            const SizedBox(height: 20),
+            Center(
+              child: Obx(() => CustomButton(
+                onPressed: controller.isTranslating.value
+                    ? null
+                    : () {
+                  FocusScope.of(context).unfocus();
+                  HapticFeedback.mediumImpact();
+                  _translateAndPreview();
+                },
+                text: controller.isTranslating.value
+                    ? 'Đang dịch ...'
+                    : 'Dịch ngay',
+                icon: controller.isTranslating.value
+                    ? null
+                    : Icons.auto_awesome,
+                iconSize: 20,
+                height: 56,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                buttonColor: AppColors.primary,
+              )),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildManualInputSection() {
+    return Card(
+      // Add unique key for AnimatedSwitcher
+      key: const ValueKey('manual_mode'),
+      elevation: 4,
+      color: Colors.grey.shade50,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Nhập thủ công',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Vietnamese
+            TextField(
+              controller: vietnameseController,
+              decoration: InputDecoration(
+                labelText: 'Tiếng Việt (Mặt trước)*',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.primary, width: 1),
+                ),
+              ),
+              maxLines: 2,
+            ),
+            const SizedBox(height: 12),
+
+            // English
+            TextField(
+              controller: englishController,
+              decoration: InputDecoration(
+                labelText: 'Tiếng Anh (Mặt sau)*',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.primary, width: 1),
+                ),
+              ),
+              maxLines: 2,
+            ),
+            const SizedBox(height: 12),
+
+            // Phonetic
+            TextField(
+              controller: phoneticController,
+              decoration: InputDecoration(
+                labelText: 'Phiên âm (tùy chọn)',
+                hintText: '/həˈloʊ/',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.primary, width: 1),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // Part of Speech
+            DropdownButtonFormField<String>(
+              value: selectedPartOfSpeech,
+              decoration: InputDecoration(
+                labelText: 'Từ loại (tùy chọn)',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.primary, width: 1),
+                ),
+              ),
+              dropdownColor: Colors.white, // Nền trắng cho menu
+              borderRadius: BorderRadius.circular(12),
+              items: partOfSpeechOptions.map((type) {
+                return DropdownMenuItem(
+                  value: type,
+                  child: Text(type),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  selectedPartOfSpeech = value;
+                });
+              },
+            ),
+            const SizedBox(height: 12),
+
+            // Examples
+            TextField(
+              controller: examplesController,
+              decoration: InputDecoration(
+                labelText: 'Ví dụ (tùy chọn)',
+                hintText: 'Mỗi ví dụ trên một dòng',
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: AppColors.primary, width: 1),
+                ),
+              ),
+              maxLines: 3,
+            ),
+            const SizedBox(height: 20),
+
+            Center(
+              child: CustomButton(
+                onPressed: () {
+                  FocusScope.of(context).unfocus();
+                  HapticFeedback.mediumImpact();
+                  _createManualFlashcard();
+                },
+                text: 'Tạo Flashcard',
+                icon: Icons.add_card,
+                iconSize: 20,
+                height: 56,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                buttonColor: AppColors.primary,
+              ),
+            ),
           ],
         ),
       ),
@@ -291,6 +572,7 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
       ),
       builder: (context) => Obx(() {
         return Container(
+          color: Colors.white, // Added: Set background to white
           padding: const EdgeInsets.all(16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -299,14 +581,26 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
+                  color: Colors.grey,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Chọn thư mục',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Row(
+                children: [
+                  const Text(
+                    'Chọn thư mục',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.folder_open),
+                    tooltip: 'Quản lý thư mục',
+                    onPressed: () {
+                      Navigator.pop(context); // Added: Close bottom sheet first
+                      GoRouter.of(context).push('/flashcards/folders');
+                    },
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               Flexible(
@@ -326,7 +620,7 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
                         height: 40,
                         decoration: BoxDecoration(
                           color: color.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(12), // Changed to 12
                         ),
                         child: Center(
                           child: Text(folder.icon,
@@ -355,142 +649,92 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
 
   Widget _buildPreviewCard(Flashcard flashcard) {
     return Card(
-      elevation: 8,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: Colors.grey.shade50,
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Vietnamese (Front)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.blue[50],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Mặt trước (Tiếng Việt)',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    flashcard.vietnamese,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+            // Vietnamese
+            Text(
+              flashcard.vietnamese,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
               ),
             ),
 
-            const SizedBox(height: 16),
+            const Divider(height: 24),
 
-            // English (Back)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.green[50],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Mặt sau (Tiếng Anh)',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    flashcard.english,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green,
-                    ),
-                  ),
-                  // FIXED: Wrap Row with Flexible to prevent overflow
-                  if (flashcard.phonetic != null || flashcard.partOfSpeech != null) ...[
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        if (flashcard.phonetic != null) ...[
-                          Flexible( // NEW: Flexible to allow wrap/ellipsis
-                            child: Text(
-                              ' ${flashcard.phonetic}',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[600],
-                                fontStyle: FontStyle.italic,
-                              ),
-                              overflow: TextOverflow.ellipsis, // NEW: Ellipsis if too long
-                              maxLines: 1,
-                            ),
-                          ),
-                        ],
-                        if (flashcard.partOfSpeech != null) ...[
-                          const SizedBox(width: 8),
-                          Flexible( // NEW: Flexible for Chip
-                            child: Chip(
-                              label: Text(flashcard.partOfSpeech!),
-                              backgroundColor: Colors.blue[50],
-                              labelStyle: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blueAccent,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ],
-                ],
+            // English
+            Text(
+              flashcard.english,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
               ),
             ),
+
+            // Phonetic & Part of Speech
+            if (flashcard.phonetic != null || flashcard.partOfSpeech != null) ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  if (flashcard.phonetic != null)
+                    Flexible(
+                      child: Text(
+                        flashcard.phonetic!,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                          fontStyle: FontStyle.italic,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  if (flashcard.phonetic != null && flashcard.partOfSpeech != null)
+                    Text('  •  ', style: TextStyle(color: Colors.grey[400])),
+                  if (flashcard.partOfSpeech != null)
+                    Text(
+                      flashcard.partOfSpeech!,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                ],
+              ),
+            ],
 
             // Examples
             if (flashcard.examples.isNotEmpty) ...[
               const SizedBox(height: 16),
-              const Text(
-                '📚 Ví dụ:',
+              Text(
+                'Ví dụ:',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
+                  color: Colors.grey[700],
                 ),
               ),
               const SizedBox(height: 8),
               ...flashcard.examples.map(
                     (example) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
+                  padding: const EdgeInsets.only(bottom: 4),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('• ', style: TextStyle(fontSize: 16)),
-                      Expanded( // NEW: Expanded to prevent overflow in examples
+                      Text('• ', style: TextStyle(color: Colors.grey[600])),
+                      Expanded(
                         child: Text(
                           example,
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.grey[700],
-                            fontStyle: FontStyle.italic,
+                            color: Colors.grey[600],
                           ),
-                          overflow: TextOverflow.ellipsis, // NEW: Ellipsis if long
-                          maxLines: 2, // Limit lines
                         ),
                       ),
                     ],

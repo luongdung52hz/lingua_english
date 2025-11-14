@@ -328,7 +328,10 @@ class _FolderCard extends StatelessWidget {
               ),
               if (!isDefault)
                 PopupMenuButton<String>(
-                  color: Colors.grey.shade50,
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   onSelected: (value) async {
                     if (value == 'edit') {
                       Get.snackbar('Thông báo', 'Tính năng chỉnh sửa sắp ra mắt');
@@ -336,6 +339,7 @@ class _FolderCard extends StatelessWidget {
                       _showDeleteDialog(context, controller);
                     }
                   },
+
                   itemBuilder: (context) => [
                     const PopupMenuItem(
                       value: 'edit',

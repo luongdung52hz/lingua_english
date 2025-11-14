@@ -29,7 +29,13 @@ class FolderChips extends StatelessWidget {
             return Obx(() {
               final currentId = controller.currentFolderId.value;
               final isSelected = folder.id == currentId;
-
+              final isDefaultFolder = folder.id == 'default';
+              int displayCount;
+              if (isDefaultFolder) {
+                displayCount = controller.folders.fold<int>(0, (sum, f) => sum + f.cardCount);
+              } else {
+                displayCount = folder.cardCount;
+              }
               return GestureDetector(
                 onTap: () {
                   final newId = folder.id ?? 'default';
@@ -81,7 +87,7 @@ class FolderChips extends StatelessWidget {
                           ),
                         ),
                       ),
-                      if (folder.cardCount > 0) ...[
+                      if (displayCount > 0) ...[
                         const SizedBox(width: 6),
                         Container(
                           alignment: Alignment.center,
@@ -94,7 +100,7 @@ class FolderChips extends StatelessWidget {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
-                            '${folder.cardCount}',
+                            '$displayCount',
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,

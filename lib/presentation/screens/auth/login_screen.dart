@@ -4,6 +4,8 @@ import 'package:get_it/get_it.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
+import 'package:get/get.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:learn_english/presentation/screens/auth/widgets/text_form_field.dart';
 import '../../../app/routes/route_names.dart';
 import '../../../data/datasources/remote/google_signin_service.dart';
@@ -84,7 +86,25 @@ class _LoginScreenState extends State<LoginScreen> {
         password: passCtrl.text.trim(),
       );
 
-      if (mounted) context.go(Routes.home);
+      if (mounted) {
+        // Xóa tất cả GetX controllers
+        Get.deleteAll(force: true);
+
+        // Hiển thị thông báo thành công
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Đăng nhập thành công!'),
+            backgroundColor: Colors.green,
+            duration: Duration(milliseconds: 1500),
+          ),
+        );
+
+        // Đợi một chút để user thấy thông báo
+        await Future.delayed(const Duration(milliseconds: 500));
+
+        // Restart toàn bộ app với Phoenix
+        Phoenix.rebirth(context);
+      }
     } on FirebaseAuthException catch (e) {
       String errorMessage = "Đăng nhập thất bại";
 
@@ -175,7 +195,23 @@ class _LoginScreenState extends State<LoginScreen> {
           }
         }
 
-        context.go(Routes.home);
+        // Xóa tất cả GetX controllers
+        Get.deleteAll(force: true);
+
+        // Hiển thị thông báo thành công
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Đăng nhập Google thành công!'),
+            backgroundColor: Colors.green,
+            duration: Duration(milliseconds: 1500),
+          ),
+        );
+
+        // Đợi một chút
+        await Future.delayed(const Duration(milliseconds: 500));
+
+        // Restart toàn bộ app với Phoenix
+        Phoenix.rebirth(context);
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -206,7 +242,6 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    // Listeners removed - handled internally by ValidatedTextFormField
   }
 
   @override
@@ -224,7 +259,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final passwordSuffixIcon = IconButton(
       icon: Icon(
         isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-        color: Colors.grey, // Simplified; widget handles focus color internally for prefix
+        color: Colors.grey,
       ),
       onPressed: () {
         setState(() {
@@ -243,12 +278,11 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // ... (unchanged: logo comment, texts, toggle button)
                   const SizedBox(height: 30),
                   Image.asset(
                     'lib/resources/assets/images/logo_L_final.png',
-                    height: 70,
-                    width: 70,
+                    height: 100,
+                    width: 100,
                     errorBuilder: (context, error, stackTrace) {
                       return const Icon(Icons.image_not_supported, size: 20, color: Colors.white);
                     },
@@ -267,7 +301,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 30),
 
-                  // Toggle Button (unchanged)
+                  // Toggle Button
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.grey[200],
@@ -346,11 +380,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Email or Username Field - Replaced with ValidatedTextFormField
+                  // Email or Username Field
                   ValidatedTextFormField(
                     controller: emailOrUsernameCtrl,
                     focusNode: emailOrUsernameFocus,
-                    key: ValueKey(isEmailMode), // Reset when mode changes
+                    key: ValueKey(isEmailMode),
                     hintText: isEmailMode ? "Email của bạn" : "Tên người dùng",
                     prefixIcon: isEmailMode ? Icons.email : Icons.person,
                     validator: (v) {
@@ -375,11 +409,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       if (text.isEmpty) return false;
                       return isEmailMode ? _isEmail(text) : text.length >= 3;
                     },
-                    // Note: Border uses green for consistency; adjust widget if needed for primary
                   ),
                   const SizedBox(height: 16),
 
-                  // Password Field - Replaced with ValidatedTextFormField
+                  // Password Field
                   ValidatedTextFormField(
                     controller: passCtrl,
                     focusNode: passFocus,
@@ -390,7 +423,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     validationLogic: (text) => text.length >= 6,
                     isObscure: !isPasswordVisible,
                     suffixIcon: passwordSuffixIcon,
-                    // Note: Visibility toggle handled in parent; obscure updates on setState
                   ),
 
                   Align(

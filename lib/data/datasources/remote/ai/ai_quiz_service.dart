@@ -10,7 +10,7 @@ class AIQuizService {
   final _uuid = const Uuid();
 
   // ⚙️ Cấu hình tối ưu để tránh rate limit
-  static const int _chunkSize = 8; // Tăng lại vì giờ xử lý tuần tự
+  static const int _chunkSize = 5; // Tăng lại vì giờ xử lý tuần tự
   static const int _maxRetries = 5; // Tăng số retry
   static const Duration _baseTimeout = Duration(seconds: 60);
   static const Duration _delayBetweenRequests = Duration(seconds: 3); // Delay giữa mỗi request
@@ -178,7 +178,7 @@ class AIQuizService {
         ],
         'generationConfig': {
           'temperature': 0.1,
-          'maxOutputTokens': 8000,
+          'maxOutputTokens': 10000,
           'topP': 0.95,
           'topK': 40,
         }
