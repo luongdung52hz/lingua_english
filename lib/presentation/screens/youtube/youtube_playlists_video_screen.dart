@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import '../../../resources/styles/colors.dart';
 import '../../controllers/youtube_controller.dart';
+import '../../widgets/info_card.dart';
+import 'package:collection/collection.dart'; // ✅ THÊM: Nếu chưa có, cho firstWhereOrNull
 
 class YoutubePlaylistsScreen extends StatelessWidget {
   const YoutubePlaylistsScreen({Key? key}) : super(key: key);
@@ -34,21 +36,40 @@ class YoutubePlaylistsScreen extends StatelessWidget {
           itemCount: controller.playlists.length,
           itemBuilder: (context, index) {
             final playlist = controller.playlists[index];
-            return Card(
-              margin: const EdgeInsets.only(bottom: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: ListTile(
-                leading: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(playlist.thumbnailUrl, width: 80, height: 60, fit: BoxFit.cover),
+            // ✅ THÊM: Conditional infoPairs - chỉ hiển thị nếu itemCount có giá trị hợp lệ (>0)
+            final List<IconTextPair>? infoPairs = (playlist.itemCount != null && playlist.itemCount! > 0)
+                ? [IconTextPair(Icons.video_library, '${playlist.itemCount} videos')]
+                : null;
+            return InfoCard(
+              title: playlist.title,
+              subtitle: playlist.channelTitle,
+              infoPairs: infoPairs, // Sẽ null/empty → không render _InfoRow nếu không có
+              leading: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  playlist.thumbnailUrl,
+                  width: 80,
+                  height: 60,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    width: 80,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.playlist_play, color: Colors.grey, size: 30),
+                  ),
                 ),
-                title: Text(playlist.title, maxLines: 2, overflow: TextOverflow.ellipsis),
-                subtitle: Text('${playlist.channelTitle} • ${playlist.itemCount} videos'),
-                trailing: const Icon(Icons.arrow_forward_ios),
-                onTap: () {
-                  controller.changePlaylist(playlist.id);  // Fetch videos của playlist
-                  context.go('/youtube/channels/playlists/videos');  // Go to VideosScreen với playlist
-                },
+              ),
+              onTap: () {
+                controller.changePlaylist(playlist.id);  // Fetch videos của playlist
+                context.push('/youtube/videos');  // Go to VideosScreen với playlist
+              },
+              trailing: const Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: Colors.grey,
               ),
             );
           },

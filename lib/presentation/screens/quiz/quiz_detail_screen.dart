@@ -108,13 +108,13 @@ class QuizDetailScreen extends StatelessWidget {
               // Questions list
               Expanded(
                 child: ListView.builder(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(10),
                   itemCount: quiz.questions.length,
                   itemBuilder: (context, index) {
                     final q = quiz.questions[index];
                     return Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.all(16),
+                      margin: const EdgeInsets.only(bottom: 6),
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         border: Border.all(color: Colors.grey.shade300),
@@ -128,7 +128,7 @@ class QuizDetailScreen extends StatelessWidget {
                             children: [
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
+                                  horizontal: 6,
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
@@ -151,20 +151,16 @@ class QuizDetailScreen extends StatelessWidget {
                                   style: const TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w500,
-                                    color: AppColors.primary,
+                                    color: Colors.black,
                                   ),
                                 ),
                               ),
-                              Icon(
-                                q.isComplete ? Icons.check_circle : Icons.circle_outlined,
-                                size: 20,
-                                color: q.isComplete ? AppColors.primary : Colors.grey.shade400,
-                              ),
+
                             ],
                           ),
                           if (q.options.isNotEmpty) ...[
-                            const SizedBox(height: 12),
-                            ...q.options.take(3).map((option) => Padding(
+                            const SizedBox(height: 2),
+                            ...q.options.take(4).map((option) => Padding(
                               padding: const EdgeInsets.only(left: 32, top: 4),
                               child: Row(
                                 children: [
@@ -189,7 +185,7 @@ class QuizDetailScreen extends StatelessWidget {
                                 ],
                               ),
                             )),
-                            if (q.options.length > 3)
+                            if (q.options.length > 4)
                               Padding(
                                 padding: const EdgeInsets.only(left: 32, top: 4),
                                 child: Text(

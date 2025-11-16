@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-import 'package:learn_english/presentation/controllers/youtube_controller.dart';
 import '../../../resources/styles/colors.dart';
 import '../../controllers/youtube_controller.dart';
+import '../../widgets/info_card.dart';
+import 'package:collection/collection.dart'; // ✅ THÊM: Nếu chưa có, cho firstWhereOrNull
 
 class YoutubeVideosScreen extends StatelessWidget {
   const YoutubeVideosScreen({Key? key}) : super(key: key);
@@ -16,14 +17,24 @@ class YoutubeVideosScreen extends StatelessWidget {
       appBar: AppBar(
         title: Obx(() {
           String name = 'Kênh';
+
           // Ưu tiên tên playlist nếu có
-          final playlist = controller.playlists.firstWhereOrNull((p) => p.id == controller.selectedPlaylistId.value);
+          final playlist = controller.playlists.firstWhereOrNull(
+                  (p) => p.id == controller.selectedPlaylistId.value
+          );
+
           if (playlist != null) {
             name = playlist.title;
           } else {
-            final channelName = controller.channels.firstWhereOrNull((c) => c['id'] == controller.selectedChannelId.value)?['name'] ?? 'Kênh';
-            name = channelName;
+            // ✅ FIX: Cast về String khi lấy channel name
+            final channel = controller.channels.firstWhereOrNull(
+                    (c) => c['id'] == controller.selectedChannelId.value
+            );
+            if (channel != null) {
+              name = channel['name'] as String? ?? 'Kênh';
+            }
           }
+
           return Text('Videos từ $name');
         }),
         backgroundColor: AppColors.primary,
@@ -32,10 +43,10 @@ class YoutubeVideosScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              // Sử dụng fetchVideosByPlaylist nếu có selectedPlaylistId, fallback fetchVideosByChannel
+              // Reload videos based on selection
               if (controller.selectedPlaylistId.value.isNotEmpty) {
                 controller.fetchVideosByPlaylist(controller.selectedPlaylistId.value);
-              } else {
+              } else if (controller.selectedChannelId.value.isNotEmpty) {
                 controller.fetchVideosByChannel(controller.selectedChannelId.value);
               }
             },
@@ -43,44 +54,73 @@ class YoutubeVideosScreen extends StatelessWidget {
         ],
       ),
       body: Obx(() {
-        print('DEBUG UI Videos: Obx rebuild - isLoading: ${controller.isLoading.value}, videos.length: ${controller.videos.length}');  // Log mỗi rebuild
+        print('DEBUG UI Videos: Obx rebuild - isLoading: ${controller.isLoading.value}, videos.length: ${controller.videos.length}');
+
         if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator(color: AppColors.primary,));
         }
+
         if (controller.videos.isEmpty) {
-          print('DEBUG UI Videos: Showing "Không có video" - List empty');  // Log khi empty
-          return const Center(child: Text('Không có video'));
+          print('DEBUG UI Videos: Showing "Không có video" - List empty');
+          return const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.video_library_outlined, size: 64, color: Colors.grey),
+                SizedBox(height: 16),
+                Text('Không có video', style: TextStyle(fontSize: 16, color: Colors.grey)),
+              ],
+            ),
+          );
         }
-        print('DEBUG UI Videos: Showing ListView with ${controller.videos.length} items');  // Log khi có
+
+        print('DEBUG UI Videos: Showing ListView with ${controller.videos.length} items');
+
         return ListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: controller.videos.length,
           itemBuilder: (context, index) {
             final video = controller.videos[index];
-            return Card(
-              margin: const EdgeInsets.only(bottom: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: ListTile(
-                leading: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(video.thumbnailUrl, width: 80, height: 60, fit: BoxFit.cover),
+
+            // Format date giống cũ
+            final formattedDate = '${video.publishedAt.day}/${video.publishedAt.month}/${video.publishedAt.year}';
+            final subtitleText = '${video.channelTitle} • $formattedDate';
+
+            return InfoCard(
+              title: video.title,
+              subtitle: subtitleText,
+              leading: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  video.thumbnailUrl,
+                  width: 80,
+                  height: 60,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    width: 80,
+                    height: 60,
+                    color: Colors.grey[300],
+                    child: const Icon(Icons.play_circle_outline, color: Colors.grey),
+                  ),
                 ),
-                title: Text(video.title, maxLines: 2, overflow: TextOverflow.ellipsis),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('${video.channelTitle} • ${video.publishedAt.day}/${video.publishedAt.month}'),
-                    const Text('Có phụ đề', style: TextStyle(fontSize: 12, color: Colors.green)),  // Hint sub
-                  ],
-                ),
-                trailing: const Icon(Icons.play_arrow),
-                onTap: () async {
-                  // Preload subtitles trước khi navigate
-                  final subs = await controller.fetchSubtitles(video.id);
-                  if (subs != null) video.subtitles = subs;
-                  context.go('/youtube/channels/playlists/videos/player/${video.id}', extra: video);
-                },
               ),
+              onTap: () {
+                // ✅ Update index trước khi navigate
+                controller.setCurrentVideoIndex(index);
+                print('DEBUG Videos: Tapped video at index $index - ${video.title}');
+
+                // ✅ Sử dụng push để có thể back về
+                context.push('/youtube/player/${video.id}', extra: video);
+              },
+              trailing: const Icon(
+                Icons.play_arrow,
+                color: Colors.red,
+                size: 20, // Giữ size phù hợp
+              ),
+              // Tùy chọn: Thêm infoPairs nếu cần (ví dụ: duration nếu có data)
+              // infoPairs: [IconTextPair(Icons.access_time, video.duration ?? '')],
+              // gradientStartColor: Colors.red.shade50, // Để highlight video mới nếu cần
+              // statusBarColor: Colors.blue, // Thanh trạng thái nếu muốn
             );
           },
         );

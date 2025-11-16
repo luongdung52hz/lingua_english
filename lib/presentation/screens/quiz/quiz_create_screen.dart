@@ -101,9 +101,6 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
     );
   }
 
-  // ------------------------
-  // KHU VỰC: BUILD GIAO DIỆN
-  // ------------------------
 
   Widget _buildQuizInfoSection(double completionPercentage) {
     return Container(
@@ -290,9 +287,7 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
     );
   }
 
-  // ------------------------
-  // XỬ LÝ CÂU HỎI & LỰA CHỌN
-  // ------------------------
+
 
   Widget _buildQuestionForm(QuestionModel question, int index) {
     _questionControllers.putIfAbsent(

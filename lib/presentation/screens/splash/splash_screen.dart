@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:get_it/get_it.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../../../app/routes/route_names.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -19,6 +20,7 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
   final FirebaseAuth _auth = GetIt.I<FirebaseAuth>();
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   @override
   void initState() {
@@ -51,6 +53,15 @@ class _SplashScreenState extends State<SplashScreen>
 
     // Delay chuyển trang
     Timer(const Duration(seconds: 3), () async {
+      try {
+        // ✅ CHỈ LOGOUT GOOGLE (không logout Firebase)
+        // Điều này xóa cache Google nhưng giữ session Firebase cho Email/Password
+        await _googleSignIn.signOut();
+        print('🔓 Google account cache cleared');
+      } catch (e) {
+        print('⚠️ Google logout error: $e');
+      }
+
       final prefs = await SharedPreferences.getInstance();
       final bool hasSeenOnboarding =
           prefs.getBool('hasSeenOnboarding') ?? false;
@@ -58,7 +69,7 @@ class _SplashScreenState extends State<SplashScreen>
 
       if (mounted) {
         if (loggedIn) {
-          // Đã login: Đi thẳng Home
+          // Đã login (Email/Password): Đi thẳng Home
           context.go(Routes.home);
         } else if (!hasSeenOnboarding) {
           // Chưa login và chưa seen onboarding: Đi Onboarding
@@ -103,16 +114,6 @@ class _SplashScreenState extends State<SplashScreen>
                 width: 120,
               ),
               const SizedBox(height: 40),
-
-              // Loading indicator (optional - có thể bỏ nếu muốn gọn hơn)
-              // const SizedBox(
-              //   width: 30,
-              //   height: 30,
-              //   child: CircularProgressIndicator(
-              //     strokeWidth: 2.5,
-              //     valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF6C63FF)),
-              //   ),
-              // ),
             ],
           ),
         ),

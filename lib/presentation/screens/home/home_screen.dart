@@ -1,16 +1,22 @@
+// presentation/screens/home/home_screen.dart - Fixed: Use DailyNewsSection without param (Get.find internal)
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get_it/get_it.dart';
+import '../../controllers/news_controller.dart';
 import '../../widgets/bottom_nav_bar.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../../resources/styles/colors.dart';
+import '../../widgets/info_card.dart';
+import '../news/daily_news.dart';
 import 'components/skill_card.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/routes/route_names.dart';
 import '../../controllers/home_controller.dart';
 import 'components/continue_study.dart';
 import 'components/appbar_home.dart';
+// ✅ THÊM: Imports cho News module
+import '../../../data/models/news_article_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -27,6 +33,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     homeCtrl = Get.put(HomeController());
+    // ✅ THÊM: Init NewsController để fetch daily news
+    Get.put(NewsController());
   }
 
   @override
@@ -43,6 +51,8 @@ class _HomeScreenState extends State<HomeScreen> {
       body: RefreshIndicator(
         onRefresh: () async {
           await homeCtrl.loadUserProgress();
+          final newsController = Get.find<NewsController>(); // Get nếu cần refresh
+          newsController.fetchDailyNews(); // ✅ THÊM: Refresh news khi pull
         },
         color: Colors.blue,
         child: StreamBuilder<DocumentSnapshot>(
@@ -58,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
             }
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(color: AppColors.primary,),
               );
             }
             final data = snapshot.data?.data() as Map<String, dynamic>? ?? {};
@@ -115,10 +125,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               onTap: () => context.go(Routes.flashcards),
                             ),
                             _buildFeatureCard(
-                              title: "AI Chat",
-                              icon: Icons.mic_rounded,
-                              color: Colors.red.shade200,
-                              onTap: () => context.go(Routes.profile),
+                              title: "YouTube",
+                              icon: Icons.play_circle_outline,
+                              color: Colors.teal.shade200,
+                              onTap: () => context.go(Routes.youtubeChannels),
                             ),
                             _buildFeatureCard(
                               title: "4 Skill",
@@ -136,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               title: "Ngữ pháp",
                               icon: Icons.abc_rounded,
                               color: Colors.purple.shade200,
-                              onTap: () => context.go(Routes.chat),
+                              onTap: () => context.push(Routes.grammar),
                             ),
                             _buildFeatureCard(
                               title: "Quiz",
@@ -145,18 +155,13 @@ class _HomeScreenState extends State<HomeScreen> {
                               onTap: () => context.go(Routes.quiz),
                             ),
                             // Thêm: YouTube Feature Card
-                            _buildFeatureCard(
-                              title: "YouTube",
-                              icon: Icons.play_circle_outline,
-                              color: Colors.teal.shade200,
-                              onTap: () => context.go(Routes.youtubeChannels),
-                            ),
                           ],
                         ),
                         const SizedBox(height: 20),
                       ],
                     ),
                   ),
+                  const DailyNewsSection(),
                 ],
               ),
             );
@@ -201,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 child: Icon(
                   icon,
-                  size: 32,
+                  size: 30,
                   color: Colors.white,
                 ),
               ),

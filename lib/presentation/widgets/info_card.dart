@@ -1,6 +1,7 @@
-// widgets/generic_info_card.dart - Updated with optional status bar (Positioned overlay)
+// widgets/generic_info_card.dart - UPDATED: Reduced paddings and margins for tighter spacing
 
 import 'package:flutter/material.dart';
+import 'package:learn_english/resources/styles/text_styles.dart';
 import '../../resources/styles/colors.dart';
 
 class InfoCard extends StatelessWidget {
@@ -14,9 +15,14 @@ class InfoCard extends StatelessWidget {
   final Color? gradientEndColor;
   final Color? badgeColor; // Badge background if completed
   final Widget? trailing; // Optional trailing widget (e.g., TTS button)
-  final Color? statusBarColor; // NEW: Optional status bar color (if provided, render Positioned bar)
-  final double? statusBarHeight; // NEW: Status bar height (default 30)
-  final double statusBarTop; // NEW: Top position for status bar (default 12 for centering)
+  final Widget? leading; // Optional leading widget (e.g., thumbnail image)
+  final Color? statusBarColor; // Optional status bar color (if provided, render Positioned bar)
+  final double? statusBarHeight; // Status bar height (default 30)
+  final double statusBarTop; // Top position for status bar (default 12 for centering)
+  final bool verticalLayout; // For grid views (Column layout with full-width leading on top)
+  final double? leadingAspectRatio; // Aspect ratio for leading in vertical layout (default 16/9)
+  final Widget? overlay; // Positioned overlay on leading (e.g., "Next" badge in vertical)
+  final TextStyle? subtitleStyle; // NEW: Custom subtitle style (overrides default)
 
   const InfoCard({
     super.key,
@@ -30,9 +36,14 @@ class InfoCard extends StatelessWidget {
     this.gradientEndColor,
     this.badgeColor,
     this.trailing,
-    this.statusBarColor, // NEW: If non-null, show left status bar
+    this.leading, // Support for leading (e.g., image thumbnail)
+    this.statusBarColor, // If non-null, show left status bar
     this.statusBarHeight,
-    this.statusBarTop = 12.0, // NEW: Position from top
+    this.statusBarTop = 12.0, // Position from top
+    this.verticalLayout = false, // Default horizontal (Row) for list
+    this.leadingAspectRatio,
+    this.overlay,
+    this.subtitleStyle, // NEW: For custom font size/color etc.
   });
 
   @override
@@ -41,11 +52,128 @@ class InfoCard extends StatelessWidget {
     final endColor = gradientEndColor ?? (isCompleted ? Colors.green.shade100 : Colors.grey.shade100);
     final effectiveStatusBarHeight = statusBarHeight ?? 30.0;
 
-    // NEW: Conditionally use Stack if status bar is provided
+    // Conditionally use Stack if status bar is provided
     final useStack = statusBarColor != null;
 
+    // Text style helpers
+    final titleStyle = TextStyle(
+      fontWeight: FontWeight.bold,
+      fontSize: 60,
+      color: AppColors.primary,
+    );
+    final defaultSubtitleStyle = TextStyle(
+      fontSize: 14,
+      color: Colors.grey.shade600,
+      height: 1.4,
+    );
+
+    Widget innerContent;
+    if (verticalLayout) {
+      // VERTICAL LAYOUT: For grid - full-width leading on top, text below
+      innerContent = Padding(
+        padding: const EdgeInsets.fromLTRB(8, 8, 8, 8), // Reduced from 10
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Leading with aspect ratio and overlay
+            Stack(
+              children: [
+                if (leadingAspectRatio != null && leading != null)
+                  AspectRatio(
+                    aspectRatio: leadingAspectRatio!,
+                    child: leading!,
+                  )
+                else if (leading != null)
+                  leading!
+                else
+                  const SizedBox.shrink(),
+                if (overlay != null)
+                  Positioned(
+                    bottom: 8,
+                    right: 8,
+                    child: overlay!,
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8), // Reduced from 12
+            // Text content
+            Text(
+              title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.title, // Smaller for grid
+            ),
+            if (subtitle != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                subtitle!,
+                maxLines: 1, // Single line for grid
+                overflow: TextOverflow.ellipsis,
+                style: (subtitleStyle ?? defaultSubtitleStyle).copyWith(fontSize: 11),
+              ),
+            ],
+            const SizedBox(height: 6), // Reduced from 8
+            if (infoPairs != null && infoPairs!.isNotEmpty)
+              _InfoRow(infoPairs: infoPairs!),
+            if (trailing != null) ...[
+              const SizedBox(height: 6), // Reduced from 8
+              trailing!,
+            ],
+          ],
+        ),
+      );
+    } else {
+      // HORIZONTAL LAYOUT: Original Row for list views
+      innerContent = Padding(
+        padding: const EdgeInsets.all(8), // Reduced from 10
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (leading != null) ...[
+              leading!,
+              const SizedBox(width: 8), // Reduced from 12
+            ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 2, // Allow multi-line title with ellipsis
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.title,
+                  ),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      subtitle!,
+                      style: subtitleStyle ?? defaultSubtitleStyle, // Use custom if provided
+                    ),
+                  ],
+                  const SizedBox(height: 6), // Reduced from 8
+                  if (infoPairs != null && infoPairs!.isNotEmpty)
+                    _InfoRow(infoPairs: infoPairs!),
+                ],
+              ),
+            ),
+            if (isCompleted && score != null) ...[
+              const SizedBox(width: 6), // Reduced from 8
+              _ScoreBadge(
+                score: score!,
+                badgeColor: badgeColor ?? Colors.green.shade600,
+              ),
+            ],
+            if (trailing != null) ...[
+              const SizedBox(width: 6), // Reduced from 8
+              trailing!,
+            ],
+          ],
+        ),
+      );
+    }
+
+    // Create Container with innerContent as child (no self-reference)
     Widget cardContent = Container(
-      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         gradient: LinearGradient(
@@ -54,54 +182,10 @@ class InfoCard extends StatelessWidget {
           colors: [startColor, endColor],
         ),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                    color: AppColors.primary,
-                  ),
-                ),
-                if (subtitle != null) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle!,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade600,
-                      height: 1.4,
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 8),
-                if (infoPairs != null && infoPairs!.isNotEmpty)
-                  _InfoRow(infoPairs: infoPairs!),
-              ],
-            ),
-          ),
-          if (isCompleted && score != null) ...[
-            const SizedBox(width: 8),
-            _ScoreBadge(
-              score: score!,
-              badgeColor: badgeColor ?? Colors.green.shade600,
-            ),
-          ],
-          if (trailing != null) ...[
-            const SizedBox(width: 8),
-            trailing!,
-          ],
-        ],
-      ),
+      child: innerContent,
     );
 
-    // NEW: Wrap in Stack only if status bar is enabled
+    // Wrap in Stack only if status bar is enabled
     if (useStack) {
       cardContent = Stack(
         children: [
@@ -123,7 +207,7 @@ class InfoCard extends StatelessWidget {
     }
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 11, vertical: 6),
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), // Reduced from horizontal 11, vertical 6
       elevation: 1,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -151,7 +235,7 @@ class _InfoRow extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: infoPairs.map((pair) => Padding(
-          padding: const EdgeInsets.only(right: 16), // Space between pairs
+          padding: const EdgeInsets.only(right: 12), // Reduced from 16
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [

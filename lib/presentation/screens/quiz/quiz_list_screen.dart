@@ -18,19 +18,21 @@ class QuizListScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.primary,
         elevation: 0.5,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => context.go('/home'),
         ),
         title: const Text(
           'Danh sách Quiz',
-          style: AppTextStyles.headline,
+          style:TextStyle(color: Colors.white,
+            fontWeight: FontWeight.w600,
+            fontSize: 20,),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add, color: Colors.black),
+            icon: const Icon(Icons.add, color: Colors.white),
             tooltip: 'Tạo quiz mới',
             onPressed: () => context.push('/quiz/create'),
           ),

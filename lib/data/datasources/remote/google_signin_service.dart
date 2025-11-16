@@ -8,14 +8,26 @@ class GoogleConfig {
 class GoogleAuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: ['email'],
+    scopes: ['email', 'profile'],
   );
 
+  /// Đăng nhập với Google
+  /// ✅ Buộc người dùng chọn lại tài khoản mỗi lần đăng nhập
   Future<UserCredential?> signInWithGoogle() async {
     try {
-      // Bước 1: Đăng nhập Google
+      // ✅ BƯỚC 0: Đăng xuất Google trước để xóa cache
+      // Điều này buộc hiển thị màn hình chọn tài khoản
+      await _googleSignIn.signOut();
+      print('🔓 Google cache cleared - forcing account selection');
+
+      // Bước 1: Đăng nhập Google (sẽ hiển thị màn hình chọn tài khoản)
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return null;
+
+      // Nếu người dùng hủy đăng nhập
+      if (googleUser == null) {
+        print('🚫 User cancelled Google Sign-In');
+        return null;
+      }
 
       // Bước 2: Lấy token
       final GoogleSignInAuthentication googleAuth =
@@ -23,23 +35,38 @@ class GoogleAuthService {
 
       // Bước 3: Tạo credential cho Firebase
       final credential = GoogleAuthProvider.credential(
-       // accessToken: googleAuth.accessToken,
+        accessToken: googleAuth.accessToken, // ✅ Nên giữ accessToken
         idToken: googleAuth.idToken,
       );
 
       // Bước 4: Đăng nhập Firebase
-      final userCredential =
-      await _auth.signInWithCredential(credential);
+      final userCredential = await _auth.signInWithCredential(credential);
 
+      print('✅ Google Sign-In successful: ${userCredential.user?.email}');
       return userCredential;
+
     } catch (e) {
-      print(' Google Sign-In failed: $e');
+      print('❌ Google Sign-In failed: $e');
       return null;
     }
   }
 
+  /// Đăng xuất khỏi Google và Firebase
   Future<void> signOut() async {
-    await _googleSignIn.signOut();
-    await _auth.signOut();
+    try {
+      await Future.wait([
+        _googleSignIn.signOut(),
+        _auth.signOut(),
+      ]);
+      print('🔓 Signed out from Google and Firebase');
+    } catch (e) {
+      print('⚠️ Sign out error: $e');
+    }
   }
+
+  /// Kiểm tra trạng thái đăng nhập
+  User? get currentUser => _auth.currentUser;
+
+  /// Stream theo dõi auth state
+  Stream<User?> get authStateChanges => _auth.authStateChanges();
 }

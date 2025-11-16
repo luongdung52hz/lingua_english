@@ -27,8 +27,12 @@ class Routes {
   static const quizTaking = '/quiz/taking';
   static const quizCreate = '/quiz/create';
 
-  // Thêm: Route cho quiz đấu với bạn (duel)
+
   static const quizDuel = '/quiz/duel';
+
+  static const grammar = '/grammar';
+  static const grammarTopic = '/grammar/subtopics';
+  static const grammarDetail = '/grammar/detail';
 
   // Flashcards
   static const flashcards = '/flashcards';
@@ -48,6 +52,9 @@ class Routes {
   static const youtubeChannels = '/youtube/channels';
   static const youtubeVideos = '/youtube/channels/videos';
   static const youtubePlayer = '/youtube/channels/videos/player';
+
+  static const news = '/news';
+  static const newsDetail = '/detail';
 
   // AI
   static const aiChat = '/ai/chat';

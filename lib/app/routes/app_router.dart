@@ -1,6 +1,8 @@
 // lib/core/router/app_router.dart
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -10,15 +12,23 @@ import 'package:learn_english/presentation/screens/quiz/quiz_list_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../data/models/news_article_model.dart';
 import '../../data/models/youtube_video_model.dart';
 import '../../presentation/controllers/chat_controller.dart';
 import '../../presentation/controllers/friend_controller.dart';
+import '../../presentation/controllers/grammar_controller.dart';
+import '../../presentation/controllers/news_controller.dart'; // ✅ THÊM: Import NewsController nếu chưa
 import '../../presentation/screens/chat/chat_list_screen.dart';
 import '../../presentation/screens/chat/chat_screen.dart';
 import '../../presentation/screens/chat/friend_screen.dart';
 import '../../presentation/screens/chat/quiz_duel_screen.dart';
 import '../../presentation/screens/flashcard/flash_study_screen.dart';
+import '../../presentation/screens/grammar/grammar_detail_screen.dart';
+import '../../presentation/screens/grammar/grammar_list_topics_screen.dart';
+import '../../presentation/screens/grammar/grammar_topics_screen.dart';
 import '../../presentation/screens/learn/learn_screen.dart';
+import '../../presentation/screens/news/daily_news.dart';
+import '../../presentation/screens/news/news_detail_screen.dart'; // ✅ THÊM: Import NewsDetailScreen
 import '../../presentation/screens/pdf/pdf_screen.dart';
 import '../../presentation/screens/profile/profile_screen.dart';
 import '../../presentation/screens/flashcard/flash_create_screen.dart';
@@ -200,7 +210,7 @@ class AppRouter {
         ],
       ),
 
-      // CHAT - CHỈ GIỮ CHATCONTROLLER VỚI PROVIDER
+      // CHAT
       GoRoute(
         path: Routes.chat,
         builder: (context, state) => ChangeNotifierProvider(
@@ -231,36 +241,77 @@ class AppRouter {
         ],
       ),
 
-      // YOUTUBE MODULE - THÊM MỚI
-      // Trong routes, thêm sub-route cho playlists dưới /youtube/channels
+      //VIDEO
       GoRoute(
         path: '/youtube/channels',
         builder: (context, state) => const YoutubeChannelsScreen(),
+      ),
+      GoRoute(
+        path: '/youtube/playlists',
+        builder: (context, state) => const YoutubePlaylistsScreen(),
+      ),
+      GoRoute(
+        path: '/youtube/videos',
+        builder: (context, state) => const YoutubeVideosScreen(),
+      ),
+      GoRoute(
+        path: '/youtube/player/:videoId',
+        builder: (context, state) {
+          final videoId = state.pathParameters['videoId']!;
+          return YoutubePlayerScreen(videoId: videoId);
+        },
+      ),
+
+      //NEWS - ✅ FIX: Nested routes đúng, inject controller, và builder detail đúng NewsDetailScreen
+      GoRoute(
+        path: '/news',
+        builder: (context, state) {
+          Get.put(DailyNewsSection()); // Inject controller
+          return const DailyNewsSection();
+        },
         routes: [
           GoRoute(
-            path: 'playlists',  // New: /youtube/channels/playlists
-            builder: (context, state) => const YoutubePlaylistsScreen(),
-            routes: [
-              GoRoute(
-                path: 'videos',  // /youtube/channels/playlists/videos
-                builder: (context, state) => const YoutubeVideosScreen(),
-                routes: [
-                  GoRoute(
-                    path: 'player/:videoId',
-                    builder: (context, state) => YoutubePlayerScreen(
-                      videoId: state.pathParameters['videoId']!,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+            path: '/detail', // Không params, dùng extra cho article
+            builder: (context, state) {
+              final article = state.extra as NewsArticle; // Từ onTap push
+              return NewsDetailScreen(article: article); // ✅ FIX: Return NewsDetailScreen với extra
+            },
           ),
         ],
       ),
 
+      //GRAMMAR
+      GoRoute(
+        path: Routes.grammar,
+        builder: (context, state) {
+          Get.put(GrammarController());
+          return  GrammarTopicsScreen(); // Cấp 1: Danh sách topics
+        },
+        routes: [
+          GoRoute(
+            path: 'subtopics/:topicId', // ✅ THÊM: Route mới cho cấp 2 - danh sách subtopics
+            builder: (context, state) {
+              Get.put(GrammarController());
+              return GrammarSubTopicsScreen(
+                topicId: state.pathParameters['topicId']!,
+              );
+            },
+          ),
+          GoRoute(
+            path: 'detail/:topicId/:subTopicId', // Cấp 3: Chi tiết sections
+            builder: (context, state) {
+              Get.put(GrammarController());
+              return GrammarDetailScreen(
+                topicId: state.pathParameters['topicId']!,
+                subTopicId: state.pathParameters['subTopicId']!,
+              );
+            },
+          ),
+        ],
+      ),
       // AI
       GoRoute(path: Routes.aiChat, builder: (context, state) => const Placeholder()),
-      GoRoute(path: Routes.aiCorrection, builder: (context, state) => const Placeholder()),
+      GoRoute(path: Routes.aiChat, builder: (context, state) => const Placeholder()),
 
       // PROFILE
       GoRoute(

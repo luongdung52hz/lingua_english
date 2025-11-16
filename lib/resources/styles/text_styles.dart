@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'colors.dart';
+
 class AppTextStyles {
   // Tiêu đề lớn
   static const TextStyle headline = TextStyle(
@@ -10,7 +12,7 @@ class AppTextStyles {
 
   // Tiêu đề vừa
   static const TextStyle title = TextStyle(
-    color: Colors.black87,
+    color: AppColors.primary,
     fontWeight: FontWeight.w600,
     fontSize: 16,
   );

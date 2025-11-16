@@ -5,6 +5,7 @@ import 'package:learn_english/presentation/screens/learn/widgets/lesson_detail/r
 import 'package:learn_english/presentation/screens/learn/widgets/lesson_detail/speaking_content.dart';
 import 'package:learn_english/presentation/screens/learn/widgets/lesson_detail/writing_content.dart';
 import '../../../data/models/lesson_model.dart';
+import '../../../resources/styles/colors.dart';
 import '../../controllers/lesson_controller.dart';
 
 class LessonDetailScreen extends StatefulWidget {
@@ -45,7 +46,9 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
     if (isLoading) {
       return Scaffold(
         appBar: AppBar(title: const Text('Đang tải...')),
-        body: const Center(child: CircularProgressIndicator()),
+        body: const Center(child: CircularProgressIndicator(
+          color: AppColors.primary,
+        )),
       );
     }
 
@@ -87,11 +90,11 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
           lesson: lesson!,
           startTime: startTime!,
         );
-      case 'speaking':
-        return SpeakingContent(
-          lesson: lesson!,
-          startTime: startTime!,
-        );
+      // case 'speaking':
+      //   return SpeakingContent(
+      //     lesson: lesson!,
+      //     startTime: startTime!,
+      //   );
       case 'reading':
         return ReadingContent(
           lesson: lesson!,
@@ -113,8 +116,8 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
     switch (skill) {
       case 'listening':
         return Colors.blue;
-      case 'speaking':
-        return Colors.orange;
+      // case 'speaking':
+      //   return Colors.orange;
       case 'reading':
         return Colors.green;
       case 'writing':

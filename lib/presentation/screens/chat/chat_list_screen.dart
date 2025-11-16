@@ -59,7 +59,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                   return const SizedBox(
                     height: 20, // Chiều cao tạm để tránh lỗi khi loading
                     child: Center(
-                      child: CircularProgressIndicator(color: AppColors.primary),
+                     // child: CircularProgressIndicator(color: AppColors.primary),
                     ),
                   );
                 }

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-import '../../../resources/styles/colors.dart';  // Giả sử bạn có AppColors
+import '../../../resources/styles/colors.dart';
 import '../../controllers/youtube_controller.dart';
+import '../../widgets/info_card.dart';
 
 class YoutubeChannelsScreen extends StatelessWidget {
   const YoutubeChannelsScreen({Key? key}) : super(key: key);
@@ -13,10 +14,10 @@ class YoutubeChannelsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => context.go('/home'),
-          ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => context.go('/home'),
+        ),
         title: const Text('Video Học Tiếng Anh'),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
@@ -26,19 +27,23 @@ class YoutubeChannelsScreen extends StatelessWidget {
         itemCount: controller.channels.length,
         itemBuilder: (context, index) {
           final channel = controller.channels[index];
-          return Card(
-            margin: const EdgeInsets.only(bottom: 12),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: ListTile(
-              leading: const Icon(Icons.subscriptions, color: Colors.red),
-              title: Text(channel['name']!),
-              subtitle: const Text('Xem video với phụ đề'),  // Thêm hint về sub
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () {
-                controller.changeChannel(channel['id']!);
-                context.go('/youtube/channels/playlists');
-              },
+          // ✅ FIX: Cast về String với as String
+          final channelName = channel['name'] as String;
+          final channelId = channel['id'] as String;
+
+          return InfoCard(
+            title: channelName,
+            subtitle: 'Xem video...',
+            onTap: () {
+              controller.changeChannel(channelId);
+              context.push('/youtube/playlists');
+            },
+            trailing: const Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: Colors.grey,
             ),
+
           );
         },
       )),
