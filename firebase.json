@@ -1,1 +1,37 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"learnenglishapp-50c96","appId":"1:982053562617:android:f380ad3eeb85aaf91a1a28","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"learnenglishapp-50c96","configurations":{"android":"1:982053562617:android:f380ad3eeb85aaf91a1a28","ios":"1:982053562617:ios:7a9c8a5945d78db61a1a28","web":"1:982053562617:web:d11b02e2d3f35ea21a1a28"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "learnenglishapp-50c96",
+          "appId": "1:982053562617:android:f380ad3eeb85aaf91a1a28",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "learnenglishapp-50c96",
+          "configurations": {
+            "android": "1:982053562617:android:f380ad3eeb85aaf91a1a28",
+            "ios": "1:982053562617:ios:7a9c8a5945d78db61a1a28",
+            "web": "1:982053562617:web:d11b02e2d3f35ea21a1a28"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
