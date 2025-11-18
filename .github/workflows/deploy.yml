@@ -23,6 +23,10 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Ensure build/web exists
+        run: mkdir -p build/web
+
+
       - name: Copy _redirects for SPA
         run: cp web/_redirects build/web/_redirects
 
