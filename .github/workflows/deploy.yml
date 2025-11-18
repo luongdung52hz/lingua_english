@@ -9,39 +9,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Lấy code từ GitHub
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      # 2. Cài Flutter
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
 
-      # 3. Bật hỗ trợ Web cho Flutter
       - name: Enable Flutter Web
         run: flutter config --enable-web
 
-      # 4. Cài dependencies
       - name: Install dependencies
         run: flutter pub get
 
-      # 5. Build Flutter Web
-      - name: Build Web
-        run: flutter build web --release
-
-      # 6. Copy _redirects để SPA không bị 404
       - name: Copy _redirects for SPA
         run: cp web/_redirects build/web/_redirects
 
-      # 7. Deploy lên Netlify
+      - name: Build Web
+        run: flutter build web --release
+
+
+
       - name: Deploy to Netlify
         uses: nwtgck/actions-netlify@v1.1
         with:
           publish-dir: "./build/web"
           production-branch: main
           deploy-message: "Auto deploy from GitHub Actions"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
