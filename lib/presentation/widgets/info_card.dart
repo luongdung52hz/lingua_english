@@ -1,4 +1,4 @@
-// widgets/generic_info_card.dart - UPDATED: Reduced paddings and margins for tighter spacing
+// widgets/generic_info_card.dart - UPDATED: Support solid color (no gradient) + fixes
 
 import 'package:flutter/material.dart';
 import 'package:learn_english/resources/styles/text_styles.dart';
@@ -11,7 +11,7 @@ class InfoCard extends StatelessWidget {
   final bool isCompleted;
   final int? score; // Optional score for badge
   final VoidCallback? onTap;
-  final Color? gradientStartColor; // Customizable gradient
+  final Color? gradientStartColor; // Customizable gradient (if not using solid)
   final Color? gradientEndColor;
   final Color? badgeColor; // Badge background if completed
   final Widget? trailing; // Optional trailing widget (e.g., TTS button)
@@ -22,7 +22,8 @@ class InfoCard extends StatelessWidget {
   final bool verticalLayout; // For grid views (Column layout with full-width leading on top)
   final double? leadingAspectRatio; // Aspect ratio for leading in vertical layout (default 16/9)
   final Widget? overlay; // Positioned overlay on leading (e.g., "Next" badge in vertical)
-  final TextStyle? subtitleStyle; // NEW: Custom subtitle style (overrides default)
+  final TextStyle? subtitleStyle; //  Custom subtitle style (overrides default)
+  final Color? bgColor; //  Solid background color (if provided, overrides gradient)
 
   const InfoCard({
     super.key,
@@ -44,10 +45,12 @@ class InfoCard extends StatelessWidget {
     this.leadingAspectRatio,
     this.overlay,
     this.subtitleStyle, // NEW: For custom font size/color etc.
+    this.bgColor,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Gradient colors (fallback if no bgColor)
     final startColor = gradientStartColor ?? (isCompleted ? Colors.green.shade50 : Colors.grey.shade50);
     final endColor = gradientEndColor ?? (isCompleted ? Colors.green.shade100 : Colors.grey.shade100);
     final effectiveStatusBarHeight = statusBarHeight ?? 30.0;
@@ -55,12 +58,6 @@ class InfoCard extends StatelessWidget {
     // Conditionally use Stack if status bar is provided
     final useStack = statusBarColor != null;
 
-    // Text style helpers
-    final titleStyle = TextStyle(
-      fontWeight: FontWeight.bold,
-      fontSize: 60,
-      color: AppColors.primary,
-    );
     final defaultSubtitleStyle = TextStyle(
       fontSize: 14,
       color: Colors.grey.shade600,
@@ -69,7 +66,6 @@ class InfoCard extends StatelessWidget {
 
     Widget innerContent;
     if (verticalLayout) {
-      // VERTICAL LAYOUT: For grid - full-width leading on top, text below
       innerContent = Padding(
         padding: const EdgeInsets.fromLTRB(8, 8, 8, 8), // Reduced from 10
         child: Column(
@@ -123,7 +119,6 @@ class InfoCard extends StatelessWidget {
         ),
       );
     } else {
-      // HORIZONTAL LAYOUT: Original Row for list views
       innerContent = Padding(
         padding: const EdgeInsets.all(8), // Reduced from 10
         child: Row(
@@ -172,16 +167,29 @@ class InfoCard extends StatelessWidget {
       );
     }
 
-    // Create Container with innerContent as child (no self-reference)
-    Widget cardContent = Container(
-      decoration: BoxDecoration(
+    // FIX: Conditional decoration - solid color if bgColor provided, else gradient
+    BoxDecoration cardDecoration;
+    if (bgColor != null) {
+      // Solid color mode
+      cardDecoration = BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(12),
+      );
+    } else {
+      // Gradient mode (fallback)
+      cardDecoration = BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [startColor, endColor],
         ),
-      ),
+      );
+    }
+
+    // Create Container with innerContent as child
+    Widget cardContent = Container(
+      decoration: cardDecoration,
       child: innerContent,
     );
 
@@ -207,7 +215,7 @@ class InfoCard extends StatelessWidget {
     }
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), // Reduced from horizontal 11, vertical 6
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),  // căn lề
       elevation: 1,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -235,7 +243,7 @@ class _InfoRow extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: infoPairs.map((pair) => Padding(
-          padding: const EdgeInsets.only(right: 12), // Reduced from 16
+          padding: const EdgeInsets.only(right: 12),  // FIX: Tăng từ 2 lên 12 để tránh sát nhau
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -273,7 +281,7 @@ class _ScoreBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),  // FIX: Bỏ dấu phẩy thừa
       decoration: BoxDecoration(
         color: badgeColor,
         borderRadius: BorderRadius.circular(16),

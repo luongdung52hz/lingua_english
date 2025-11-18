@@ -32,11 +32,10 @@ class YoutubePlaylistsScreen extends StatelessWidget {
         if (controller.isLoading.value) return const Center(child: CircularProgressIndicator());
         if (controller.playlists.isEmpty) return const Center(child: Text('Không có playlist'));
         return ListView.builder(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(vertical:12 ),
           itemCount: controller.playlists.length,
           itemBuilder: (context, index) {
             final playlist = controller.playlists[index];
-            // ✅ THÊM: Conditional infoPairs - chỉ hiển thị nếu itemCount có giá trị hợp lệ (>0)
             final List<IconTextPair>? infoPairs = (playlist.itemCount != null && playlist.itemCount! > 0)
                 ? [IconTextPair(Icons.video_library, '${playlist.itemCount} videos')]
                 : null;

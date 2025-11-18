@@ -53,7 +53,7 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tạo Quiz Mới', style: AppTextStyles.headline),
+        title: const Text('Tạo Quiz Mới', style: AppTextStyles.headlineb),
         backgroundColor: Colors.white,
       ),
       resizeToAvoidBottomInset: true,

@@ -16,7 +16,7 @@ class LearnController extends GetxController {
   final RxString currentLevel = 'A1'.obs;
   final RxString currentSkill = 'listening'.obs;
   final Rx<LessonModel?> currentLesson = Rx<LessonModel?>(null);
-  final RxList<String> topics = <String>[].obs; // ⭐ Thêm RxList cho topics (dynamic theo level/skill)
+  final RxList<String> topics = <String>[].obs;
   final RxString currentTopic = ''.obs; // Thêm dòng này
 
   final List<String> levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']; // CEFR
@@ -32,7 +32,7 @@ class LearnController extends GetxController {
   Future<void> loadLessons(String level, String skill) async {
     currentLevel.value = level;
     currentSkill.value = skill;
-    currentTopic.value = ''; // ⭐ Sửa: Set currentTopic = '' (default empty, không undefined 'topic')
+    currentTopic.value = '';
 
     // Load lessons stream
     _repo.getLessonsStream(level, skill).listen((data) {
@@ -44,11 +44,9 @@ class LearnController extends GetxController {
     final stats = await _repo.getProgressStats(level, skill);
     completedLessons.value = stats['completed'] ?? 0;
 
-    // ⭐ Load topics unique từ repo (hoặc extract từ lessons)
     await _loadTopics(level, skill);
   }
 
-  /// ⭐ NEW: Load topics unique theo level + skill
   Future<void> _loadTopics(String level, String skill) async {
     try {
       // Gọi repo nếu có method getTopicsByLevelAndSkill
@@ -99,7 +97,7 @@ class LearnController extends GetxController {
 
       loadLessons(lesson.level, lesson.skill); // Refresh
     } catch (e) {
-      print('❌ Error completing lesson: $e');
+      print(' Error completing lesson: $e');
       rethrow;
     }
   }
@@ -123,7 +121,7 @@ class LearnController extends GetxController {
 
       return !wasCompleted;
     } catch (e) {
-      print('⚠️ Error checking completion status: $e');
+      print('Error checking completion status: $e');
       return true; // Default first time
     }
   }
@@ -152,7 +150,7 @@ class LearnController extends GetxController {
       int newStreak = currentStreak;
       if (newDaily == targetDaily) {
         newStreak = currentStreak + 1;
-        print('🔥 Daily goal reached! Streak +1 → $newStreak days');
+        print(' Daily goal reached! Streak +1 → $newStreak days');
       }
 
       await _firestore.collection('users').doc(userId).update({
@@ -163,7 +161,7 @@ class LearnController extends GetxController {
       });
 
       if (isFirstCompletion) {
-        print('✅ First completion! Total: $newCompleted | Daily: $newDaily/$targetDaily | Streak: $newStreak 🔥');
+        print(' First completion! Total: $newCompleted | Daily: $newDaily/$targetDaily | Streak: $newStreak 🔥');
       } else {
         print('🔄 Re-complete! Total: $newCompleted (no change) | Daily: $newDaily/$targetDaily | Streak: $newStreak 🔥');
       }

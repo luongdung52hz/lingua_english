@@ -55,7 +55,7 @@ class _NewsDetailScreenState extends State<NewsDetailScreen> {
         backgroundColor: Colors.white,
         title: Text(
           widget.article.title,
-          style: AppTextStyles.headline,
+          style: AppTextStyles.headlineb,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),

@@ -35,7 +35,7 @@ class YoutubeVideo {
       return video;
     } catch (e) {
       print('DEBUG Model: Parse error for full json: $json, error: $e');  // Log full nếu fail
-      rethrow;  // Để service catch
+      rethrow;
     }
   }
 }

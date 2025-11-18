@@ -1,0 +1,511 @@
+[
+  {
+    "id": "tenses",
+    "title": "Các thì trong tiếng Anh",
+    "subTopics": [
+      {
+        "id": "present_simple",
+        "title": "Thì hiện tại đơn",
+        "sections": {
+          "definition": {
+            "title": "Định nghĩa",
+            "content": "*~~{Thì hiện tại đơn}[green]~~* dùng để diễn tả **thói quen**, **sự thật hiển nhiên**, hoặc **hành động lặp lại thường xuyên**.\n\nĐây là thì cơ bản nhất trong tiếng Anh, thường dùng cho các sự việc xảy ra đều đặn.",
+            "examples": [
+              "The sun rises in the east. (Mặt trời mọc ở phía đông.)",
+              "Water boils at 100°C. (Nước sôi ở 100°C.)"
+            ]
+          },
+          "structure": {
+            "title": "Cấu trúc",
+            "content": "**1. Cấu trúc** với {TO BE}[red]\nỞ thì hiện tại, động từ \"to be\" có 3 dạng: **am/is/are** \n\n *<color:yellow>A: Khẳng định</color>*\n\n| Chủ ngữ | Động từ | Ví dụ |\n|---------|---------|-------|\n| I | am | I am a student. |\n| He/She/It | is | She is happy. |\n| You/We/They | are | They are friends. |\n\n#### {B: Phủ định}[blue]\n\n| Chủ ngữ | Cấu trúc | Ví dụ |\n|---------|----------|-------|\n| I | am not | I am not tired. |\n| He/She/It | is not (isn't) | He isn't here. |\n| You/We/They | are not (aren't) | We aren't ready. |\n\n#### {C: Nghi vấn}[blue]\n\n| Cấu trúc | Ví dụ | Trả lời |\n|----------|-------|----------|\n| Am + I...? | Am I late? | Yes, you are. / No, you aren't. |\n| Is + he/she/it...? | Is she a teacher? | Yes, she is. / No, she isn't. |\n| Are + you/we/they...? | Are they students? | Yes, they are. / No, they aren't. |\n\n---\n\n### 2. Cấu trúc với {Động từ thường}[yellow]\n\n#### {A: Khẳng định}[blue]\n\n**Công thức:** \n- I/You/We/They + {V (nguyên thể)}[yellow]\n- He/She/It + {V-s/es}[yellow]\n\n| Chủ ngữ | Động từ | Ví dụ |\n|---------|---------|-------|\n| I/You/We/They | work | I work in Hanoi. |\n| He/She/It | works | She works hard. |\n\n**Quy tắc thêm -s/-es:**\n\n__Lưu ý quan trọng:__\n\n- Động từ kết thúc bằng **-o, -ch, -sh, -x, -ss** → thêm **-es**\n  - go → goes\n  - watch → watches\n\n- Động từ kết thúc bằng **phụ âm + y** → đổi **y → ies**\n  - study → studies\n\n- Các trường hợp còn lại → thêm **-s**\n  - work → works\n\n#### {B: Phủ định}[blue]\n\n**Công thức:**\n- I/You/We/They + {do not (don't)}[yellow] + V\n- He/She/It + {does not (doesn't)}[yellow] + V\n\n| Chủ ngữ | Cấu trúc | Ví dụ |\n|---------|----------|-------|\n| I/You/We/They | don't + V | I don't like coffee. |\n| He/She/It | doesn't + V | He doesn't play games. |\n\n#### {C: Nghi vấn}[blue]\n\n**Công thức:**\n- {Do}[yellow] + I/you/we/they + V?\n- {Does}[yellow] + he/she/it + V?\n\n| Cấu trúc | Ví dụ | Trả lời |\n|----------|-------|----------|\n| Do + you...? | Do you speak English? | Yes, I do. / No, I don't. |\n| Does + he/she/it...? | Does she like music? | Yes, she does. / No, she doesn't. |",
+            "examples": [
+              "I eat apples every day. (Tôi ăn táo mỗi ngày.)",
+              "She eats lunch at 12 PM. (Cô ấy ăn trưa lúc 12 giờ.)",
+              "They don't drink alcohol. (Họ không uống rượu.)",
+              "Does he play football? (Anh ấy có chơi bóng đá không?)"
+            ]
+          },
+          "usage": {
+            "title": "Cách sử dụng",
+            "content": "Thì hiện tại đơn được sử dụng trong các trường hợp sau:\n\n### 1. {Thói quen hàng ngày}[blue]\n\nDiễn tả các hoạt động lặp lại thường xuyên.\n\n__Ví dụ:__\n- I **wake up** at 6 AM every morning.\n- She **drinks** coffee after breakfast.\n\n### 2. {Sự thật hiển nhiên/Chân lý}[blue]\n\nCác sự thật không thay đổi.\n\n__Ví dụ:__\n- The Earth **revolves** around the Sun.\n- Water **freezes** at 0°C.\n\n### 3. {Lịch trình cố định}[blue]\n\nCác sự kiện đã được lên lịch.\n\n__Ví dụ:__\n- The train **leaves** at 9 AM.\n- The meeting **starts** at 2 PM.\n\n### 4. {Sở thích/Cảm xúc}[blue]\n\nDiễn tả cảm xúc, sở thích lâu dài.\n\n__Ví dụ:__\n- I **love** chocolate.\n- He **hates** getting up early.",
+            "examples": [
+              "She works in London. (Cô ấy làm việc ở London.)",
+              "The sun sets in the west. (Mặt trời lặn ở phía tây.)",
+              "The bus arrives at 8:30. (Xe buýt đến lúc 8:30.)"
+            ]
+          },
+          "signs": {
+            "title": "Dấu hiệu nhận biết",
+            "content": "Thì hiện tại đơn thường đi kèm với các **trạng từ tần suất** và **cụm từ chỉ thời gian**:\n\n### {Trạng từ tần suất}[yellow]\n\n| Trạng từ | Nghĩa | Vị trí trong câu |\n|----------|-------|------------------|\n| always | luôn luôn (100%) | Trước động từ thường, sau \"to be\" |\n| usually | thường xuyên (80%) | Trước động từ thường, sau \"to be\" |\n| often | thường (60%) | Trước động từ thường, sau \"to be\" |\n| sometimes | thỉnh thoảng (40%) | Đầu câu, giữa câu, cuối câu |\n| seldom/rarely | hiếm khi (20%) | Trước động từ thường, sau \"to be\" |\n| never | không bao giờ (0%) | Trước động từ thường, sau \"to be\" |\n\n### {Cụm từ chỉ thời gian}[yellow]\n- **every** day/week/month/year\n- **once/twice** a week/month\n- **on** Mondays/weekends\n- **in the morning/afternoon/evening**\n- **at night**\n\n**Lưu ý vị trí:**\n- Trạng từ tần suất: **trước động từ thường**, **sau \"to be\"**\n  - I {always}[yellow] drink milk. ✓\n  - She is {always}[yellow] busy. ✓\n- Cụm từ thời gian: thường ở **cuối câu** hoặc **đầu câu**\n  - I go to school {every day}[yellow]. ✓\n  - {Every morning}[yellow], he reads newspapers. ✓",
+            "examples": [
+              "I always drink coffee in the morning. (Tôi luôn uống cà phê vào buổi sáng.)",
+              "He never smokes. (Anh ấy không bao giờ hút thuốc.)",
+              "She goes to the gym twice a week. (Cô ấy đến phòng gym hai lần một tuần.)",
+              "We usually have dinner at 7 PM. (Chúng tôi thường ăn tối lúc 7 giờ tối.)"
+            ]
+          },
+          "rules": {
+            "title": "Các quy tắc quan trọng",
+            "content": "### 1. {Quy tắc thêm -s/-es với động từ}[blue]\n\n| Trường hợp | Quy tắc | Ví dụ |\n|------------|---------|-------|\n| Kết thúc bằng -o, -ch, -sh, -ss, -x, -z | Thêm **-es** | go → goes, watch → watches, wash → washes |\n| Kết thúc bằng phụ âm + y | Đổi **y → ies** | study → studies, cry → cries |\n| Kết thúc bằng nguyên âm + y | Thêm **-s** | play → plays, say → says |\n| Các trường hợp còn lại | Thêm **-s** | work → works, like → likes |\n\n### 2. {Động từ \"to be\" đặc biệt}[blue]\n\nKhông sử dụng **do/does** với động từ \"to be\":\n- ✓ She **is** a teacher.\n- ✗ She **does is** a teacher.\n- ✓ **Is** he happy?\n- ✗ **Does** he **is** happy?\n\n### 3. {Động từ \"have\" đặc biệt}[blue]\n\n| Chủ ngữ | Dạng đúng | Ví dụ |\n|---------|-----------|-------|\n| I/You/We/They | have | I have a car. |\n| He/She/It | has | She has two cats. |\n\n### 4. {Lỗi thường gặp}[red]\n\n^^Tránh những lỗi sau:^^\n\n❌ **SAI:** He don't like pizza.\n\n✅ **ĐÚNG:** He doesn't like pizza.\n\n---\n\n❌ **SAI:** Does she likes coffee?\n\n✅ **ĐÚNG:** Does she like coffee?\n\n---\n\n❌ **SAI:** They is students.\n\n✅ **ĐÚNG:** They are students.\n\n---\n\n❌ **SAI:** I am go to school.\n\n✅ **ĐÚNG:** I go to school.",
+            "examples": []
+          }
+        }
+      }
+    ]
+  },  {
+    "id": "parts_of_speech",
+    "title": "Các loại từ trong tiếng Anh",
+    "subTopics": [
+      {
+        "id": "noun",
+        "title": "Danh từ (Noun)",
+        "sections": {
+          "definition": {
+            "title": "Định nghĩa",
+            "content": "Danh từ dùng để chỉ người, vật, nơi chốn, ý tưởng.",
+            "examples": ["student", "city", "happiness"]
+          },
+          "types": {
+            "title": "Các loại danh từ",
+            "content": "- Danh từ chung\n- Danh từ riêng\n- Danh từ đếm được/không đếm được"
+          }
+        }
+      },
+      {
+        "id": "verb",
+        "title": "Động từ (Verb)",
+        "sections": {
+          "definition": {
+            "title": "Định nghĩa",
+            "content": "Chỉ hành động hoặc trạng thái.",
+            "examples": ["eat", "sleep", "be"]
+          },
+          "types": {
+            "title": "Phân loại",
+            "content": "- Động từ thường\n- Động từ to be\n- Động từ khiếm khuyết"
+          }
+        }
+      },
+      {
+        "id": "adjective",
+        "title": "Tính từ (Adjective)",
+        "sections": {
+          "definition": {
+            "title": "Định nghĩa",
+            "content": "Bổ nghĩa cho danh từ.",
+            "examples": ["beautiful", "big"]
+          }
+        }
+      },
+      {
+        "id": "adverb",
+        "title": "Trạng từ (Adverb)",
+        "sections": {
+          "definition": {
+            "title": "Định nghĩa",
+            "content": "Bổ nghĩa cho động từ, tính từ hoặc toàn câu.",
+            "examples": ["quickly", "very"]
+          }
+        }
+      },
+      {
+        "id": "pronoun",
+        "title": "Đại từ (Pronoun)",
+        "sections": {
+          "definition": {
+            "title": "Định nghĩa",
+            "content": "Thay thế cho danh từ.",
+            "examples": ["he", "they", "it"]
+          }
+        }
+      },
+      {
+        "id": "preposition",
+        "title": "Giới từ (Preposition)",
+        "sections": {
+          "definition": {
+            "title": "Định nghĩa",
+            "content": "Chỉ vị trí, thời gian, quan hệ.",
+            "examples": ["in", "on", "at"]
+          }
+        }
+      },
+      {
+        "id": "conjunction",
+        "title": "Liên từ (Conjunction)",
+        "sections": {
+          "definition": {
+            "title": "Định nghĩa",
+            "content": "Kết nối từ, cụm từ hoặc mệnh đề.",
+            "examples": ["and", "but", "because"]
+          }
+        }
+      },
+      {
+        "id": "interjection",
+        "title": "Thán từ (Interjection)",
+        "sections": {
+          "definition": {
+            "title": "Định nghĩa",
+            "content": "Diễn tả cảm xúc mạnh.",
+            "examples": ["Wow!", "Oh!", "Hey!"]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "your_topic_id",
+    "title": "Tên chủ đề (ví dụ: Thì hiện tại đơn)",
+    "subTopics": [
+      {
+        "id": "sub_topic_id",
+        "title": "Tên Tiểu mục (ví dụ: Cấu trúc)",
+        "sections": {
+          "definition": {
+            "title": "Định nghĩa",
+            "content": "Thì này ==dùng== để diễn tả **thói quen**, *sự thật*, hoặc ^^***hành động lặp lại***^^.\n\n^^Đây là thì cơ bản nhất trong tiếng Anh^^\n\n> Đây là một trích dẫn ví dụ. ^^**_~~<color:đỏ>Chữ đỏ, đậm, nghiêng, gạch chân, căn giữa</color:đỏ>~~_**^^",
+
+            "examples": [
+              "The sun rises in the east.",
+              "I drink coffee every morning."
+            ]
+          },
+
+          "structure": {
+            "title": "Cấu trúc",
+            "content": "### {Cấu trúc với TO BE}[blue]\n\nCông thức:\n\n- **Khẳng định:** S + am/is/are\n- --Phủ định--: S + am/is/are + not\n- *Nghi vấn:* Am/Is/Are + S?\n\n| Chủ ngữ | Động từ | Ví dụ |\n|---------|---------|-------|\n| I | am | I am happy. |\n| He/She/It | is | She is tall. |\n| You/We/They | are | They are here. |\n\n---\n\n### {Cấu trúc với động từ thường}[orange]\n\n**Quy tắc thêm -s/-es:**\n\n- go → goes\n- watch → watches\n- study → studies\n\n```\nVí dụ code block:\nI work.\nHe works.\n```",
+            "examples": [
+              "I work every day.",
+              "She studies English."
+            ]
+          },
+
+          "usage": {
+            "title": "Cách sử dụng",
+            "content": "### 1. {Thói quen}[yellow]\n\nDiễn tả hành động lặp lại.\n\n--Ví dụ:--\n- I **wake up** at 7 AM.\n- She *drinks* coffee.\n\n### 2. {Sự thật hiển nhiên}[green]\n\n- The Earth {revolves}[blue] around the Sun.\n- Water {boils}[red] at 100°C.\n\n### 3. {Lịch trình cố định}[purple]\n\n- The bus __leaves__ at 8:30.\n- School **starts** at 7:00.",
+            "examples": [
+              "I go to school every day.",
+              "The sun rises in the east."
+            ]
+          },
+
+          "signals": {
+            "title": "Dấu hiệu nhận biết",
+            "content": "### {Trạng từ tần suất}[blue]\n\n| Trạng từ | Nghĩa | Tần suất |\n|----------|-------|-----------|\n| always | luôn luôn | 100% |\n| often | thường | 60% |\n| rarely | hiếm khi | 20% |\n\n---\n\n### {Cụm thời gian}[yellow]\n\n- every day\n- once a week\n- on Mondays\n\n^^Các từ này thường xuất hiện trong thì hiện tại đơn^^",
+            "examples": [
+              "I always brush my teeth.",
+              "She often listens to music."
+            ]
+          },
+
+          "common_mistakes": {
+            "title": "Lỗi thường gặp",
+            "content": "### {Những lỗi thường gặp}[red]\n\n^^Hãy chú ý để tránh các lỗi sau^^\n\n#### {Lỗi 1: Quên thêm -s/-es}[orange]\n❌ SAI: He go to school.\n\n✅ ĐÚNG: He **goes** to school.\n\n---\n\n#### {Lỗi 2: Dùng sai do/does}[orange]\n❌ SAI: She don't like tea.\n\n✅ ĐÚNG: She **doesn't** like tea.\n\n---\n\n#### {Lỗi 3: Thêm -s sau Do/Does}[orange]\n❌ SAI: Does she likes coffee?\n\n✅ ĐÚNG: Does she like coffee?\n\n---\n\n#### {Lỗi 4: Nhầm lẫn 'to be'}[orange]\n❌ SAI: They is students.\n\n✅ ĐÚNG: They **are** students.",
+            "examples": [
+              "Correct: She works hard.",
+              "Correct: Do you like music?"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "id": "markdown_format_test",
+    "title": "Test tất cả định dạng Markdown",
+    "subTopics": [
+      {
+        "id": "basic_markdown",
+        "title": "1. Markdown cơ bản",
+        "sections": {
+          "headers": {
+            "title": "Headers",
+            "content": "# Heading 1\n## Heading 2\n### Heading 3\n#### Heading 4",
+            "examples": ["H1 lớn nhất", "H4 nhỏ nhất"]
+          },
+          "text_styles": {
+            "title": "Text Styles",
+            "content": "**Bold text** và __bold text__\n\n*Italic text* và _italic text_\n\n***Bold and italic***\n\n~~~Strikethrough~~~",
+            "examples": ["Bold: **text**", "Italic: *text*", "Strike: ~~~text~~~"]
+          },
+          "lists": {
+            "title": "Lists",
+            "content": "**Unordered:**\n- Item 1\n- Item 2\n  - Nested item\n  - Another nested\n\n**Ordered:**\n1. First\n2. Second\n3. Third",
+            "examples": ["- cho bullet", "1. cho số"]
+          }
+        }
+      },
+      {
+        "id": "custom_underline",
+        "title": "2. Underline (~~text~~)",
+        "sections": {
+          "simple": {
+            "title": "Underline đơn giản",
+            "content": "~~Underline text~~ bình thường",
+            "examples": ["~~text~~ gạch dưới màu xanh"]
+          },
+          "with_bold": {
+            "title": "Underline + Bold",
+            "content": "~~**Underline và bold**~~",
+            "examples": ["Kết hợp underline với bold"]
+          },
+          "with_italic": {
+            "title": "Underline + Italic",
+            "content": "~~*Underline và italic*~~",
+            "examples": ["Kết hợp underline với italic"]
+          },
+          "nested_complex": {
+            "title": "Underline phức tạp",
+            "content": "~~**Bold** và *italic* trong underline~~",
+            "examples": ["Nhiều format trong underline"]
+          }
+        }
+      },
+      {
+        "id": "custom_center",
+        "title": "3. Center (^^text^^)",
+        "sections": {
+          "simple": {
+            "title": "Center đơn giản",
+            "content": "^^Centered text^^",
+            "examples": ["^^text^^ căn giữa"]
+          },
+          "with_bold": {
+            "title": "Center + Bold",
+            "content": "^^**Centered and bold**^^",
+            "examples": ["Center với chữ đậm"]
+          },
+          "with_italic": {
+            "title": "Center + Italic",
+            "content": "^^*Centered and italic*^^",
+            "examples": ["Center với chữ nghiêng"]
+          },
+          "nested_complex": {
+            "title": "Center phức tạp",
+            "content": "^^**Bold**, *italic*, và ~~underline~~ trong center^^",
+            "examples": ["Tất cả format trong center"]
+          }
+        }
+      },
+      {
+        "id": "custom_color_xml",
+        "title": "4. Color XML (<color:name>text</color>)",
+        "sections": {
+          "all_colors_english": {
+            "title": "Tất cả màu (tiếng Anh)",
+            "content": "{Red}[red] {Blue}[blue] {Green}[green] {Yellow}[yellow] {Purple}[purple]",
+            "examples": ["red, blue, green, yellow, orange, purple"]
+          },
+          "all_colors_vietnamese": {
+            "title": "Tất cả màu (tiếng Việt)",
+            "content": "<color:đỏ>Đỏ</color> <color:xanh>Xanh</color> <color:xanh lá>Xanh lá</color> <color:vàng>Vàng</color> <color:cam>Cam</color> <color:tím>Tím</color>",
+            "examples": ["đỏ, xanh, xanh lá, vàng, cam, tím"]
+          },
+          "with_bold": {
+            "title": "Color + Bold",
+            "content": "<color:red>**Red and bold**</color>",
+            "examples": ["Màu với chữ đậm"]
+          },
+          "with_italic": {
+            "title": "Color + Italic",
+            "content": "<color:blue>*Blue and italic*</color>",
+            "examples": ["Màu với chữ nghiêng"]
+          },
+          "nested_complex": {
+            "title": "Color phức tạp",
+            "content": "<color:green>**Bold**, *italic*, và ~~underline~~ màu xanh</color>",
+            "examples": ["Nhiều format trong color"]
+          }
+        }
+      },
+      {
+        "id": "custom_color_bracket",
+        "title": "5. Color Bracket ({text}[color])",
+        "sections": {
+          "all_colors_english": {
+            "title": "Tất cả màu (tiếng Anh)",
+            "content": "{Red}[red] {Blue}[blue] {Green}[green] {Yellow}[yellow] {Orange}[orange] {Purple}[purple]",
+            "examples": ["[red], [blue], [green], [yellow], [orange], [purple]"]
+          },
+          "all_colors_vietnamese": {
+            "title": "Tất cả màu (tiếng Việt)",
+            "content": "{Đỏ}[đỏ] {Xanh}[xanh] {Xanh lá}[xanh lá] {Vàng}[vàng] {Cam}[cam] {Tím}[tím]",
+            "examples": ["[đỏ], [xanh], [xanh lá], [vàng], [cam], [tím]"]
+          },
+          "with_bold": {
+            "title": "Color + Bold",
+            "content": "{**Red and bold**}[red]",
+            "examples": ["Bold trong bracket color"]
+          },
+          "with_italic": {
+            "title": "Color + Italic",
+            "content": "{*Blue and italic*}[blue]",
+            "examples": ["Italic trong bracket color"]
+          },
+          "nested_complex": {
+            "title": "Color Bracket phức tạp",
+            "content": "{**Bold**, *italic*, ~~underline~~}[green]",
+            "examples": ["Nhiều format trong bracket"]
+          }
+        }
+      },
+      {
+        "id": "nested_combinations",
+        "title": "6. Kết hợp phức tạp (Nested)",
+        "sections": {
+          "center_color": {
+            "title": "Center + Color",
+            "content": "^^{Centered and red}[red]^^",
+            "examples": ["Center với màu"]
+          },
+          "center_underline_bold": {
+            "title": "Center + Underline + Bold",
+            "content": "^^~~**All three combined**~~^^",
+            "examples": ["3 format kết hợp"]
+          },
+          "color_all_styles": {
+            "title": "Color + All Styles",
+            "content": "<color:yellow>**Bold**, *italic*, ~~*{underline}[black]*~~ all blue</color>",
+            "examples": ["Tất cả trong một màu"]
+          },
+          "ultimate_nested": {
+            "title": "Ultimate Nested",
+            "content": "^^**{Bold, centered, and red}[red]** với ~~underline~~^^",
+            "examples": ["Nested tối đa"]
+          },
+          "multiple_colors": {
+            "title": "Nhiều màu trong câu",
+            "content": "~~{Red wordd}[red]~~ và *{blue word}[blue]* và _{green word}[green]_",
+            "examples": ["Nhiều màu khác nhau <color:blue></color>, {context}[colors]"]
+          },
+          "extreme_nested": {
+            "title": "Extreme Nested",
+            "content": "^^<color:purple>**~~Bold, *underline*, purple, centered~~**</color>^^",
+            "examples": ["4 format cùng lúc"]
+          }
+        }
+      },
+      {
+        "id": "markdown_advanced",
+        "title": "7. Markdown nâng cao",
+        "sections": {
+          "blockquote": {
+            "title": "Blockquote",
+            "content": "> This is a quote\n> >Multiple lines\n> > > Nested quote",
+            "examples": ["> cho quote"]
+          },
+          "code_inline": {
+            "title": "Inline Code",
+            "content": "Use `const` keyword in Dart. Code: `flutter run`",
+            "examples": ["`code` trong dòng"]
+          },
+          "code_block": {
+            "title": "Code Block",
+            "content": "```dart\nvoid main() {\n  print('Hello');\n}\n```",
+            "examples": ["``` cho code block"]
+          },
+          "horizontal_rule": {
+            "title": "Horizontal Rule",
+            "content": "Text before\n\n---\n\nText after",
+            "examples": ["--- cho đường kẻ ngang"]
+          },
+          "links": {
+            "title": "Links",
+            "content": "[Google](https://google.com)\n[Flutter](https://flutter.dev)",
+            "examples": ["[text](url) cho link"]
+          },
+          "table": {
+            "title": "Table",
+            "content": "| Column 1 | Column 2 | Column 3 |\n|----------|----------|----------|\n| A        | B        | C        |\n| 1        | 2        | 3        |",
+            "examples": ["| cho bảng"]
+          }
+        }
+      },
+      {
+        "id": "edge_cases",
+        "title": "8. Edge Cases & Special Cases",
+        "sections": {
+          "empty_formats": {
+            "title": "Format rỗng",
+            "content": "~~~~ **  ** __  __ ^^  ^^",
+            "examples": ["Format với nội dung rỗng"]
+          },
+          "special_characters": {
+            "title": "Ký tự đặc biệt",
+            "content": "**Text với @ # $ % ^ & * ( ) { } [ ]**",
+            "examples": ["Format với ký tự đặc biệt"]
+          },
+          "long_text": {
+            "title": "Text dài",
+            "content": "~~This is a very long underlined text to test how the formatting handles multiple lines and wrapping behavior when the text exceeds the container width~~",
+            "examples": ["Format với text dài"]
+          },
+          "unicode": {
+            "title": "Unicode & Emoji",
+            "content": "<color:red>**Tiếng Việt có dấu: áàảãạ**</color>\n\n{Emoji test: 🎉 ✨ 🚀}[blue]",
+            "examples": ["Unicode và emoji"]
+          },
+          "mixed_syntax": {
+            "title": "Trộn lẫn syntax",
+            "content": "~~Underline~~ với ~~~strikethrough~~~\n\n**Bold** vs __bold__\n\n*Italic* vs _italic_",
+            "examples": ["Các syntax tương tự nhau"]
+          },
+          "malformed": {
+            "title": "Format sai",
+            "content": "**Bold không đóng\n\n{Color không có bracket\n\n~~Underline ~~ (có space)",
+            "examples": ["Test format không đúng"]
+          }
+        }
+      },
+      {
+        "id": "real_world_examples",
+        "title": "9. Ví dụ thực tế",
+        "sections": {
+          "grammar_rule": {
+            "title": "Quy tắc ngữ pháp",
+            "content": "**Presentt Simple**\n**Form:** {Subject + V(s/es)}[blue]\n\n**Usage:**\n- ~~Thói quen hàng ngày~~\n- *Sự thật hiển nhiên*\n\n^^**Important!**^^ Don't forget **-s/-es** with he/she/it",
+            "examples": ["Kết hợp nhiều format"]
+          },
+          "vocabulary": {
+            "title": "Từ vựng",
+            "content": "**Animalll (Động vật)**\n\n1. <color:red>**Cat**</color> (n) /kæt/: con mèo\n2. <color:blue>**Dog**</color> (n) /dɒɡ/: con chó\n3. {**Bird**}[green] (n) /bɜːd/: con chim\n\n^^Hãy nhớ phát âm!^^",
+            "examples": ["Bài học thực tế"]
+          },
+          "exercise": {
+            "title": "Bài tập",
+            "content": "**Điền vào chỗ trống:**\n\n1. She _____ (go) to school every day.\n2. They _____ (play) football now.",
+            "examples": ["Bài tập có gợi ý"]
+          },
+          "comparison_table": {
+            "title": "Bảng so sánh",
+            "content": "| Tense | Form | Example |\n|-------|------|----------|\n| Present Simple | {V/V(s/es)}[blue] | I **work** |\n| Present Continuous | {am/is/are + V-ing}[red] | I **am working** |\n| Past Simple | {V-ed/V2}[green] | I **worked** |",
+            "examples": ["Bảng với color"]
+          }
+        }
+      },
+      {
+        "id": "performance_test",
+        "title": "10. Performance Test",
+        "sections": {
+          "many_formats": {
+            "title": "Nhiều format cùng lúc",
+            "content": "{Red}[red] {Blue}[blue] {Green}[green] **Bold** *Italic* ~~Underline~~ ^^Center^^ {Yellow}[yellow] {Orange}[orange] {Purple}[purple] **Bold2** *Italic2* ~~Underline2~~",
+            "examples": ["Test hiệu năng"]
+          },
+          "deep_nesting": {
+            "title": "Nested sâu",
+            "content": "^^<color:red>**~~{Deep nested}[blue]~~**</color>^^",
+            "examples": ["5 levels nested"]
+          },
+          "long_document": {
+            "title": "Document dài",
+            "content": "# Title\n\n## Section 1\n{Text}[red]\n\n## Section 2\n{Text}[blue]\n\n## Section 3\n{Text}[green]\n\n---\n\n> Quote\n\n**Bold** *Italic*\n\n- List 1\n- List 2\n\n```\ncode block\n```",
+            "examples": ["Document đầy đủ"]
+          }
+        }
+      }
+    ]
+  }
+  
+]

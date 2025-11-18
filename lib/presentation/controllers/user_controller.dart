@@ -1,4 +1,3 @@
-// lib/controllers/user_controller.dart (mới hoặc extend)
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../data/models/user_model.dart';

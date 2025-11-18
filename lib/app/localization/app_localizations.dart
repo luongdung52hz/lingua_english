@@ -8,7 +8,6 @@ class AppLocalizations {
     GlobalMaterialLocalizations.delegate,
     GlobalWidgetsLocalizations.delegate,
     GlobalCupertinoLocalizations.delegate,
-    // nếu dùng generated delegate, thêm ở đây
   ];
 
   static const supportedLocales = [

@@ -15,7 +15,6 @@ import '../../../app/routes/route_names.dart';
 import '../../controllers/home_controller.dart';
 import 'components/continue_study.dart';
 import 'components/appbar_home.dart';
-// ✅ THÊM: Imports cho News module
 import '../../../data/models/news_article_model.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -52,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onRefresh: () async {
           await homeCtrl.loadUserProgress();
           final newsController = Get.find<NewsController>(); // Get nếu cần refresh
-          newsController.fetchDailyNews(); // ✅ THÊM: Refresh news khi pull
+          newsController.fetchDailyNews();
         },
         color: Colors.blue,
         child: StreamBuilder<DocumentSnapshot>(

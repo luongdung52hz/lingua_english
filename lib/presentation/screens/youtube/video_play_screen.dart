@@ -423,7 +423,8 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
       body: YoutubePlayerBuilder(
         player: YoutubePlayer(
           controller: _playerController!,
-          showVideoProgressIndicator: true,
+     //     showVideoProgressIndicator: true,
+           thumbnail: Text(_video!.title) ,
           progressIndicatorColor: AppColors.primary,
           progressColors: ProgressBarColors(
             playedColor: AppColors.primary,
@@ -645,7 +646,7 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
 
   Widget _buildListView(List<YoutubeVideo> videos, BuildContext context) {
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(vertical:12 ),
       itemCount: videos.length,
       itemBuilder: (context, index) {
         final videoItem = videos[index];
@@ -655,7 +656,7 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
         return InfoCard(
           title: videoItem.title,
           subtitle: '${videoItem.channelTitle} • ${_formatDate(videoItem.publishedAt)}',
-          subtitleStyle: const TextStyle( // ✅ THÊM: Custom style với fontSize nhỏ hơn (12 thay vì 14 default)
+          subtitleStyle: const TextStyle(
             fontSize: 12,
             color: Colors.grey,
             height: 1.3,
@@ -677,7 +678,7 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
           ),
           trailing: Icon(
             Icons.play_circle_outline,
-            color: isNext ? Colors.green.shade600 : Colors.grey.shade400,
+            color: isNext ? Colors.green.shade200 : Colors.grey.shade400,
             size: 28,
           ),
           onTap: () => _handleVideoTap(videoItem, context),
@@ -724,7 +725,7 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
           overlay: isNext ? _buildNextBadge() : null,
           title: videoItem.title,
           subtitle: '${videoItem.channelTitle} • ${_formatDate(videoItem.publishedAt)}',
-          subtitleStyle: const TextStyle( // ✅ THÊM: Custom style với fontSize nhỏ hơn (11 thay vì default, phù hợp grid)
+          subtitleStyle: const TextStyle(
             fontSize: 11,
             color: Colors.grey,
             height: 1.2,

@@ -98,7 +98,7 @@ class QuizListScreen extends StatelessWidget {
                     },
                     child: ListView.builder(
                       key: ValueKey('quiz_list_${filteredList.length}'),
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.symmetric(vertical:12 ),
                       itemCount: filteredList.length,
                       itemBuilder: (context, index) {
                         final quiz = filteredList[index];

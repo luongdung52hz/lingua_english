@@ -31,16 +31,15 @@ class QuizDetailScreen extends StatelessWidget {
         }
 
         return Scaffold(
-          backgroundColor: Colors.white,
-          appBar: AppBar(
-            backgroundColor: Colors.white,
-            elevation: 0,
-            iconTheme: const IconThemeData(color: Colors.black),
+
+            appBar: AppBar(
+              backgroundColor: AppColors.primary,
             title: const Text(
-              'Chi tiết Quiz',
-              style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
-            ),
-          ),
+              'Chi tiết Quiz',),
+              foregroundColor: Colors.white,
+                //style: AppTextStyles.headlinew),
+            iconTheme: IconThemeData(color: Colors.white),),
+
           body: Column(
             children: [
               // Header section

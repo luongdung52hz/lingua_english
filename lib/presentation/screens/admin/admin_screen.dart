@@ -110,29 +110,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
           tooltip: 'Đăng xuất',
         ),
         actions: [
-          PopupMenuButton<String>(
-            icon: const Icon(
-              Icons.more_vert,
-              color: Colors.white,
-            ),
-            onSelected: (value) {
-              if (value == 'pdf') {
-                context.go(Routes.pdf);
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'pdf',
-                child: Row(
-                  children: [
-                    Icon(Icons.picture_as_pdf, size: 20, color: Colors.grey),
-                    SizedBox(width: 8),
-                    Text('Chuyển đổi dữ liệu'),
-                  ],
-                ),
-              ),
-            ],
-          ),
+
         ],
         bottom: TabBar(
           controller: _tabController,

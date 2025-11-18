@@ -29,7 +29,6 @@ import '../../presentation/screens/grammar/grammar_topics_screen.dart';
 import '../../presentation/screens/learn/learn_screen.dart';
 import '../../presentation/screens/news/daily_news.dart';
 import '../../presentation/screens/news/news_detail_screen.dart'; // ✅ THÊM: Import NewsDetailScreen
-import '../../presentation/screens/pdf/pdf_screen.dart';
 import '../../presentation/screens/profile/profile_screen.dart';
 import '../../presentation/screens/flashcard/flash_create_screen.dart';
 import '../../presentation/screens/flashcard/flashcard_detail_screen.dart';
@@ -145,7 +144,6 @@ class AppRouter {
       // MAIN
       GoRoute(path: Routes.home, builder: (context, state) => const HomeScreen()),
       GoRoute(path: Routes.admin, builder: (context, state) => const AdminScreen()),
-      GoRoute(path: Routes.pdf, builder: (context, state) => const PdfUploadPage()),
 
       // LEARN
       GoRoute(

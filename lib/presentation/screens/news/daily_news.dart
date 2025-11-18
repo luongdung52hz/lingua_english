@@ -1,10 +1,7 @@
-// presentation/screens/home/components/daily_news_section.dart - Widget riêng cho news horizontal list (no controller param, use Get.find)
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../data/models/news_article_model.dart';
-
 import 'package:go_router/go_router.dart';
-
 import '../../../resources/styles/colors.dart';
 import '../../controllers/news_controller.dart';
 import '../../widgets/info_card.dart';
@@ -19,7 +16,7 @@ class DailyNewsSection extends StatelessWidget {
     return Obx(() {
       if (newsController.isLoading.value) {
         return const Padding(
-          padding: EdgeInsets.all(16),
+          padding: EdgeInsets.all(10),
           child: Center(child: CircularProgressIndicator(color: AppColors.primary
             ,)),
         );
@@ -41,7 +38,7 @@ class DailyNewsSection extends StatelessWidget {
       if (newsController.articles.isEmpty) {
         return const Padding(
           padding: EdgeInsets.all(8),
-          child: Text('Không có bài báo hôm nay'),
+         // child: Text('Không có bài báo hôm nay'),
         );
       }
 
@@ -57,10 +54,10 @@ class DailyNewsSection extends StatelessWidget {
           ),
           const SizedBox(height: 10,),
           SizedBox(
-            height: 120, // Chiều cao fixed cho horizontal scroll
+            height: 110, // Chiều cao fixed cho horizontal scroll
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
               itemCount: newsController.articles.length,
               itemBuilder: (context, index) {
                 final article = newsController.articles[index];
@@ -70,7 +67,7 @@ class DailyNewsSection extends StatelessWidget {
 
                 return Container(
                   width: 300,
-                  margin: const EdgeInsets.only(right: 12),
+                  margin: const EdgeInsets.only(right: 2),
                   child: InfoCard(
                     title: article.title,
                   //  subtitle: truncatedSubtitle,
@@ -82,8 +79,8 @@ class DailyNewsSection extends StatelessWidget {
                     ),
                     onTap: () => _openArticle(context, article),
                     trailing: const Icon(Icons.arrow_forward_ios,color: Colors.grey,),
-                    gradientStartColor: Colors.blue.shade50,
-                    gradientEndColor: Colors.blue.shade100,
+                    bgColor: Colors.blue.shade50,
+
                   ),
                 );
               },

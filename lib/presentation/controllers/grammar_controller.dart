@@ -19,10 +19,9 @@ class GrammarController extends GetxController {
   void loadGrammarData() async {
     try {
       // Load từ assets (cần context, nên dùng trong build hoặc Get.context!)
-      final jsonString = await rootBundle.loadString('lib/resources/assets/grammar.json'); // Import flutter/services.dart
+      final jsonString = await rootBundle.loadString('lib/resources/data/grammar.json'); // Import flutter/services.dart
       final List<dynamic> jsonList = json.decode(jsonString);
 
-      // ✅ FIX: Ép kiểu explicit với List<GrammarTopic>.from() và map
       topics.value = List<GrammarTopic>.from(
           jsonList.map((dynamic json) => GrammarTopic.fromJson(json as Map<String, dynamic>))
       );

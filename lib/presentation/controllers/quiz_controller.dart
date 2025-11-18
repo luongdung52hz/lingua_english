@@ -123,4 +123,6 @@ class QuizController extends GetxController {
   getQuizStream(String quizId) {}
 
   void setCurrentQuiz(quiz) {}
+
+  Future generateQuiz({required String level, required String topic, required int numQuestions, required int timePerQuestion}) async {}
 }

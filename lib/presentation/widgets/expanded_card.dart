@@ -1,4 +1,3 @@
-// widgets/expandable_card.dart - Tối ưu animation và clean code
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:markdown/markdown.dart' as md;
@@ -63,7 +62,6 @@ class _ExpandableCardState extends State<ExpandableCard>
   @override
   Widget build(BuildContext context) {
     return Card(
-
       margin: const EdgeInsets.only(bottom: 4),
       color: Colors.white,
       elevation: _isExpanded ? 4 : 1,
@@ -162,10 +160,6 @@ class _ExpandableCardState extends State<ExpandableCard>
                 const SizedBox(height: 10),
                 widget.expandedChild!,
               ],
-              if (widget.onMarkComplete != null) ...[
-                const SizedBox(height: 10),
-              //  _buildCompleteButton(),
-              ],
             ],
           ),
         ),
@@ -174,13 +168,50 @@ class _ExpandableCardState extends State<ExpandableCard>
   }
 
   Widget _buildMarkdownContent() {
-    return MarkdownBody(
-      data: widget.content,
-      selectable: true,
-      styleSheet: _buildMarkdownStyle(),
-      extensionSet: _buildExtensionSet(),
-      builders: _buildCustomBuilders(),
-    );
+    final hasComplexSyntax = _hasComplexCustomSyntax(widget.content);
+
+    if (hasComplexSyntax) {
+      // Dùng custom parser cho nested/complex formatting
+      return _CustomMarkdownWidget(
+        content: widget.content,
+        baseStyle: const TextStyle(height: 1.6, fontSize: 15.5, letterSpacing: 0.2),
+      );
+    } else {
+      // Dùng MarkdownBody cho performance tốt hơn với standard markdown
+      return MarkdownBody(
+        data: widget.content,
+        selectable: true,
+        styleSheet: _buildMarkdownStyle(),
+        extensionSet: _buildExtensionSet(),
+        builders: _buildCustomBuilders(),
+      );
+    }
+  }
+
+  // Phát hiện xem có cần custom parser không - MỞ RỘNG ĐỂ DETECT BAO QUANH
+  bool _hasComplexCustomSyntax(String content) {
+    // Các pattern cũ (nested bên trong)
+    final complexPatterns = [
+      r'\^\^.*[\*_~{].*\^\^',  // Center với nested formatting: ^^**bold**^^
+      r'~~.*[\*_{].*~~',        // Underline với nested: ~~**bold**~~
+      r'<color:[^>]+>.*[\*_~].*</color>',  // Color với nested bên trong
+      r'\{[^}]*[\*_].*\}\[',   // Color bracket với nested bên trong
+    ];
+
+    // Thêm pattern mới: Custom syntax bị bao quanh bởi * / ** / _ (italic/bold/list)
+    final surroundingPatterns = [
+      r'\* *<color:',  // *<color (như bullet hoặc italic mở)
+      r'</color> *\*',  // </color>* (italic đóng)
+      r'\*\* *\{',      // **{ (bold quanh bracket)
+      r'\} *\*\*',      // }** (bold đóng)
+      r'_ *<color:',    // _<color (underline italic?)
+      r'</color> *_',   // </color>_
+      r'\* *\{',        // *{ (italic quanh bracket)
+      r'\} *\*',        // }*
+    ];
+
+    final allPatterns = [...complexPatterns, ...surroundingPatterns];
+    return allPatterns.any((pattern) => RegExp(pattern, dotAll: true).hasMatch(content));
   }
 
   MarkdownStyleSheet _buildMarkdownStyle() {
@@ -210,12 +241,15 @@ class _ExpandableCardState extends State<ExpandableCard>
   }
 
   md.ExtensionSet _buildExtensionSet() {
+    final gfmInlineSyntaxes = md.ExtensionSet.gitHubFlavored.inlineSyntaxes.toList();
+    gfmInlineSyntaxes.insert(0, UnderlineTextSyntax());
+
     return md.ExtensionSet(
       md.ExtensionSet.gitHubFlavored.blockSyntaxes,
       [
-        ...md.ExtensionSet.gitHubFlavored.inlineSyntaxes,
-        ColoredTextSyntax(),
-        UnderlineTextSyntax(),
+        ...gfmInlineSyntaxes,
+        ColoredTextXmlSyntax(),
+        ColoredTextBracketSyntax(),
         CenterTextSyntax(),
       ],
     );
@@ -291,68 +325,17 @@ class _ExpandableCardState extends State<ExpandableCard>
       ),
     );
   }
-
-  // Widget _buildCompleteButton() {
-  //   return SizedBox(
-  //     width: double.infinity,
-  //     // child: ElevatedButton.icon(
-  //     //   onPressed: widget.onMarkComplete,
-  //     //   icon: Icon(
-  //     //     widget.isCompleted ? Icons.check_circle : Icons.circle_outlined,
-  //     //     size: 20,
-  //     //   ),
-  //     //   // label: Text(
-  //     //   //   widget.isCompleted ? 'Đã hoàn thành' : 'Đánh dấu hoàn thành',
-  //     //   //   style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-  //     //   // ),
-  //     //   style: ElevatedButton.styleFrom(
-  //     //     padding: const EdgeInsets.symmetric(vertical: 10),
-  //     //     backgroundColor: widget.isCompleted ? Colors.green[100] : Colors.blue[100],
-  //     //     foregroundColor: widget.isCompleted ? Colors.green[800] : Colors.blue[800],
-  //     //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-  //     //   ),
-  //     // ),
-  //   );
-  // }
 }
 
-// ==================== Custom Markdown Syntax ====================
+class _CustomMarkdownWidget extends StatelessWidget {
+  final String content;
+  final TextStyle baseStyle;
 
-class ColoredTextSyntax extends md.InlineSyntax {
-  ColoredTextSyntax() : super(r'\{([^}]+)\}\[([^\]]+)\]');
+  const _CustomMarkdownWidget({
+    required this.content,
+    required this.baseStyle,
+  });
 
-  @override
-  bool onMatch(md.InlineParser parser, Match match) {
-    final element = md.Element.text('colored', match.group(1)!)
-      ..attributes['color'] = match.group(2)!;
-    parser.addNode(element);
-    return true;
-  }
-}
-
-class UnderlineTextSyntax extends md.InlineSyntax {
-  UnderlineTextSyntax() : super(r'__([^_]+)__');
-
-  @override
-  bool onMatch(md.InlineParser parser, Match match) {
-    parser.addNode(md.Element.text('underline', match.group(1)!));
-    return true;
-  }
-}
-
-class CenterTextSyntax extends md.InlineSyntax {
-  CenterTextSyntax() : super(r'\^\^([^\^]+)\^\^');
-
-  @override
-  bool onMatch(md.InlineParser parser, Match match) {
-    parser.addNode(md.Element.text('center', match.group(1)!));
-    return true;
-  }
-}
-
-// ==================== Custom Builders ====================
-
-class ColoredTextBuilder extends MarkdownElementBuilder {
   static final Map<String, Color> _colorMap = {
     'yellow': Colors.amber.shade700,
     'vàng': Colors.amber.shade700,
@@ -369,18 +352,199 @@ class ColoredTextBuilder extends MarkdownElementBuilder {
   };
 
   @override
-  Widget? visitElementAfter(md.Element element, TextStyle? preferredStyle) {
-    final colorName = element.attributes['color']?.toLowerCase() ?? 'black';
-    final color = _colorMap[colorName] ?? Colors.black87;
-
-    return Text(
-      element.textContent,
-      style: preferredStyle?.copyWith(
-        color: color,
-        fontWeight: FontWeight.bold,
-        fontSize: 15.5,
-      ),
+  Widget build(BuildContext context) {
+    return SelectableText.rich(
+      TextSpan(children: _parseContent(content, baseStyle)),
+      style: baseStyle,
     );
+  }
+
+  // Helper để kiểm tra nếu spans có chứa bold (đệ quy cho nested)
+  bool _hasBoldInSpans(List<InlineSpan> spans) {
+    for (final span in spans) {
+      if (span is TextSpan) {
+        if (span.style?.fontWeight == FontWeight.bold ||
+            (span.children != null && _hasBoldInSpans(span.children!))) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  List<InlineSpan> _parseContent(String text, TextStyle baseStyle) {
+    final spans = <InlineSpan>[];
+    int lastIndex = 0;
+
+    // Pattern với thứ tự ưu tiên: center > underline > color > bold/italic
+    final pattern = RegExp(
+      r'\^\^(.+?)\^\^|'  // 1. Center
+      r'~~(.+?)~~|'      // 2. Underline
+      r'<color:([^>]+)>(.+?)</color>|'  // 3. Color XML
+      r'\{([^}]+)\}\[([^\]]+)\]|'  // 4. Color bracket
+      r'\*\*(.+?)\*\*|'  // 5. Bold
+      r'_([^_]+)_|'      // 6. Italic (underscore)
+      r'\*([^\*]+)\*',   // 7. Italic (asterisk)
+      dotAll: true,
+    );
+
+    for (final match in pattern.allMatches(text)) {
+      // Text trước match
+      if (match.start > lastIndex) {
+        spans.add(TextSpan(text: text.substring(lastIndex, match.start)));
+      }
+
+      // Xử lý từng loại match
+      if (match.group(1) != null) {
+        // ^^center^^ - Đệ quy parse nội dung bên trong
+        final innerSpans = _parseContent(match.group(1)!, baseStyle);
+        spans.add(WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
+          child: Container(
+            alignment: Alignment.center,
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Text.rich(
+              TextSpan(children: innerSpans),
+              textAlign: TextAlign.center,
+              style: baseStyle.copyWith(fontSize: 17, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ));
+      } else if (match.group(2) != null) {
+        // ~~underline~~ - Đệ quy cho nested
+        final innerSpans = _parseContent(match.group(2)!, baseStyle);
+        spans.add(TextSpan(
+          children: innerSpans,
+          style: TextStyle(
+            decoration: TextDecoration.underline,
+            decorationColor: Colors.black,
+            decorationThickness: 1,
+          ),
+        ));
+      } else if (match.group(3) != null && match.group(4) != null) {
+        // <color:red>text</color> - Đệ quy, chỉ bold nếu inner có bold
+        final colorName = match.group(3)!.toLowerCase();
+        final color = _colorMap[colorName] ?? Colors.black87;
+        final innerSpans = _parseContent(match.group(4)!, baseStyle);
+        final isBold = _hasBoldInSpans(innerSpans);
+        spans.add(TextSpan(
+          children: innerSpans,
+          style: TextStyle(
+            color: color,
+            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+          ),
+        ));
+      } else if (match.group(5) != null && match.group(6) != null) {
+        // {text}[color] - Đệ quy, chỉ bold nếu inner có bold
+        final colorName = match.group(6)!.toLowerCase();
+        final color = _colorMap[colorName] ?? Colors.black87;
+        final innerSpans = _parseContent(match.group(5)!, baseStyle);
+        final isBold = _hasBoldInSpans(innerSpans);
+        spans.add(TextSpan(
+          children: innerSpans,
+          style: TextStyle(
+            color: color,
+            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+          ),
+        ));
+      } else if (match.group(7) != null) {
+        // **bold** - Đệ quy
+        final innerSpans = _parseContent(match.group(7)!, baseStyle);
+        spans.add(TextSpan(
+          children: innerSpans,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ));
+      } else if (match.group(8) != null) {
+        // _italic_ - Đệ quy
+        final innerSpans = _parseContent(match.group(8)!, baseStyle);
+        spans.add(TextSpan(
+          children: innerSpans,
+          style: const TextStyle(fontStyle: FontStyle.italic),
+        ));
+      } else if (match.group(9) != null) {
+        // *italic* - Đệ quy
+        final innerSpans = _parseContent(match.group(9)!, baseStyle);
+        spans.add(TextSpan(
+          children: innerSpans,
+          style: const TextStyle(fontStyle: FontStyle.italic),
+        ));
+      }
+
+      lastIndex = match.end;
+    }
+
+    // Text còn lại
+    if (lastIndex < text.length) {
+      spans.add(TextSpan(text: text.substring(lastIndex)));
+    }
+
+    return spans.isEmpty ? [const TextSpan(text: '')] : spans;
+  }
+}
+
+class _ColorUtils {
+  static final Map<String, Color> colorMap = {
+    'yellow': Colors.amber.shade700,
+    'vàng': Colors.amber.shade700,
+    'blue': Colors.blue.shade700,
+    'xanh': Colors.blue.shade700,
+    'red': Colors.red.shade700,
+    'đỏ': Colors.red.shade700,
+    'green': Colors.green.shade700,
+    'xanh lá': Colors.green.shade700,
+    'orange': Colors.orange.shade700,
+    'cam': Colors.orange.shade700,
+    'purple': Colors.purple.shade700,
+    'tím': Colors.purple.shade700,
+  };
+
+  static Color getColor(String name) {
+    return colorMap[name.toLowerCase()] ?? Colors.black87;
+  }
+}
+
+class UnderlineTextSyntax extends md.InlineSyntax {
+  UnderlineTextSyntax() : super(r'~~(?!~)([^~\n]+?)~~');
+
+  @override
+  bool onMatch(md.InlineParser parser, Match match) {
+    parser.addNode(md.Element.text('underline', match.group(1)!));
+    return true;
+  }
+}
+
+class CenterTextSyntax extends md.InlineSyntax {
+  CenterTextSyntax() : super(r'\^\^(.+?)\^\^');
+
+  @override
+  bool onMatch(md.InlineParser parser, Match match) {
+    parser.addNode(md.Element.text('center', match.group(1)!));
+    return true;
+  }
+}
+
+class ColoredTextXmlSyntax extends md.InlineSyntax {
+  ColoredTextXmlSyntax() : super(r'<color:([^>]+)>(.+?)</color>');
+
+  @override
+  bool onMatch(md.InlineParser parser, Match match) {
+    final element = md.Element.text('colored', match.group(2)!)
+      ..attributes['color'] = match.group(1)!;
+    parser.addNode(element);
+    return true;
+  }
+}
+
+class ColoredTextBracketSyntax extends md.InlineSyntax {
+  ColoredTextBracketSyntax() : super(r'\{([^}]+)\}\[([^\]]+)\]');
+
+  @override
+  bool onMatch(md.InlineParser parser, Match match) {
+    final element = md.Element.text('colored', match.group(1)!)
+      ..attributes['color'] = match.group(2)!;
+    parser.addNode(element);
+    return true;
   }
 }
 
@@ -414,6 +578,27 @@ class CenterTextBuilder extends MarkdownElementBuilder {
             height: 1.5,
           ),
         ),
+      ),
+    );
+  }
+}
+
+class ColoredTextBuilder extends MarkdownElementBuilder {
+  @override
+  Widget? visitElementAfter(md.Element element, TextStyle? preferredStyle) {
+    final colorName = element.attributes['color'] ?? 'black';
+    final color = _ColorUtils.getColor(colorName);
+    final text = element.textContent;
+
+    // Kiểm tra nếu text có pattern bold
+    final hasBoldPattern = RegExp(r'\*\*.*?\*\*').hasMatch(text);
+
+    return Text(
+      text,
+      style: preferredStyle?.copyWith(
+        color: color,
+        fontWeight: hasBoldPattern ? FontWeight.bold : FontWeight.normal,  // Chỉ bold nếu có **
+        fontSize: 15.5,
       ),
     );
   }

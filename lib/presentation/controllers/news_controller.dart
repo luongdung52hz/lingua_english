@@ -57,8 +57,8 @@ class NewsController extends GetxController {
     }
 
     // Nếu tất cả sources đều fail
-    error.value = 'Không thể tải tin tức từ tất cả nguồn';
-    _loadFallbackData();
+    //error.value = 'Không thể tải tin tức từ tất cả nguồn';
+    //_loadFallbackData();
     isLoading.value = false;
   }
 

@@ -116,7 +116,6 @@ class _LearnScreenState extends State<LearnScreen>
           skillColor: skillColor,
           skill: skill,
         ),
-        const SizedBox(height: 8),
         Expanded(
           child: LessonList(
             controller: controller,

@@ -1,11 +1,10 @@
-// lib/data/models/quiz_model.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class QuizAIModel {
   final String id;
   final List<String> participants; // [uid1, uid2]
   final List<QuizQuestion> questions; // Danh sách câu hỏi
-  final String level; // Level của quiz (e.g., "A1")
+  final String level;
   final Timestamp createdAt;
   final Map<String, int> scores; // {uid: score}
   final QuizStatus status; // pending, invited, ongoing, finished
@@ -101,6 +100,10 @@ class QuizQuestion {
       correctAnswer: json['correctAnswer'] ?? '',
     );
   }
+
+  get timePerQuestion => null;
+
+  get explanation => null;
 
   Map<String, dynamic> toJson() => {
     'question': question,

@@ -4,8 +4,14 @@ import 'colors.dart';
 
 class AppTextStyles {
   // Tiêu đề lớn
-  static const TextStyle headline = TextStyle(
-    color: Colors.black87,
+  static const TextStyle headlinew = TextStyle(
+    color: Colors.white,
+    fontWeight: FontWeight.w600,
+    fontSize: 20,
+  );
+
+  static const TextStyle headlineb = TextStyle(
+    color: Colors.black,
     fontWeight: FontWeight.w600,
     fontSize: 20,
   );

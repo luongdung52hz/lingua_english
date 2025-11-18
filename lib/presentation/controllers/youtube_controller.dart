@@ -41,8 +41,8 @@ class YoutubeController extends GetxController {
       'id': 'UCsooa4yRKGN_zEE8iknghZA',
     },
     {
-      'name': 'LOL',
-      'id': 'UC2t5bjwHdUX4vM2g8TRDq5g',
+      'name': 'Family Guy',
+      'id': 'UCzI57speLHzZgl2Qq-cqe9Q',
     },
     {
       'name': 'Extra',

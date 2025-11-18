@@ -1,4 +1,3 @@
-// lib/presentation/screens/chat/friends_screen.dart (Cập nhật: Sử dụng GoRouter cho navigation)
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';

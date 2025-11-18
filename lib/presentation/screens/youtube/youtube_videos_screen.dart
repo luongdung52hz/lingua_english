@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../resources/styles/colors.dart';
 import '../../controllers/youtube_controller.dart';
 import '../../widgets/info_card.dart';
-import 'package:collection/collection.dart'; // ✅ THÊM: Nếu chưa có, cho firstWhereOrNull
+import 'package:collection/collection.dart'; //
 
 class YoutubeVideosScreen extends StatelessWidget {
   const YoutubeVideosScreen({Key? key}) : super(key: key);
@@ -26,7 +26,6 @@ class YoutubeVideosScreen extends StatelessWidget {
           if (playlist != null) {
             name = playlist.title;
           } else {
-            // ✅ FIX: Cast về String khi lấy channel name
             final channel = controller.channels.firstWhereOrNull(
                     (c) => c['id'] == controller.selectedChannelId.value
             );
@@ -43,7 +42,6 @@ class YoutubeVideosScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              // Reload videos based on selection
               if (controller.selectedPlaylistId.value.isNotEmpty) {
                 controller.fetchVideosByPlaylist(controller.selectedPlaylistId.value);
               } else if (controller.selectedChannelId.value.isNotEmpty) {
@@ -77,7 +75,7 @@ class YoutubeVideosScreen extends StatelessWidget {
         print('DEBUG UI Videos: Showing ListView with ${controller.videos.length} items');
 
         return ListView.builder(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(vertical:12 ),
           itemCount: controller.videos.length,
           itemBuilder: (context, index) {
             final video = controller.videos[index];
@@ -105,22 +103,17 @@ class YoutubeVideosScreen extends StatelessWidget {
                 ),
               ),
               onTap: () {
-                // ✅ Update index trước khi navigate
                 controller.setCurrentVideoIndex(index);
                 print('DEBUG Videos: Tapped video at index $index - ${video.title}');
 
-                // ✅ Sử dụng push để có thể back về
                 context.push('/youtube/player/${video.id}', extra: video);
               },
               trailing: const Icon(
                 Icons.play_arrow,
-                color: Colors.red,
+                color: Colors.grey,
                 size: 20, // Giữ size phù hợp
               ),
-              // Tùy chọn: Thêm infoPairs nếu cần (ví dụ: duration nếu có data)
-              // infoPairs: [IconTextPair(Icons.access_time, video.duration ?? '')],
-              // gradientStartColor: Colors.red.shade50, // Để highlight video mới nếu cần
-              // statusBarColor: Colors.blue, // Thanh trạng thái nếu muốn
+
             );
           },
         );

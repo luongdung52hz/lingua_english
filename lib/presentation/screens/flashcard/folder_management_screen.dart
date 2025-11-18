@@ -16,7 +16,7 @@ class FolderManagementScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Quản lý thư mục',style: AppTextStyles.headline,),
+        title: const Text('Quản lý thư mục',style: AppTextStyles.headlineb,),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
       ),

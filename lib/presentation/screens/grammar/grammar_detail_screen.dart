@@ -1,7 +1,7 @@
-// presentation/screens/grammar/grammar_detail_screen.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../resources/styles/colors.dart';
+import '../../../resources/styles/text_styles.dart';
 import '../../controllers/grammar_controller.dart';
 import '../../widgets/expanded_card.dart';
 
@@ -35,9 +35,10 @@ class GrammarDetailScreen extends StatelessWidget {
 
       return Scaffold(
         appBar: AppBar(
-          title: Text(subTopic.title),
-          backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
+          title: Text(subTopic.title,),
+          iconTheme: IconThemeData(color: Colors.white),
+          backgroundColor: AppColors.primary,
           elevation: 0,
         ),
         body: Container(
