@@ -1,0 +1,50 @@
+{
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "emulators": {
+    "singleProjectMode": true
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "linguaapp-476307",
+          "appId": "1:531392476639:android:b4d252c93281c825d6006a",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "linguaapp-476307",
+          "configurations": {
+            "android": "1:531392476639:android:b4d252c93281c825d6006a",
+            "ios": "1:531392476639:ios:643bf4ad6098dc74d6006a",
+            "macos": "1:531392476639:ios:643bf4ad6098dc74d6006a",
+            "web": "1:531392476639:web:6a64463979db557bd6006a"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "database": "(default)",
+    "location": "asia-southeast1",
+    "rules": "admin",
+    "indexes": "firestore.indexes.json"
+  }
+}
