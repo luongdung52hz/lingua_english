@@ -30,6 +30,6 @@ jobs:
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}  # Cho comments tự động trên PR
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_LINGUAAPP_476307 }}  # Chỉ cần secret này
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}  # Chỉ cần secret này
           channelId: ${{ github.ref == format('refs/heads/main') && 'live' || 'preview' }}  # Live cho main, preview cho PR
           expires: 7d  # Preview hết hạn sau 7 ngày
