@@ -423,7 +423,7 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
       body: YoutubePlayerBuilder(
         player: YoutubePlayer(
           controller: _playerController!,
-     //     showVideoProgressIndicator: true,
+        showVideoProgressIndicator: true,
            thumbnail: Text(_video!.title) ,
           progressIndicatorColor: AppColors.primary,
           progressColors: ProgressBarColors(

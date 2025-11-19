@@ -44,7 +44,7 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
 
   Flashcard? previewFlashcard;
   String? selectedFolderId;
-  bool isManualMode = false;
+  bool isManualMode = true;
   String? selectedPartOfSpeech;
 
   TranslationDirection translationDirection = TranslationDirection.viToEn;

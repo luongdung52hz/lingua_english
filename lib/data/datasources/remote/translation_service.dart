@@ -22,7 +22,6 @@ class TranslationResult {
   });
 }
 
-// ✅ NEW: Enum cho hướng dịch
 enum TranslationDirection {
   viToEn,  // Việt → Anh
   enToVi,  // Anh → Việt
@@ -36,31 +35,31 @@ class TranslationService {
 
   TranslationService({required this.apiKey});
 
-  /// ⭐ SỬA: Thêm tham số direction (bắt buộc)
+  ///  SỬA: Thêm tham số direction (bắt buộc)
   Future<TranslationResult> translate(
       String text, {
-        required TranslationDirection direction, // ✅ NEW: Bắt buộc chọn hướng dịch
+        required TranslationDirection direction,
       }) async {
-    print('🔍 [START] Translation started for: "$text"');
-    print('🌐 [DIRECTION] User selected: ${direction == TranslationDirection.viToEn ? "Vietnamese → English" : "English → Vietnamese"}');
+    print(' [START] Translation started for: "$text"');
+    print(' [DIRECTION] User selected: ${direction == TranslationDirection.viToEn ? "Vietnamese → English" : "English → Vietnamese"}');
 
-    // ✅ SỬA: Dùng direction thay vì auto-detect
+    //  SỬA: Dùng direction thay vì auto-detect
     final prompt = direction == TranslationDirection.viToEn
         ? _buildPromptViToEn(text)
         : _buildPromptEnToVi(text);
 
     try {
-      print('📤 [API] Sending prompt to Gemini...');
+      print('API] Sending prompt to Gemini...');
       final response = await _callGemini(prompt);
-      print('📥 [API] Gemini response received (code: 200)');
+      print(' [API] Gemini response received (code: 200)');
 
-      print('🧹 [CLEAN] Cleaning Markdown JSON...');
+      print(' [CLEAN] Cleaning Markdown JSON...');
       final cleaned = _cleanMarkdownJson(response);
-      print('✅ [CLEAN] Cleaned JSON: $cleaned');
+      print(' [CLEAN] Cleaned JSON: $cleaned');
 
-      print('🔄 [PARSE] Parsing JSON data...');
+      print(' [PARSE] Parsing JSON data...');
       final jsonData = jsonDecode(cleaned);
-      print('✅ [PARSE] JSON parsed successfully. English: ${jsonData['english'] ?? 'N/A'}');
+      print(' [PARSE] JSON parsed successfully. English: ${jsonData['english'] ?? 'N/A'}');
 
       final result = TranslationResult(
         english: jsonData['english'] ?? '',
@@ -71,14 +70,14 @@ class TranslationService {
         imageUrl: jsonData['imageUrl'],
       );
 
-      print('🎉 [SUCCESS] Translation completed! Result: English="${result.english}", Vietnamese="${result.vietnamese ?? 'N/A'}", Examples=${result.examples.length}');
+      print('[SUCCESS] Translation completed! Result: English="${result.english}", Vietnamese="${result.vietnamese ?? 'N/A'}", Examples=${result.examples.length}');
       return result;
     } catch (e) {
-      print('❌ [ERROR] Translation failed at step: $e');
-      print('🔚 [END] Translation process aborted due to error.');
+      print(' [ERROR] Translation failed at step: $e');
+      print(' [END] Translation process aborted due to error.');
       rethrow;
     } finally {
-      print('🔚 [END] Translation process finished (success or error).');
+      print(' [END] Translation process finished (success or error).');
     }
   }
 
@@ -119,14 +118,14 @@ Chỉ trả về 1 cặp câu ví dụ.
 
   /// Dọn JSON từ Markdown
   String _cleanMarkdownJson(String response) {
-    print('🧹 [CLEAN] Original response snippet: ${response.substring(0, min(100, response.length))}...');
+    print(' [CLEAN] Original response snippet: ${response.substring(0, min(100, response.length))}...');
     final cleaned = response
         .trim()
         .replaceAll(RegExp(r'^```json\s*', multiLine: true), '')
         .replaceAll(RegExp(r'\s*```$', multiLine: true), '');
 
     if (cleaned.isEmpty) {
-      print('❌ [CLEAN] Error: Empty after cleaning!');
+      print(' [CLEAN] Error: Empty after cleaning!');
       throw Exception('Empty response after cleaning');
     }
     return cleaned;
@@ -134,7 +133,7 @@ Chỉ trả về 1 cặp câu ví dụ.
 
   /// Gọi Gemini API
   Future<String> _callGemini(String prompt) async {
-    print('📤 [API] Calling Gemini with prompt length: ${prompt.length} chars');
+    print(' [API] Calling Gemini with prompt length: ${prompt.length} chars');
 
     final response = await http.post(
       Uri.parse('$_geminiUrl?key=$apiKey'),
@@ -151,19 +150,19 @@ Chỉ trả về 1 cặp câu ví dụ.
       }),
     );
 
-    print('📥 [API] Response status: ${response.statusCode}');
+    print(' [API] Response status: ${response.statusCode}');
     if (response.statusCode != 200) {
-      print('❌ [API] Error body: ${response.body}');
+      print(' [API] Error body: ${response.body}');
       throw Exception('Gemini API error: ${response.statusCode} - ${response.body}');
     }
 
     final data = jsonDecode(response.body);
     final result = data['candidates']?[0]?['content']?['parts']?[0]?['text'];
     if (result == null) {
-      print('❌ [API] No text in response: ${response.body.substring(0, 200)}...');
+      print(' [API] No text in response: ${response.body.substring(0, 200)}...');
       throw Exception('No text found in Gemini response');
     }
-    print('✅ [API] Text extracted successfully (length: ${result.length})');
+    print(' [API] Text extracted successfully (length: ${result.length})');
     return result;
   }
 }

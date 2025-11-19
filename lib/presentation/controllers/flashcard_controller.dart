@@ -130,7 +130,7 @@ class FlashcardController extends GetxController {
 
   Future<Flashcard?> createFlashcardFromText(
       String inputText, {
-        required TranslationDirection direction, // ✅ NEW: Bắt buộc chọn hướng dịch
+        required TranslationDirection direction, //  NEW: Bắt buộc chọn hướng dịch
         String? folderId,
       }) async {
     if (inputText.trim().isEmpty) {
