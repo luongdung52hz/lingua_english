@@ -8,9 +8,6 @@ class FlashcardRepository {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   String? get _userId => _auth.currentUser?.uid;
 
-  // ============================================
-  // FLASHCARD OPERATIONS
-  // ============================================
   /// Get user's flashcard collection reference
   CollectionReference _getFlashcardsCollection() {
     if (_userId == null) throw Exception('User not authenticated');
@@ -174,9 +171,7 @@ class FlashcardRepository {
     };
   }
 
-  // ============================================
-  // FOLDER OPERATIONS
-  // ============================================
+
   /// Get user's folder collection reference
   CollectionReference _getFoldersCollection() {
     if (_userId == null) throw Exception('User not authenticated');

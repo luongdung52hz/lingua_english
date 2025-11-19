@@ -40,30 +40,41 @@ void main() async {
   print(' AppRouter.router: ${AppRouter.router.toString()}');
   //await createAdmin();
   // Upload demo lessons to Firestore (bỏ comment để chạy)
-  // await uploadDemoLessons();
+   //await uploadDemoLessons();
+   await testWrite();
   //await uploadDemoQuiz();
   runApp(Phoenix(child: MyApp()));
 
 }
 
-// Future<void> uploadDemoLessons() async {
-//   final firestore = FirebaseFirestore.instance;
-//   final batch = firestore.batch();
-//
-//   final lessons = LessonDemoData.getAllLessons();
-//
-//   for (var lesson in lessons) {
-//     final docRef = firestore.collection('lessons').doc(lesson.id);
-//     batch.set(docRef, lesson.toJson());
-//   }
-//
-//   try {
-//     await batch.commit();
-//     print(' Uploaded ${lessons.length} demo lessons to Firestore!');
-//   } catch (e) {
-//     print(' Error uploading lessons: $e');
-//   }
-// }
+Future<void> testWrite() async {
+  try {
+    var _firestore;
+    await _firestore.collection('test').add({'message': 'Hello Firestore', 'timestamp': FieldValue.serverTimestamp()});
+    print('Write success!');
+  } catch (e) {
+    print('Write error: $e');
+  }
+}
+
+Future<void> uploadDemoLessons() async {
+  final firestore = FirebaseFirestore.instance;
+  final batch = firestore.batch();
+
+  final lessons = LessonDemoData.getAllLessons();
+
+  for (var lesson in lessons) {
+    final docRef = firestore.collection('lessons').doc(lesson.id);
+    batch.set(docRef, lesson.toJson());
+  }
+
+  try {
+    await batch.commit();
+    print(' Uploaded ${lessons.length} demo lessons to Firestore!');
+  } catch (e) {
+    print(' Error uploading lessons: $e');
+  }
+}
 
 
 class MyApp extends StatelessWidget {

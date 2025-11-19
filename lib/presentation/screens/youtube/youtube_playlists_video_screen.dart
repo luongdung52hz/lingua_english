@@ -29,7 +29,7 @@ class YoutubePlaylistsScreen extends StatelessWidget {
         ],
       ),
       body: Obx(() {
-        if (controller.isLoading.value) return const Center(child: CircularProgressIndicator());
+        if (controller.isLoading.value) return const Center(child: CircularProgressIndicator(color: AppColors.primary,));
         if (controller.playlists.isEmpty) return const Center(child: Text('Không có playlist'));
         return ListView.builder(
           padding: const EdgeInsets.symmetric(vertical:12 ),

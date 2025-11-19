@@ -25,7 +25,7 @@ class SpeakingChecker {
 
       return SpeakingResult.fromJson(jsonDecode(jsonStr));
     } catch (e) {
-      print('❌ Error checking speaking: $e');
+      print(' Error checking speaking: $e');
       return SpeakingResult.error('AI check failed: ${e.toString()}');
     }
   }

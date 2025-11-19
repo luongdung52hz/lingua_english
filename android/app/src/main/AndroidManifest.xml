@@ -20,7 +20,7 @@
     <queries>
 
         <!-- Google (nếu cần) -->
-        <package android:name="com.google.android.gms" />
+        <package android:name="com.example.lingua" />
 
         <!-- Browser intents -->
         <intent>
@@ -52,7 +52,7 @@
                 android:resource="@style/NormalTheme" />
             <meta-data
                 android:name="com.google.android.gms.auth.api.credentials.ClientId"
-                android:value="982053562617-0p65l70qc4l9fqkq22cvh7ejg22gf8fm.apps.googleusercontent.com" />
+                android:value="531392476639-cm06bbopc5maq1goh06ajjhshv49356k.apps.googleusercontent.com" />
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

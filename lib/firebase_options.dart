@@ -25,10 +25,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -47,31 +44,39 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDQVjVDWUqj3M-h8CYy4oJ0vjVGCd8I0wo',
-    appId: '1:982053562617:android:f380ad3eeb85aaf91a1a28',
-    messagingSenderId: '982053562617',
-    projectId: 'learnenglishapp-50c96',
-    storageBucket: 'learnenglishapp-50c96.firebasestorage.app',
+    apiKey: 'AIzaSyDqek_7RBLDEMavYvBQi5VoDuTM6GVNZl0',
+    appId: '1:531392476639:android:b4d252c93281c825d6006a',
+    messagingSenderId: '531392476639',
+    projectId: 'linguaapp-476307',
+    storageBucket: 'linguaapp-476307.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyABuJomqzZtElmeqU6FhQFvwJfDx5LTKV8',
-    appId: '1:982053562617:ios:7a9c8a5945d78db61a1a28',
-    messagingSenderId: '982053562617',
-    projectId: 'learnenglishapp-50c96',
-    storageBucket: 'learnenglishapp-50c96.firebasestorage.app',
-    androidClientId: '982053562617-ieesthu9se3dsqagd2v85i3arikccpun.apps.googleusercontent.com',
-    iosClientId: '982053562617-0elqbte62pv1m8rpr33stism8lh2sudm.apps.googleusercontent.com',
+    apiKey: 'AIzaSyA_OBdjZp1_ZGKRKY5TS6WmlDmBisgKC_M',
+    appId: '1:531392476639:ios:643bf4ad6098dc74d6006a',
+    messagingSenderId: '531392476639',
+    projectId: 'linguaapp-476307',
+    storageBucket: 'linguaapp-476307.firebasestorage.app',
     iosBundleId: 'com.example.learnEnglish',
   );
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyB2dhrLnTjkXxSvfbLmCQA_UeT_CaXvLMA',
-    appId: '1:982053562617:web:d11b02e2d3f35ea21a1a28',
-    messagingSenderId: '982053562617',
-    projectId: 'learnenglishapp-50c96',
-    authDomain: 'learnenglishapp-50c96.firebaseapp.com',
-    storageBucket: 'learnenglishapp-50c96.firebasestorage.app',
+    apiKey: 'AIzaSyAkKSA3c9KT55_ZH0lKHu4SEEJ2aGhZpNo',
+    appId: '1:531392476639:web:6a64463979db557bd6006a',
+    messagingSenderId: '531392476639',
+    projectId: 'linguaapp-476307',
+    authDomain: 'linguaapp-476307.firebaseapp.com',
+    storageBucket: 'linguaapp-476307.firebasestorage.app',
+    measurementId: 'G-RH2EBRK33P',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyA_OBdjZp1_ZGKRKY5TS6WmlDmBisgKC_M',
+    appId: '1:531392476639:ios:643bf4ad6098dc74d6006a',
+    messagingSenderId: '531392476639',
+    projectId: 'linguaapp-476307',
+    storageBucket: 'linguaapp-476307.firebasestorage.app',
+    iosBundleId: 'com.example.learnEnglish',
   );
 
 }
