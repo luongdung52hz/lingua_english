@@ -102,7 +102,7 @@ flutter:
     - lib/resources/assets/audios/
     - lib/resources/assets/lottie/
     - lib/resources/data/grammar.json
-    - .env
+
 
   uses-material-design: true
 
