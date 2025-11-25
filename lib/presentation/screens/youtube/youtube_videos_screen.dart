@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../resources/styles/colors.dart';
 import '../../controllers/youtube_controller.dart';
 import '../../widgets/info_card.dart';
-import 'package:collection/collection.dart'; //
+import 'package:collection/collection.dart';
 
 class YoutubeVideosScreen extends StatelessWidget {
   const YoutubeVideosScreen({Key? key}) : super(key: key);

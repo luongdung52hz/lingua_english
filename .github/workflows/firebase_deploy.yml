@@ -23,6 +23,9 @@ jobs:
           flutter config --enable-web
           flutter pub get
 
+      - name: Inject secret as env variable
+        run: echo "CLIENT_ID=${{ secrets.CLIENT_ID }}" >> $GITHUB_ENV
+
       - name: Build Web
         run: flutter build web --release  # Thêm --base-href '/subpath/' nếu deploy subpath
 
