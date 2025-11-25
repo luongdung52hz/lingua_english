@@ -20,14 +20,7 @@ class YoutubeController extends GetxController {
   var autoPlayEnabled = true.obs;
 
   final channels = [
-    {
-      'name': 'LoL Esports',
-      'id': 'UC2t5bjwHdUX4vM2g8TRDq5g',
-      'playlists': [
-        {'id': 'PLrx0FnDHZfrMUZE0YFLhEREMRSaGOC6lC', 'title': 'Worlds 2024'},
-        {'id': 'PLrx0FnDHZfrN8VKhIYxxKJDHqB3rMNlJk', 'title': 'LCK Highlights'},
-      ],
-    },
+
     {
       'name': 'BBC Learning English',
       'id': 'UCHaHD477h-FeBbVh9Sh7syA',
@@ -53,11 +46,7 @@ class YoutubeController extends GetxController {
       ],
 
     },
-    {
-      'name': 'Hỏi dân IT',
-      'id': 'UCVkBcokjObNZiXavfAE1-fA',
 
-    },
     {
       'name': 'Alex-Tiếng Anh',
       'id': 'UCOHC3mlHop6TRXl7i8o2AYQ',

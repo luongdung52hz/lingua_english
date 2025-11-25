@@ -3,7 +3,7 @@ class YoutubePlaylist {
   final String title;
   final String thumbnailUrl;
   final String channelTitle;
-  final int itemCount;  // Số video trong playlist (từ API)
+  final int itemCount;
 
   YoutubePlaylist({
     required this.id,

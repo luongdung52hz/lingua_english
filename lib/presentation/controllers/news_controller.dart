@@ -10,7 +10,6 @@ class NewsController extends GetxController {
   final RxBool isLoading = true.obs;
   final RxString error = ''.obs;
 
-  // Danh sách RSS feeds với priority
   static final _rssSources = [
     {
       'url': 'https://learningenglish.voanews.com/api/zopqgoeuq',
@@ -164,7 +163,6 @@ class NewsController extends GetxController {
     ];
   }
 
-  // Thêm method refresh manual
   Future<void> refresh() async {
     await fetchDailyNews();
   }

@@ -2,10 +2,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChatRoomModel {
-  final String id; // ID phòng chat (kết hợp UID1_UID2)
-  final List<String> participants; // [uid1, uid2]
+  final String id;
+  final List<String> participants;
   final Timestamp lastMessageAt;
-  final String lastMessage; // Tin nhắn cuối để hiển thị preview
+  final String lastMessage;
 
   ChatRoomModel({
     required this.id,

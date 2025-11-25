@@ -34,7 +34,7 @@ class YoutubeVideo {
       print('DEBUG Model: Parsed success - Title: ${video.title}, ID: ${video.id}, Thumbnail: ${video.thumbnailUrl.isNotEmpty ? "OK" : "EMPTY"}');  // Log kết quả
       return video;
     } catch (e) {
-      print('DEBUG Model: Parse error for full json: $json, error: $e');  // Log full nếu fail
+      print('DEBUG Model: Parse error for full json: $json, error: $e');
       rethrow;
     }
   }

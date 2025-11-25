@@ -114,7 +114,7 @@ class GeminiProvider implements AIProvider {
       final response = await generate('Say "OK" in JSON: {"status": "OK"}');
       return response.contains('OK');
     } catch (e) {
-      print('❌ Gemini connection test failed: $e');
+      print(' Gemini connection test failed: $e');
       return false;
     }
   }
