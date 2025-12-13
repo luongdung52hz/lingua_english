@@ -44,7 +44,6 @@ void main() async {
    await testWrite();
   //await uploadDemoQuiz();
   runApp(Phoenix(child: MyApp()));
-
 }
 
 Future<void> testWrite() async {
