@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import '../../../data/repositories/auth_repository.dart';
 import 'package:get_it/get_it.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
@@ -24,22 +24,24 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final emailFocus = FocusNode();
 
   bool loading = false;
-  final FirebaseAuth _auth = GetIt.I<FirebaseAuth>();
+  final AuthRepository _auth = GetIt.I<AuthRepository>();
 
   Future<void> _resetPassword() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => loading = true);
     try {
-      await _auth.sendPasswordResetEmail(email: emailCtrl.text.trim());
+      await _auth.resetPassword(emailCtrl.text);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Liên kết đặt lại mật khẩu đã gửi đến ${emailCtrl.text.trim()}! Kiểm tra email (kể cả thư rác) và click link để reset.'),
+            content: Text(
+              'Liên kết đặt lại mật khẩu đã gửi đến ${emailCtrl.text.trim()}! Kiểm tra email (kể cả thư rác) và click link để reset.',
+            ),
             backgroundColor: Colors.green,
             action: SnackBarAction(
               label: 'OK',
               onPressed: () {
-                context.go(Routes.login);  // Quay về login ngay khi click OK
+                context.go(Routes.login); // Quay về login ngay khi click OK
               },
             ),
           ),
@@ -61,13 +63,15 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         default:
           errorMsg = e.message ?? errorMsg;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(errorMsg)),
-      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(errorMsg)));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lỗi không xác định: $e')),
-      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Lỗi không xác định: $e')));
     } finally {
       if (mounted) setState(() => loading = false);
     }
@@ -104,7 +108,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     height: 100,
                     width: 100,
                     errorBuilder: (context, error, stackTrace) {
-                      return const Icon(Icons.image_not_supported, size: 20, color: Colors.white);
+                      return const Icon(
+                        Icons.image_not_supported,
+                        size: 20,
+                        color: Colors.white,
+                      );
                     },
                   ),
                   const SizedBox(height: 10),
@@ -127,14 +135,21 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     prefixIcon: Icons.email,
                     validator: (v) {
                       if (v == null || v.isEmpty) return "Nhập email";
-                      final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                      if (!emailRegex.hasMatch(v.trim())) return "Email không hợp lệ";
+                      final emailRegex = RegExp(
+                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                      );
+                      if (!emailRegex.hasMatch(v.trim()))
+                        return "Email không hợp lệ";
                       return null;
                     },
-                    onValidationChanged: (valid) => setState(() => isEmailValid = valid),
+                    onValidationChanged: (valid) =>
+                        setState(() => isEmailValid = valid),
                     validationLogic: (text) {
-                      final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                      return emailRegex.hasMatch(text.trim()) && text.isNotEmpty;
+                      final emailRegex = RegExp(
+                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                      );
+                      return emailRegex.hasMatch(text.trim()) &&
+                          text.isNotEmpty;
                     },
                   ),
                   const SizedBox(height: 24),

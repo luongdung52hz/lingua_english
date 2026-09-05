@@ -1,10 +1,9 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';  // Để load assets
+import 'package:flutter/services.dart'; // Để load assets
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:path/path.dart' as path;
-import '../demo/lesson_demo_data.dart';  // Import class của bạn
+import '../demo/lesson_demo_data.dart'; // Import class của bạn
 
 class AudioUploader extends StatefulWidget {
   @override
@@ -13,7 +12,7 @@ class AudioUploader extends StatefulWidget {
 
 class _AudioUploaderState extends State<AudioUploader> {
   final FirebaseStorage _storage = FirebaseStorage.instance;
-  List<String> _uploadedUrls = [];  // Lưu URL sau upload
+  List<String> _uploadedUrls = []; // Lưu URL sau upload
   bool _isUploading = false;
 
   // Map từ lesson ID sang file name (tùy chỉnh theo naming convention của bạn)
@@ -24,7 +23,7 @@ class _AudioUploaderState extends State<AudioUploader> {
     'a1_listen_family_01': 'test4.mp3',
     'a1_listen_family_02': 'siblings.mp3',
     'a1_listen_daily_01': 'morning.mp3',
-    'a1_speak_family_01': 'family_speak.mp3',  // Ví dụ cho speaking
+    'a1_speak_family_01': 'family_speak.mp3', // Ví dụ cho speaking
     // Thêm các ID khác tương ứng với file MP3 của bạn
     // Ví dụ: 'a2_listen_shop_01': 'shopping.mp3',
   };
@@ -61,12 +60,13 @@ class _AudioUploaderState extends State<AudioUploader> {
     _uploadedUrls.clear();
 
     for (final lesson in LessonDemoData.getAllLessons()) {
-      if (lesson.content.containsKey('audioUrl') && _lessonToFileMap.containsKey(lesson.id)) {
+      if (lesson.content.containsKey('audioUrl') &&
+          _lessonToFileMap.containsKey(lesson.id)) {
         final fileName = _lessonToFileMap[lesson.id]!;
         final url = await _uploadSingleFile(fileName, lesson.id);
         if (url != null) {
           _uploadedUrls.add('${lesson.id}|$url');
-          print('Uploaded ${lesson.id}: $url');  // Copy từ console
+          print('Uploaded ${lesson.id}: $url'); // Copy từ console
         }
       }
     }
@@ -80,7 +80,9 @@ class _AudioUploaderState extends State<AudioUploader> {
   Future<String?> _uploadSingleFile(String fileName, String lessonId) async {
     try {
       // Load file từ assets thành bytes
-      final ByteData data = await rootBundle.load('lib/resources/assets/audios/$fileName');
+      final ByteData data = await rootBundle.load(
+        'lib/resources/assets/audios/$fileName',
+      );
       final Uint8List bytes = data.buffer.asUint8List();
 
       // Tạo file tạm để upload (Firebase cần File hoặc bytes)
@@ -89,12 +91,16 @@ class _AudioUploaderState extends State<AudioUploader> {
       await tempFile.writeAsBytes(bytes);
 
       // Upload
-      final storageRef = _storage.ref().child('audios/$lessonId.mp3');  // Tên file = lessonId.mp3 để dễ quản lý
+      final storageRef = _storage.ref().child(
+        'audios/$lessonId.mp3',
+      ); // Tên file = lessonId.mp3 để dễ quản lý
       final uploadTask = storageRef.putFile(tempFile);
 
       // Theo dõi progress (tùy chọn)
       uploadTask.snapshotEvents.listen((snapshot) {
-        print('Progress for $lessonId: ${(snapshot.bytesTransferred / snapshot.totalBytes) * 100}%');
+        print(
+          'Progress for $lessonId: ${(snapshot.bytesTransferred / snapshot.totalBytes) * 100}%',
+        );
       });
 
       final snapshot = await uploadTask;

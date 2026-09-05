@@ -1,9 +1,9 @@
+import 'package:learn_english/presentation/feedback/app_feedback.dart';
 // lib/ui/screens/flashcard_create_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:collection/collection.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 import '../../../data/models/flashcard_model.dart';
@@ -72,21 +72,13 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
   Future<void> _translateAndPreview() async {
     final inputText = textController.text;
     if (inputText.isEmpty) {
-      Get.snackbar(
-        'Lỗi',
-        'Vui lòng nhập từ/câu cần dịch',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      AppFeedback.show('Lỗi', 'Vui lòng nhập từ/câu cần dịch');
       return;
     }
 
     // Added null check for folder
     if (selectedFolderId == null) {
-      Get.snackbar(
-        'Lỗi',
-        'Vui lòng chọn thư mục',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      AppFeedback.show('Lỗi', 'Vui lòng chọn thư mục');
       return;
     }
 
@@ -103,36 +95,30 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
 
   void _createManualFlashcard() {
     if (vietnameseController.text.isEmpty || englishController.text.isEmpty) {
-      Get.snackbar(
-        'Lỗi',
-        'Vui lòng nhập đầy đủ mặt trước và mặt sau',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      AppFeedback.show('Lỗi', 'Vui lòng nhập đầy đủ mặt trước và mặt sau');
       return;
     }
 
     // Added null check for folder
     if (selectedFolderId == null) {
-      Get.snackbar(
-        'Lỗi',
-        'Vui lòng chọn thư mục',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      AppFeedback.show('Lỗi', 'Vui lòng chọn thư mục');
       return;
     }
 
     final examples = examplesController.text.isEmpty
         ? <String>[]
         : examplesController.text
-        .split('\n')
-        .where((line) => line.isNotEmpty)
-        .toList();
+              .split('\n')
+              .where((line) => line.isNotEmpty)
+              .toList();
 
     final flashcard = Flashcard(
       id: const Uuid().v4(),
       vietnamese: vietnameseController.text,
       english: englishController.text,
-      phonetic: phoneticController.text.isEmpty ? null : phoneticController.text,
+      phonetic: phoneticController.text.isEmpty
+          ? null
+          : phoneticController.text,
       partOfSpeech: selectedPartOfSpeech,
       createdAt: DateTime.now(),
       examples: examples,
@@ -192,7 +178,9 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(isManualMode ? 'Tạo Flashcard (Thủ công)' : 'Tạo Flashcard (AI)'),
+        title: Text(
+          isManualMode ? 'Tạo Flashcard (Thủ công)' : 'Tạo Flashcard (AI)',
+        ),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         actions: [
@@ -239,10 +227,7 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
             if (previewFlashcard != null) ...[
               const Text(
                 'Xem trước Flashcard',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
               _buildPreviewCard(previewFlashcard!),
@@ -258,25 +243,33 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
                       icon: Icons.cancel,
                       iconSize: 18,
                       height: 52,
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 16,
+                      ),
                       borderRadius: BorderRadius.circular(12),
                       buttonColor: Colors.grey.shade300,
                     ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Obx(() => CustomButton(
-                      onPressed: controller.isLoading.value
-                          ? null
-                          : _saveFlashcard,
-                      text: 'Lưu',
-                      icon: Icons.save,
-                      iconSize: 18,
-                      height: 52,
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                      borderRadius: BorderRadius.circular(12),
-                      buttonColor: Colors.green,
-                    )),
+                    child: Obx(
+                      () => CustomButton(
+                        onPressed: controller.isLoading.value
+                            ? null
+                            : _saveFlashcard,
+                        text: 'Lưu',
+                        icon: Icons.save,
+                        iconSize: 18,
+                        height: 52,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 16,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        buttonColor: Colors.green,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -293,9 +286,7 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
       key: const ValueKey('ai_mode'),
       elevation: 4,
       color: Colors.grey.shade50,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -350,10 +341,7 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: AppColors.primary,
-                    width: 1,
-                  ),
+                  borderSide: BorderSide(color: AppColors.primary, width: 1),
                 ),
               ),
               maxLines: 3,
@@ -362,25 +350,30 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
             ),
             const SizedBox(height: 20),
             Center(
-              child: Obx(() => CustomButton(
-                onPressed: controller.isTranslating.value
-                    ? null
-                    : () {
-                  FocusScope.of(context).unfocus();
-                  HapticFeedback.mediumImpact();
-                  _translateAndPreview();
-                },
-                text: controller.isTranslating.value
-                    ? 'Đang dịch ...'
-                    : 'Dịch ngay',
-                icon: controller.isTranslating.value
-                    ? null
-                    : Icons.auto_awesome,
-                iconSize: 20,
-                height: 56,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                buttonColor: AppColors.primary,
-              )),
+              child: Obx(
+                () => CustomButton(
+                  onPressed: controller.isTranslating.value
+                      ? null
+                      : () {
+                          FocusScope.of(context).unfocus();
+                          HapticFeedback.mediumImpact();
+                          _translateAndPreview();
+                        },
+                  text: controller.isTranslating.value
+                      ? 'Đang dịch ...'
+                      : 'Dịch ngay',
+                  icon: controller.isTranslating.value
+                      ? null
+                      : Icons.auto_awesome,
+                  iconSize: 20,
+                  height: 56,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
+                  buttonColor: AppColors.primary,
+                ),
+              ),
             ),
           ],
         ),
@@ -394,9 +387,7 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
       key: const ValueKey('manual_mode'),
       elevation: 4,
       color: Colors.grey.shade50,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -404,10 +395,7 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
           children: [
             const Text(
               'Nhập thủ công',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
 
@@ -486,10 +474,7 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
               dropdownColor: Colors.white, // Nền trắng cho menu
               borderRadius: BorderRadius.circular(12),
               items: partOfSpeechOptions.map((type) {
-                return DropdownMenuItem(
-                  value: type,
-                  child: Text(type),
-                );
+                return DropdownMenuItem(value: type, child: Text(type));
               }).toList(),
               onChanged: (value) {
                 setState(() {
@@ -530,7 +515,10 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
                 icon: Icons.add_card,
                 iconSize: 20,
                 height: 56,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
                 buttonColor: AppColors.primary,
               ),
             ),
@@ -543,8 +531,9 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
   Widget _buildFolderSelector() {
     return Obx(() {
       final folders = controller.folders;
-      final selectedFolder =
-      folders.firstWhereOrNull((f) => f.id == selectedFolderId);
+      final selectedFolder = folders.firstWhereOrNull(
+        (f) => f.id == selectedFolderId,
+      );
 
       return Card(
         elevation: 2,
@@ -620,11 +609,15 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
                         height: 40,
                         decoration: BoxDecoration(
                           color: color.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(12), // Changed to 12
+                          borderRadius: BorderRadius.circular(
+                            12,
+                          ), // Changed to 12
                         ),
                         child: Center(
-                          child: Text(folder.icon,
-                              style: const TextStyle(fontSize: 20)),
+                          child: Text(
+                            folder.icon,
+                            style: const TextStyle(fontSize: 20),
+                          ),
                         ),
                       ),
                       title: Text(folder.name),
@@ -660,10 +653,7 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
             // Vietnamese
             Text(
               flashcard.vietnamese,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
 
             const Divider(height: 24),
@@ -671,14 +661,12 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
             // English
             Text(
               flashcard.english,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-              ),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
             ),
 
             // Phonetic & Part of Speech
-            if (flashcard.phonetic != null || flashcard.partOfSpeech != null) ...[
+            if (flashcard.phonetic != null ||
+                flashcard.partOfSpeech != null) ...[
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -694,7 +682,8 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                  if (flashcard.phonetic != null && flashcard.partOfSpeech != null)
+                  if (flashcard.phonetic != null &&
+                      flashcard.partOfSpeech != null)
                     Text('  •  ', style: TextStyle(color: Colors.grey[400])),
                   if (flashcard.partOfSpeech != null)
                     Text(
@@ -722,7 +711,7 @@ class _FlashcardCreateScreenState extends State<FlashcardCreateScreen> {
               ),
               const SizedBox(height: 8),
               ...flashcard.examples.map(
-                    (example) => Padding(
+                (example) => Padding(
                   padding: const EdgeInsets.only(bottom: 4),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,

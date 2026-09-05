@@ -29,7 +29,7 @@ class _FlashcardListScreenState extends State<FlashcardListScreen> {
   @override
   void initState() {
     super.initState();
-    controller = Get.put(FlashcardController());
+    controller = Get.find<FlashcardController>();
     searchController.addListener(() => setState(() {}));
   }
 
@@ -51,9 +51,7 @@ class _FlashcardListScreenState extends State<FlashcardListScreen> {
       if (controller.currentFolderId.value == 'default') {
         controller.loadFlashcards();
       } else {
-        controller.loadFlashcardsByFolder(
-          controller.currentFolderId.value,
-        );
+        controller.loadFlashcardsByFolder(controller.currentFolderId.value);
       }
     }
   }
@@ -78,10 +76,7 @@ class _FlashcardListScreenState extends State<FlashcardListScreen> {
               expandedHeight: 90,
               actions: [
                 PopupMenuButton<String>(
-                  icon: const Icon(
-                    Icons.more_vert,
-                    color: Colors.white,
-                  ),
+                  icon: const Icon(Icons.more_vert, color: Colors.white),
                   color: Colors.grey[100],
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -93,7 +88,8 @@ class _FlashcardListScreenState extends State<FlashcardListScreen> {
 
                       if (selected) {
                         controller.loadFlashcardsToReview(
-                          folderId: controller.currentFolderId.value != 'default'
+                          folderId:
+                              controller.currentFolderId.value != 'default'
                               ? controller.currentFolderId.value
                               : null,
                         );
@@ -138,7 +134,11 @@ class _FlashcardListScreenState extends State<FlashcardListScreen> {
                       value: 'reset',
                       child: Row(
                         children: [
-                          Icon(Icons.restart_alt, size: 20, color: Colors.grey[600]),
+                          Icon(
+                            Icons.restart_alt,
+                            size: 20,
+                            color: Colors.grey[600],
+                          ),
                           const SizedBox(width: 8),
                           Text(
                             'Reset tất cả',
@@ -167,15 +167,19 @@ class _FlashcardListScreenState extends State<FlashcardListScreen> {
                       if (controller.currentFolderId.value == 'default') {
                         controller.loadFlashcards();
                       } else {
-                        controller.loadFlashcardsByFolder(controller.currentFolderId.value);
+                        controller.loadFlashcardsByFolder(
+                          controller.currentFolderId.value,
+                        );
                       }
                     },
                   ),
-                  Obx(() => ActionButtons(
-                    onCreatePressed: () => context.push('/flashcards/create'),
-                    onStudyPressed: () => context.push('/flashcards/study'),
-                    studyEnabled: controller.hasUnmemorized.value,
-                  )),
+                  Obx(
+                    () => ActionButtons(
+                      onCreatePressed: () => context.push('/flashcards/create'),
+                      onStudyPressed: () => context.push('/flashcards/study'),
+                      studyEnabled: controller.hasUnmemorized.value,
+                    ),
+                  ),
                   const FolderChips(),
                   const SizedBox(height: 2),
                 ],
@@ -189,8 +193,10 @@ class _FlashcardListScreenState extends State<FlashcardListScreen> {
                     context.push('/flashcards/detail/${flashcard.id}'),
                 onToggleMemorized: (id, isMemorized) =>
                     controller.toggleMemorized(id, !isMemorized),
-                onMoveToFolder: (flashcard) => _showMoveToFolderDialog(flashcard),
-                onDeleteFlashcard: (flashcard) => _showDeleteFlashcardDialog(flashcard),
+                onMoveToFolder: (flashcard) =>
+                    _showMoveToFolderDialog(flashcard),
+                onDeleteFlashcard: (flashcard) =>
+                    _showDeleteFlashcardDialog(flashcard),
               ),
             ),
           ],
@@ -229,9 +235,8 @@ class _FlashcardListScreenState extends State<FlashcardListScreen> {
   void _showResetAllDialog() {
     showDialog(
       context: context,
-      builder: (context) => ResetAllDialog(
-        onReset: () => controller.resetAllFlashcards(),
-      ),
+      builder: (context) =>
+          ResetAllDialog(onReset: () => controller.resetAllFlashcards()),
     );
   }
 }

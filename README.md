@@ -1,16 +1,27 @@
-# learn_english
+# Lingua English
 
-A new Flutter project.
+Ứng dụng Flutter học tiếng Anh: bài học theo kỹ năng, quiz, flashcard, tin tức, YouTube, chat và quản trị nội dung.
 
-## Getting Started
+## Chạy trên máy ảo iOS
 
-This project is a starting point for a Flutter application.
+Cần Flutter phù hợp với `pubspec.yaml`, Xcode và iOS Simulator.
 
-A few resources to get you started if this is your first Flutter project:
+```sh
+flutter pub get
+flutter devices
+flutter run -d <simulator-id>
+```
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Tệp `.env` được khai báo trong assets và được Git bỏ qua. Cấu hình các khóa theo chức năng cần thử: `CLIENT_ID` cho Google Sign-In web, `GEMINI_API_KEY` cho AI/dịch, `YOUTUBE_API_KEY` cho YouTube. Firebase dùng cấu hình hiện có trong `lib/firebase_options.dart` và thư mục native. Không commit giá trị bí mật. `.env` trong assets có thể trích xuất từ bản build; khóa backend riêng tư cần đặt ở server khi phát hành.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Kiểm tra
+
+```sh
+flutter analyze --no-pub
+flutter test --no-pub
+flutter build ios --simulator --debug --no-pub
+```
+
+Test không dùng tài khoản hay Firebase thật; bao gồm session guard, vòng đời controller, kết quả bất đồng bộ, UID repository, tiến độ học, RSS fallback và UI root.
+
+Xem [kiến trúc và quy tắc phát triển](docs/architecture.md). Dự án vẫn còn lint và chức năng placeholder từ phiên bản cũ; không coi build thành công là xác nhận mọi chức năng backend.

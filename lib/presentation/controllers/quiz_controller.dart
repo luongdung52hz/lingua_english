@@ -1,17 +1,18 @@
+import 'package:learn_english/presentation/feedback/app_feedback.dart';
 import 'package:get/get.dart';
-import 'package:uuid/uuid.dart';
 import '../../data/models/quiz_model.dart';
 import '../../data/repositories/quiz_repository.dart';
 
-
 class QuizController extends GetxController {
-  final QuizRepository _repository = QuizRepository();
+  QuizController({required QuizRepository repository})
+    : _repository = repository;
+  final QuizRepository _repository;
 
   // Reactive variables
   var quizzes = <QuizModel>[].obs;
   var isLoading = false.obs;
   var quizCount = 0.obs;
-  var selectedStatus = QuizStatus.draft.obs;  // For filter
+  var selectedStatus = QuizStatus.draft.obs; // For filter
   var searchQuery = ''.obs;
 
   @override
@@ -28,7 +29,7 @@ class QuizController extends GetxController {
       final list = await _repository.getAllQuizzes();
       quizzes.value = list;
     } catch (e) {
-      Get.snackbar('Lỗi', 'Không tải được danh sách quiz: $e');
+      AppFeedback.show('Lỗi', 'Không tải được danh sách quiz: $e');
     } finally {
       isLoading.value = false;
     }
@@ -39,22 +40,17 @@ class QuizController extends GetxController {
     try {
       return await _repository.getQuizById(id);
     } catch (e) {
-      Get.snackbar('Lỗi', 'Không tìm thấy quiz: $e');
+      AppFeedback.show('Lỗi', 'Không tìm thấy quiz: $e');
       return null;
     }
   }
 
   // Tạo quiz mới
   Future<void> createQuiz(QuizModel quiz) async {
-    try {
-      final newId = const Uuid().v4();
-      final newQuiz = quiz.copyWith(id: newId);
-      await _repository.saveQuiz(newQuiz);
-      quizzes.add(newQuiz);
-      Get.snackbar('Thành công', 'Quiz đã được lưu!');
-      Get.back();
-    } catch (e) {
-      Get.snackbar('Lỗi', 'Không lưu được quiz: $e');
+    await _repository.saveQuiz(quiz);
+    if (!isClosed) {
+      quizzes.add(quiz);
+      quizCount.value = quizzes.length;
     }
   }
 
@@ -67,9 +63,9 @@ class QuizController extends GetxController {
         quizzes[index] = quiz;
         quizzes.refresh();
       }
-      Get.snackbar('Thành công', 'Quiz đã được cập nhật!');
+      AppFeedback.show('Thành công', 'Quiz đã được cập nhật!');
     } catch (e) {
-      Get.snackbar('Lỗi', 'Không cập nhật được quiz: $e');
+      AppFeedback.show('Lỗi', 'Không cập nhật được quiz: $e');
     }
   }
 
@@ -78,17 +74,21 @@ class QuizController extends GetxController {
     try {
       await _repository.deleteQuiz(id);
       quizzes.removeWhere((q) => q.id == id);
-      Get.snackbar('Thành công', 'Quiz đã bị xóa!');
+      AppFeedback.show('Thành công', 'Quiz đã bị xóa!');
     } catch (e) {
-      Get.snackbar('Lỗi', 'Không xóa được quiz: $e');
+      AppFeedback.show('Lỗi', 'Không xóa được quiz: $e');
     }
   }
 
   // Tìm kiếm (local filter)
   List<QuizModel> get filteredQuizzes {
     return quizzes.where((q) {
-      final matchesStatus = selectedStatus.value == QuizStatus.draft || q.status == selectedStatus.value;  // Default all if draft
-      final matchesSearch = q.title.toLowerCase().contains(searchQuery.value.toLowerCase());
+      final matchesStatus =
+          selectedStatus.value == QuizStatus.draft ||
+          q.status == selectedStatus.value; // Default all if draft
+      final matchesSearch = q.title.toLowerCase().contains(
+        searchQuery.value.toLowerCase(),
+      );
       return matchesStatus && matchesSearch;
     }).toList();
   }
@@ -118,11 +118,21 @@ class QuizController extends GetxController {
     await updateQuiz(publishedQuiz);
   }
 
-  void submitAnswer(String quizId, String s, int currentQuestionIndex, String t) {}
+  void submitAnswer(
+    String quizId,
+    String s,
+    int currentQuestionIndex,
+    String t,
+  ) {}
 
   getQuizStream(String quizId) {}
 
   void setCurrentQuiz(quiz) {}
 
-  Future generateQuiz({required String level, required String topic, required int numQuestions, required int timePerQuestion}) async {}
+  Future generateQuiz({
+    required String level,
+    required String topic,
+    required int numQuestions,
+    required int timePerQuestion,
+  }) async {}
 }

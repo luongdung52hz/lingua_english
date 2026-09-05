@@ -1,9 +1,10 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/quiz_model.dart';
 
 class QuizRepository {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  QuizRepository({required FirebaseFirestore firestore})
+    : _firestore = firestore;
+  final FirebaseFirestore _firestore;
   final String _collection = 'quizzes';
 
   Future<String> saveQuiz(QuizModel quiz) async {
@@ -22,10 +23,7 @@ class QuizRepository {
 
       if (!doc.exists) return null;
 
-      return QuizModel.fromJson({
-        'id': doc.id,
-        ...doc.data()!,
-      });
+      return QuizModel.fromJson({'id': doc.id, ...doc.data()!});
     } catch (e) {
       throw Exception('Lỗi lấy quiz: $e');
     }
@@ -39,10 +37,7 @@ class QuizRepository {
           .get();
 
       return snapshot.docs
-          .map((doc) => QuizModel.fromJson({
-        'id': doc.id,
-        ...doc.data(),
-      }))
+          .map((doc) => QuizModel.fromJson({'id': doc.id, ...doc.data()}))
           .toList();
     } catch (e) {
       throw Exception('Lỗi lấy danh sách quiz: $e');
@@ -58,10 +53,7 @@ class QuizRepository {
           .get();
 
       return snapshot.docs
-          .map((doc) => QuizModel.fromJson({
-        'id': doc.id,
-        ...doc.data(),
-      }))
+          .map((doc) => QuizModel.fromJson({'id': doc.id, ...doc.data()}))
           .toList();
     } catch (e) {
       throw Exception('Lỗi lấy quiz theo status: $e');
@@ -96,10 +88,7 @@ class QuizRepository {
           .get();
 
       return snapshot.docs
-          .map((doc) => QuizModel.fromJson({
-        'id': doc.id,
-        ...doc.data(),
-      }))
+          .map((doc) => QuizModel.fromJson({'id': doc.id, ...doc.data()}))
           .toList();
     } catch (e) {
       throw Exception('Lỗi tìm kiếm quiz: $e');

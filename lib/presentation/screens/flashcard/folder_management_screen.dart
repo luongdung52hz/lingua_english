@@ -1,3 +1,4 @@
+import 'package:learn_english/presentation/feedback/app_feedback.dart';
 // lib/ui/screens/folder_management_screen.dart
 
 import 'package:flutter/material.dart';
@@ -16,7 +17,7 @@ class FolderManagementScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Quản lý thư mục',style: AppTextStyles.headlineb,),
+        title: const Text('Quản lý thư mục', style: AppTextStyles.headlineb),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
       ),
@@ -37,15 +38,19 @@ class FolderManagementScreen extends StatelessWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showCreateFolderDialog(context, controller),
         icon: const Icon(Icons.create_new_folder, color: Colors.white),
-        label: const Text('Tạo thư mục mới',
-            style: TextStyle(color: Colors.white)),
+        label: const Text(
+          'Tạo thư mục mới',
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: AppColors.primary,
       ),
     );
   }
 
   void _showCreateFolderDialog(
-    BuildContext context, FlashcardController controller) {
+    BuildContext context,
+    FlashcardController controller,
+  ) {
     final nameController = TextEditingController();
     final descController = TextEditingController();
     String selectedIcon = '📚';
@@ -53,8 +58,14 @@ class FolderManagementScreen extends StatelessWidget {
 
     final icons = ['📚', '🎯', '💼', '🎓', '🌟', '📝', '🔖', '📌', '🎨', '🚀'];
     final colors = [
-      '#9C27B0', '#2196F3', '#4CAF50', '#FF9800',
-      '#F44336', '#00BCD4', '#E91E63', '#FFC107',
+      '#9C27B0',
+      '#2196F3',
+      '#4CAF50',
+      '#FF9800',
+      '#F44336',
+      '#00BCD4',
+      '#E91E63',
+      '#FFC107',
     ];
 
     showDialog(
@@ -84,7 +95,10 @@ class FolderManagementScreen extends StatelessWidget {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: AppColors.primary, width: 1),
+                      borderSide: BorderSide(
+                        color: AppColors.primary,
+                        width: 1,
+                      ),
                     ),
                     floatingLabelStyle: TextStyle(
                       color: AppColors.primary,
@@ -108,7 +122,10 @@ class FolderManagementScreen extends StatelessWidget {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: AppColors.primary, width: 1),
+                      borderSide: BorderSide(
+                        color: AppColors.primary,
+                        width: 1,
+                      ),
                     ),
                     floatingLabelStyle: TextStyle(
                       color: AppColors.primary,
@@ -118,8 +135,10 @@ class FolderManagementScreen extends StatelessWidget {
                 ),
 
                 const SizedBox(height: 24),
-                const Text('Chọn biểu tượng:',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'Chọn biểu tượng:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 8),
 
                 SizedBox(
@@ -147,8 +166,10 @@ class FolderManagementScreen extends StatelessWidget {
                             ),
                           ),
                           child: Center(
-                            child: Text(icon,
-                                style: const TextStyle(fontSize: 24)),
+                            child: Text(
+                              icon,
+                              style: const TextStyle(fontSize: 24),
+                            ),
                           ),
                         ),
                       );
@@ -157,8 +178,10 @@ class FolderManagementScreen extends StatelessWidget {
                 ),
 
                 const SizedBox(height: 16),
-                const Text('Chọn màu:',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'Chọn màu:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 10),
                 Wrap(
                   spacing: 10,
@@ -171,8 +194,9 @@ class FolderManagementScreen extends StatelessWidget {
                         width: 34,
                         height: 34,
                         decoration: BoxDecoration(
-                          color: Color(int.parse('FF${color.substring(1)}',
-                              radix: 16)),
+                          color: Color(
+                            int.parse('FF${color.substring(1)}', radix: 16),
+                          ),
                           shape: BoxShape.circle,
                           border: Border.all(
                             color: isSelected
@@ -194,20 +218,23 @@ class FolderManagementScreen extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Hủy',style: TextStyle(color: AppColors.primary),),
+              child: const Text(
+                'Hủy',
+                style: TextStyle(color: AppColors.primary),
+              ),
             ),
             ElevatedButton(
-              style:ButtonStyle(
+              style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all(AppColors.primary),
                 shape: MaterialStateProperty.all(
                   RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-              ) ,
+              ),
               onPressed: () async {
                 if (nameController.text.trim().isEmpty) {
-                  Get.snackbar('Lỗi', 'Vui lòng nhập tên thư mục');
+                  AppFeedback.show('Lỗi', 'Vui lòng nhập tên thư mục');
                   return;
                 }
 
@@ -223,7 +250,7 @@ class FolderManagementScreen extends StatelessWidget {
                 await controller.createFolder(folder);
                 Navigator.pop(context);
               },
-              child: const Text('Tạo',style: TextStyle(color: Colors.white),),
+              child: const Text('Tạo', style: TextStyle(color: Colors.white)),
             ),
           ],
         ),
@@ -268,8 +295,10 @@ class _FolderCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Center(
-                  child: Text(folder.icon,
-                      style: const TextStyle(fontSize: 32)),
+                  child: Text(
+                    folder.icon,
+                    style: const TextStyle(fontSize: 32),
+                  ),
                 ),
               ),
               const SizedBox(width: 16),
@@ -280,14 +309,20 @@ class _FolderCard extends StatelessWidget {
                     Row(
                       children: [
                         Expanded(
-                          child: Text(folder.name,
-                              style: const TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold)),
+                          child: Text(
+                            folder.name,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                         if (isDefault)
                           Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.blue[100],
                               borderRadius: BorderRadius.circular(8),
@@ -295,31 +330,34 @@ class _FolderCard extends StatelessWidget {
                             child: const Text(
                               'Mặc định',
                               style: TextStyle(
-                                  fontSize: 10, fontWeight: FontWeight.bold),
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                       ],
                     ),
                     if (folder.description != null) ...[
                       const SizedBox(height: 4),
-                      Text(folder.description!,
-                          style: TextStyle(
-                              fontSize: 13, color: Colors.grey[600]),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis),
+                      Text(
+                        folder.description!,
+                        style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ],
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        Icon(Icons.style,
-                            size: 16, color: Colors.grey[600]),
+                        Icon(Icons.style, size: 16, color: Colors.grey[600]),
                         const SizedBox(width: 4),
                         Text(
                           '${folder.cardCount} flashcards',
                           style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey[600],
-                              fontWeight: FontWeight.w500),
+                            fontSize: 13,
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ],
                     ),
@@ -334,7 +372,10 @@ class _FolderCard extends StatelessWidget {
                   ),
                   onSelected: (value) async {
                     if (value == 'edit') {
-                      Get.snackbar('Thông báo', 'Tính năng chỉnh sửa sắp ra mắt');
+                      AppFeedback.show(
+                        'Thông báo',
+                        'Tính năng chỉnh sửa sắp ra mắt',
+                      );
                     } else if (value == 'delete') {
                       _showDeleteDialog(context, controller);
                     }
@@ -345,9 +386,12 @@ class _FolderCard extends StatelessWidget {
                       value: 'edit',
                       child: Row(
                         children: [
-                          Icon(Icons.edit, size: 20,color: Colors.grey,),
+                          Icon(Icons.edit, size: 20, color: Colors.grey),
                           SizedBox(width: 8),
-                          Text('Chỉnh sửa',style: TextStyle(color: Colors.grey),),
+                          Text(
+                            'Chỉnh sửa',
+                            style: TextStyle(color: Colors.grey),
+                          ),
                         ],
                       ),
                     ),
@@ -372,26 +416,29 @@ class _FolderCard extends StatelessWidget {
 
   void _showDeleteDialog(BuildContext context, FlashcardController controller) {
     showDialog(
-
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Colors.grey.shade50,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         title: const Text('Xóa thư mục'),
         content: Text('Bạn có chắc muốn xóa thư mục "${folder.name}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Hủy',style: TextStyle(color: AppColors.primary),),
+            child: const Text(
+              'Hủy',
+              style: TextStyle(color: AppColors.primary),
+            ),
           ),
           TextButton(
             onPressed: () async {
               Navigator.pop(context);
               await controller.deleteFolder(folder.id!, moveToDefault: true);
             },
-            child: const Text('Chuyển về "Tất cả"',style: TextStyle(color: AppColors.primary)),
+            child: const Text(
+              'Chuyển về "Tất cả"',
+              style: TextStyle(color: AppColors.primary),
+            ),
           ),
           TextButton(
             onPressed: () async {

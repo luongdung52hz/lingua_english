@@ -1,12 +1,13 @@
 // lib/controllers/friend_controller.dart
-import 'package:flutter/material.dart';
 import '../../data/datasources/remote/user_service.dart';
 import '../../data/models/user_model.dart';
 
 import 'base_controller.dart';
 
 class FriendController extends BaseController {
-  final UserService _userService = UserService();
+  FriendController({required UserService repository})
+    : _userService = repository;
+  final UserService _userService;
   List<UserModel> _searchResults = [];
   List<UserModel> get searchResults => _searchResults;
 

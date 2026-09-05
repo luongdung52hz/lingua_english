@@ -4,8 +4,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../models/flashcard_model.dart';
 
 class FlashcardRepository {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  FlashcardRepository({
+    required FirebaseFirestore firestore,
+    required FirebaseAuth auth,
+  }) : _firestore = firestore,
+       _auth = auth;
+  final FirebaseFirestore _firestore;
+  final FirebaseAuth _auth;
   String? get _userId => _auth.currentUser?.uid;
 
   /// Get user's flashcard collection reference
@@ -19,9 +24,16 @@ class FlashcardRepository {
     return _getFlashcardsCollection()
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-        .map((doc) => Flashcard.fromJson(doc.data() as Map<String, dynamic>, doc.id))
-        .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map(
+                (doc) => Flashcard.fromJson(
+                  doc.data() as Map<String, dynamic>,
+                  doc.id,
+                ),
+              )
+              .toList(),
+        );
   }
 
   /// Stream flashcards by folder
@@ -30,9 +42,16 @@ class FlashcardRepository {
         .where('folderId', isEqualTo: folderId)
         .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-        .map((doc) => Flashcard.fromJson(doc.data() as Map<String, dynamic>, doc.id))
-        .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map(
+                (doc) => Flashcard.fromJson(
+                  doc.data() as Map<String, dynamic>,
+                  doc.id,
+                ),
+              )
+              .toList(),
+        );
   }
 
   /// Stream flashcards to review (not memorized)
@@ -41,9 +60,16 @@ class FlashcardRepository {
         .where('isMemorized', isEqualTo: false)
         .orderBy('lastReviewed')
         .snapshots()
-        .map((snapshot) => snapshot.docs
-        .map((doc) => Flashcard.fromJson(doc.data() as Map<String, dynamic>, doc.id))
-        .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map(
+                (doc) => Flashcard.fromJson(
+                  doc.data() as Map<String, dynamic>,
+                  doc.id,
+                ),
+              )
+              .toList(),
+        );
   }
 
   /// Stream flashcards to review by folder
@@ -53,21 +79,33 @@ class FlashcardRepository {
         .where('isMemorized', isEqualTo: false)
         .orderBy('lastReviewed')
         .snapshots()
-        .map((snapshot) => snapshot.docs
-        .map((doc) => Flashcard.fromJson(doc.data() as Map<String, dynamic>, doc.id))
-        .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map(
+                (doc) => Flashcard.fromJson(
+                  doc.data() as Map<String, dynamic>,
+                  doc.id,
+                ),
+              )
+              .toList(),
+        );
   }
 
   /// Search flashcards
   Stream<List<Flashcard>> searchFlashcards(String query) {
     return _getFlashcardsCollection().snapshots().map((snapshot) {
       final allCards = snapshot.docs
-          .map((doc) => Flashcard.fromJson(doc.data() as Map<String, dynamic>, doc.id))
+          .map(
+            (doc) =>
+                Flashcard.fromJson(doc.data() as Map<String, dynamic>, doc.id),
+          )
           .toList();
       return allCards
-          .where((card) =>
-      card.vietnamese.toLowerCase().contains(query.toLowerCase()) ||
-          card.english.toLowerCase().contains(query.toLowerCase()))
+          .where(
+            (card) =>
+                card.vietnamese.toLowerCase().contains(query.toLowerCase()) ||
+                card.english.toLowerCase().contains(query.toLowerCase()),
+          )
           .toList();
     });
   }
@@ -83,7 +121,9 @@ class FlashcardRepository {
   /// Update flashcard
   Future<void> updateFlashcard(Flashcard flashcard) async {
     if (flashcard.id == null) throw Exception('Flashcard ID is required');
-    await _getFlashcardsCollection().doc(flashcard.id).update(flashcard.toJson());
+    await _getFlashcardsCollection()
+        .doc(flashcard.id)
+        .update(flashcard.toJson());
   }
 
   /// Delete flashcard
@@ -115,10 +155,7 @@ class FlashcardRepository {
     final snapshot = await _getFlashcardsCollection().get();
     final batch = _firestore.batch();
     for (var doc in snapshot.docs) {
-      batch.update(doc.reference, {
-        'isMemorized': false,
-        'reviewCount': 0,
-      });
+      batch.update(doc.reference, {'isMemorized': false, 'reviewCount': 0});
     }
     await batch.commit();
   }
@@ -146,7 +183,10 @@ class FlashcardRepository {
   Future<Map<String, int>> getStatistics() async {
     final snapshot = await _getFlashcardsCollection().get();
     final cards = snapshot.docs
-        .map((doc) => Flashcard.fromJson(doc.data() as Map<String, dynamic>, doc.id))
+        .map(
+          (doc) =>
+              Flashcard.fromJson(doc.data() as Map<String, dynamic>, doc.id),
+        )
         .toList();
     return {
       'total': cards.length,
@@ -162,7 +202,10 @@ class FlashcardRepository {
         .get();
 
     final cards = snapshot.docs
-        .map((doc) => Flashcard.fromJson(doc.data() as Map<String, dynamic>, doc.id))
+        .map(
+          (doc) =>
+              Flashcard.fromJson(doc.data() as Map<String, dynamic>, doc.id),
+        )
         .toList();
     return {
       'total': cards.length,
@@ -170,7 +213,6 @@ class FlashcardRepository {
       'toReview': cards.where((c) => !c.isMemorized).length,
     };
   }
-
 
   /// Get user's folder collection reference
   CollectionReference _getFoldersCollection() {
@@ -183,9 +225,16 @@ class FlashcardRepository {
     return _getFoldersCollection()
         .orderBy('createdAt', descending: false)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-        .map((doc) => FlashcardFolder.fromJson(doc.data() as Map<String, dynamic>, doc.id))
-        .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map(
+                (doc) => FlashcardFolder.fromJson(
+                  doc.data() as Map<String, dynamic>,
+                  doc.id,
+                ),
+              )
+              .toList(),
+        );
   }
 
   /// Create folder
@@ -201,7 +250,10 @@ class FlashcardRepository {
   }
 
   /// Delete folder (and optionally move cards to default)
-  Future<void> deleteFolder(String folderId, {bool moveToDefault = true}) async {
+  Future<void> deleteFolder(
+    String folderId, {
+    bool moveToDefault = true,
+  }) async {
     if (folderId == 'default') {
       throw Exception('Cannot delete default folder');
     }
@@ -252,15 +304,17 @@ class FlashcardRepository {
       final doc = await _getFoldersCollection().doc('default').get();
 
       if (!doc.exists) {
-        await _getFoldersCollection().doc('default').set(
-          FlashcardFolder(
-            id: 'default',
-            name: 'Tất cả',
-            description: 'Thư mục mặc định chứa tất cả flashcard',
-            icon: '📚',
-            color: '#9C27B0',
-          ).toJson(),
-        );
+        await _getFoldersCollection()
+            .doc('default')
+            .set(
+              FlashcardFolder(
+                id: 'default',
+                name: 'Tất cả',
+                description: 'Thư mục mặc định chứa tất cả flashcard',
+                icon: '📚',
+                color: '#9C27B0',
+              ).toJson(),
+            );
       }
     } catch (e) {
       print('Error initializing default folder: $e');

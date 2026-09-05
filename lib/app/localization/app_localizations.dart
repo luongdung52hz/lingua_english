@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:intl/intl.dart';
 
 class AppLocalizations {
   static const localizationsDelegates = <LocalizationsDelegate<dynamic>>[
@@ -9,6 +8,5 @@ class AppLocalizations {
     GlobalCupertinoLocalizations.delegate,
   ];
 
-  static const supportedLocales = [
-  ];
+  static const supportedLocales = [];
 }

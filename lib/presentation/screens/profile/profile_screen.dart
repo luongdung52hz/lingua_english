@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../data/repositories/auth_repository.dart';
 import 'package:get_it/get_it.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../widgets/bottom_nav_bar.dart';
@@ -33,7 +34,8 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildProfileHeader(User? user) {
-    final displayName = user?.displayName ?? user?.email?.split('@').first ?? 'User';
+    final displayName =
+        user?.displayName ?? user?.email?.split('@').first ?? 'User';
     final initial = displayName.isNotEmpty ? displayName[0].toUpperCase() : 'U';
 
     return Container(
@@ -92,10 +94,7 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             user?.email ?? "Chưa đăng nhập",
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
           ),
         ],
       ),
@@ -190,10 +189,7 @@ class ProfileScreen extends StatelessWidget {
             if (trailing != null)
               Text(
                 trailing,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
             const SizedBox(width: 8),
             Icon(Icons.chevron_right, size: 20, color: Colors.grey[400]),
@@ -221,10 +217,7 @@ class ProfileScreen extends StatelessWidget {
         icon: const Icon(Icons.logout),
         label: const Text(
           "Đăng xuất",
-          style: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         ),
         style: OutlinedButton.styleFrom(
           foregroundColor: Colors.red,
@@ -259,7 +252,7 @@ class ProfileScreen extends StatelessWidget {
     );
 
     if (shouldLogout == true && context.mounted) {
-      await GetIt.I<FirebaseAuth>().signOut();
+      await GetIt.I<AuthRepository>().signOut();
       if (context.mounted) context.go(Routes.login);
     }
   }

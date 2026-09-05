@@ -1,3 +1,4 @@
+import 'package:learn_english/presentation/feedback/app_feedback.dart';
 // lib/presentation/screens/flashcard/flashcard_detail_screen.dart
 
 import 'dart:math';
@@ -34,9 +35,12 @@ class _FlashcardDetailScreenState extends State<FlashcardDetailScreen>
     super.initState();
     _loadCard();
     _flipController = AnimationController(
-        duration: const Duration(milliseconds: 600), vsync: this);
-    _flipAnimation = Tween<double>(begin: 0, end: 1)
-        .animate(CurvedAnimation(parent: _flipController, curve: Curves.easeInOut));
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+    _flipAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _flipController, curve: Curves.easeInOut),
+    );
     _initTts();
   }
 
@@ -69,14 +73,21 @@ class _FlashcardDetailScreenState extends State<FlashcardDetailScreen>
   void _handleMenu(String action) async {
     switch (action) {
       case 'toggle':
-        await controller.toggleMemorized(currentCard.id!, !currentCard.isMemorized);
+        await controller.toggleMemorized(
+          currentCard.id!,
+          !currentCard.isMemorized,
+        );
         setState(() {
-          currentCard = currentCard.copyWith(isMemorized: !currentCard.isMemorized);
+          currentCard = currentCard.copyWith(
+            isMemorized: !currentCard.isMemorized,
+          );
         });
         HapticFeedback.mediumImpact();
-        Get.snackbar(
+        AppFeedback.show(
           'Cập nhật',
-          currentCard.isMemorized ? 'Đã đánh dấu là ĐÃ THUỘC' : 'Đã đánh dấu là CHƯA THUỘC',
+          currentCard.isMemorized
+              ? 'Đã đánh dấu là ĐÃ THUỘC'
+              : 'Đã đánh dấu là CHƯA THUỘC',
           backgroundColor: Colors.white,
           colorText: Colors.black87,
         );
@@ -90,8 +101,12 @@ class _FlashcardDetailScreenState extends State<FlashcardDetailScreen>
             onMove: (folderId) async {
               await controller.moveToFolder(currentCard.id!, folderId);
               Navigator.pop(context);
-              Get.snackbar('Thành công', 'Đã chuyển thẻ sang thư mục khác!',
-                  backgroundColor: Colors.green[100], colorText: Colors.black);
+              AppFeedback.show(
+                'Thành công',
+                'Đã chuyển thẻ sang thư mục khác!',
+                backgroundColor: Colors.green[100],
+                colorText: Colors.black,
+              );
             },
           ),
         );
@@ -102,12 +117,18 @@ class _FlashcardDetailScreenState extends State<FlashcardDetailScreen>
           context: context,
           builder: (_) => AlertDialog(
             title: const Text('Xóa thẻ này?'),
-            content: Text('Bạn có chắc muốn xóa "${currentCard.english}" không?'),
+            content: Text(
+              'Bạn có chắc muốn xóa "${currentCard.english}" không?',
+            ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Hủy')),
               TextButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  child: const Text('Xóa', style: TextStyle(color: Colors.red))),
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Hủy'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Xóa', style: TextStyle(color: Colors.red)),
+              ),
             ],
           ),
         );
@@ -136,30 +157,44 @@ class _FlashcardDetailScreenState extends State<FlashcardDetailScreen>
             itemBuilder: (_) => [
               PopupMenuItem(
                 value: 'toggle',
-                child: Row(children: [
-                  Icon(
-                    currentCard.isMemorized ? Icons.cancel : Icons.check_circle,
-                    color: currentCard.isMemorized ? Colors.orange : Colors.green,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(currentCard.isMemorized ? 'Đánh dấu chưa thuộc' : 'Đánh dấu đã thuộc'),
-                ]),
+                child: Row(
+                  children: [
+                    Icon(
+                      currentCard.isMemorized
+                          ? Icons.cancel
+                          : Icons.check_circle,
+                      color: currentCard.isMemorized
+                          ? Colors.orange
+                          : Colors.green,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      currentCard.isMemorized
+                          ? 'Đánh dấu chưa thuộc'
+                          : 'Đánh dấu đã thuộc',
+                    ),
+                  ],
+                ),
               ),
               const PopupMenuItem(
                 value: 'move',
-                child: Row(children: [
-                  Icon(Icons.drive_file_move, color: Colors.blue),
-                  SizedBox(width: 8),
-                  Text('Chuyển thư mục'),
-                ]),
+                child: Row(
+                  children: [
+                    Icon(Icons.drive_file_move, color: Colors.blue),
+                    SizedBox(width: 8),
+                    Text('Chuyển thư mục'),
+                  ],
+                ),
               ),
               const PopupMenuItem(
                 value: 'delete',
-                child: Row(children: [
-                  Icon(Icons.delete, color: Colors.red),
-                  SizedBox(width: 8),
-                  Text('Xóa thẻ'),
-                ]),
+                child: Row(
+                  children: [
+                    Icon(Icons.delete, color: Colors.red),
+                    SizedBox(width: 8),
+                    Text('Xóa thẻ'),
+                  ],
+                ),
               ),
             ],
             icon: const Icon(Icons.more_vert),
@@ -183,29 +218,23 @@ class _FlashcardDetailScreenState extends State<FlashcardDetailScreen>
                       ..setEntry(3, 2, 0.001)
                       ..rotateY(angle),
                     child: isFront
-                        ? FlashcardCard(
-                      flashcard: currentCard,
-                      isFront: true,
-                    )
+                        ? FlashcardCard(flashcard: currentCard, isFront: true)
                         : Transform(
-                      alignment: Alignment.center,
-                      transform: Matrix4.identity()..rotateY(pi),
-                      child: FlashcardCard(
-                        flashcard: currentCard,
-                        isFront: false,
-                        onSpeak: () => _speak(currentCard.english),
-                      ),
-                    ),
+                            alignment: Alignment.center,
+                            transform: Matrix4.identity()..rotateY(pi),
+                            child: FlashcardCard(
+                              flashcard: currentCard,
+                              isFront: false,
+                              onSpeak: () => _speak(currentCard.english),
+                            ),
+                          ),
                   );
                 },
               ),
             ),
             Container(
               padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colors.transparent,
-
-              ),
+              decoration: BoxDecoration(color: Colors.transparent),
               child: Column(
                 children: [
                   const Icon(Icons.touch_app, color: Colors.grey),
@@ -216,7 +245,7 @@ class _FlashcardDetailScreenState extends State<FlashcardDetailScreen>
                   ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),

@@ -1,3 +1,4 @@
+import 'package:learn_english/presentation/feedback/app_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
@@ -41,12 +42,15 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isQuizComplete = _titleController.text.isNotEmpty &&
+    final bool isQuizComplete =
+        _titleController.text.isNotEmpty &&
         _questions.isNotEmpty &&
         _questions.every(_computeQuestionComplete) &&
         _questions.every(_isQuestionValid);
 
-    final int completeQuestions = _questions.where(_computeQuestionComplete).length;
+    final int completeQuestions = _questions
+        .where(_computeQuestionComplete)
+        .length;
     final double completionPercentage = _questions.isEmpty
         ? 0
         : (completeQuestions / _questions.length * 100);
@@ -78,8 +82,9 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        backgroundColor:
-                        isQuizComplete ? AppColors.primary : null,
+                        backgroundColor: isQuizComplete
+                            ? AppColors.primary
+                            : null,
                         disabledBackgroundColor: Colors.grey[300],
                       ),
                       child: Text(
@@ -87,8 +92,9 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color:
-                          isQuizComplete ? Colors.white : Colors.grey[600],
+                          color: isQuizComplete
+                              ? Colors.white
+                              : Colors.grey[600],
                         ),
                       ),
                     ),
@@ -101,7 +107,6 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
     );
   }
 
-
   Widget _buildQuizInfoSection(double completionPercentage) {
     return Container(
       color: Colors.grey[50],
@@ -112,8 +117,7 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
             cursorColor: Colors.grey,
             controller: _titleController,
             decoration: _inputDecoration('Tiêu đề Quiz'),
-            validator: (value) =>
-            value?.isEmpty ?? true ? 'Bắt buộc' : null,
+            validator: (value) => value?.isEmpty ?? true ? 'Bắt buộc' : null,
             onChanged: (_) => _updateState(),
           ),
           const SizedBox(height: 12),
@@ -145,14 +149,21 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
               ElevatedButton.icon(
                 onPressed: _generateQuestions,
                 icon: const Icon(Icons.add, color: Colors.white, size: 20),
-                label: const Text('Tạo',
-                    style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                label: const Text(
+                  'Tạo',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 20, vertical: 16),
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   backgroundColor: AppColors.primary,
                 ),
               ),
@@ -263,14 +274,10 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
                         isComplete
                             ? Icons.check_circle
                             : Icons.radio_button_unchecked,
-                        color: isComplete
-                            ? Colors.green
-                            : Colors.grey[400],
+                        color: isComplete ? Colors.green : Colors.grey[400],
                       ),
                       const SizedBox(width: 8),
-                      Icon(isExpanded
-                          ? Icons.expand_less
-                          : Icons.expand_more),
+                      Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
                     ],
                   ),
                 ),
@@ -287,17 +294,12 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
     );
   }
 
-
-
   Widget _buildQuestionForm(QuestionModel question, int index) {
-    _questionControllers.putIfAbsent(
-      question.id,
-          () {
-        final c = TextEditingController(text: question.question);
-        c.addListener(_updateState);
-        return c;
-      },
-    );
+    _questionControllers.putIfAbsent(question.id, () {
+      final c = TextEditingController(text: question.question);
+      c.addListener(_updateState);
+      return c;
+    });
 
     final questionController = _questionControllers[question.id]!;
 
@@ -315,12 +317,11 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
         c.dispose();
       });
 
-      _optionControllers[question.id] =
-          options.map((opt) {
-            final c = TextEditingController(text: opt);
-            c.addListener(_updateState);
-            return c;
-          }).toList();
+      _optionControllers[question.id] = options.map((opt) {
+        final c = TextEditingController(text: opt);
+        c.addListener(_updateState);
+        return c;
+      }).toList();
     }
 
     final optionControllers = _optionControllers[question.id]!;
@@ -334,19 +335,19 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
           decoration: _inputDecoration('Nội dung câu hỏi'),
           maxLines: 2,
           onChanged: (text) {
-            _questions[index] =
-                _questions[index].copyWith(question: text);
+            _questions[index] = _questions[index].copyWith(question: text);
             _updateState();
           },
         ),
         const SizedBox(height: 16),
-        const Text('Lựa chọn:',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+        const Text(
+          'Lựa chọn:',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        ),
         const SizedBox(height: 8),
         ...List.generate(optionControllers.length, (i) {
           final optController = optionControllers[i];
-          final currentValue =
-          i < options.length ? options[i] : '';
+          final currentValue = i < options.length ? options[i] : '';
 
           return Padding(
             padding: const EdgeInsets.only(bottom: 8),
@@ -358,8 +359,9 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
                   activeColor: AppColors.primary,
                   onChanged: (val) {
                     if (val != null && val.isNotEmpty) {
-                      _questions[index] = _questions[index]
-                          .copyWith(correctAnswer: val);
+                      _questions[index] = _questions[index].copyWith(
+                        correctAnswer: val,
+                      );
                       _updateState();
                     }
                   },
@@ -375,34 +377,33 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
                       newOpts[i] = text;
 
                       String? newAnswer = question.correctAnswer;
-                      if (newAnswer ==
-                          currentValue) {
-                        newAnswer =
-                        text.isEmpty ? null : text;
+                      if (newAnswer == currentValue) {
+                        newAnswer = text.isEmpty ? null : text;
                       }
 
-                      _questions[index] = _questions[index]
-                          .copyWith(options: newOpts, correctAnswer: newAnswer);
+                      _questions[index] = _questions[index].copyWith(
+                        options: newOpts,
+                        correctAnswer: newAnswer,
+                      );
                       _updateState();
                     },
                   ),
                 ),
-                if (question.options.length > 2 &&
-                    i < question.options.length)
+                if (question.options.length > 2 && i < question.options.length)
                   IconButton(
                     icon: const Icon(Icons.close, size: 20),
                     onPressed: () {
                       final newOpts = List<String>.from(question.options);
-                      final removed =
-                      newOpts.removeAt(i);
+                      final removed = newOpts.removeAt(i);
                       String? newAns = question.correctAnswer;
-                      if (removed ==
-                          question.correctAnswer) {
+                      if (removed == question.correctAnswer) {
                         newAns = null;
                       }
 
-                      _questions[index] = _questions[index]
-                          .copyWith(options: newOpts, correctAnswer: newAns);
+                      _questions[index] = _questions[index].copyWith(
+                        options: newOpts,
+                        correctAnswer: newAns,
+                      );
                       optController.dispose();
                       _optionControllers[question.id]!.removeAt(i);
                       _updateState();
@@ -423,24 +424,23 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
             _updateState();
           },
           icon: Icon(Icons.add, color: AppColors.primary, size: 18),
-          label:
-          Text('Thêm lựa chọn', style: TextStyle(color: AppColors.primary)),
+          label: Text(
+            'Thêm lựa chọn',
+            style: TextStyle(color: AppColors.primary),
+          ),
         ),
       ],
     );
   }
-
 
   InputDecoration _inputDecoration(String label) => InputDecoration(
     labelText: label,
     labelStyle: TextStyle(color: Colors.grey[700]),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(8),
-      borderSide:
-      BorderSide(color: AppColors.primary, width: 1),
+      borderSide: BorderSide(color: AppColors.primary, width: 1),
     ),
-    border:
-    OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
     filled: true,
     fillColor: Colors.white,
   );
@@ -468,7 +468,7 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
     _disposeAllControllers();
     _questions = List.generate(
       count,
-          (_) => QuestionModel(id: const Uuid().v4(), question: '', options: []),
+      (_) => QuestionModel(id: const Uuid().v4(), question: '', options: []),
     );
     _expandedIndex = null;
     _updateState();
@@ -477,18 +477,18 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
   Future<void> _saveQuiz() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final isQuizComplete = _titleController.text.isNotEmpty &&
+    final isQuizComplete =
+        _titleController.text.isNotEmpty &&
         _questions.isNotEmpty &&
         _questions.every(_computeQuestionComplete) &&
         _questions.every(_isQuestionValid);
 
     if (!isQuizComplete) {
-      Get.snackbar(
+      AppFeedback.show(
         'Cảnh báo',
         'Vui lòng hoàn thành tất cả câu hỏi!',
         backgroundColor: Colors.orange,
         colorText: Colors.white,
-        snackPosition: SnackPosition.TOP,
       );
       return;
     }
@@ -507,18 +507,22 @@ class _CreateQuizScreenState extends State<CreateQuizScreen> {
     try {
       await controller.createQuiz(quiz);
       if (mounted) {
-        Get.snackbar('Thành công', 'Quiz đã được lưu!',
-            backgroundColor: Colors.green,
-            colorText: Colors.white,
-            snackPosition: SnackPosition.TOP);
+        AppFeedback.show(
+          'Thành công',
+          'Quiz đã được lưu!',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
         GoRouter.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
-        Get.snackbar('Lỗi', 'Không thể lưu quiz: $e',
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
-            snackPosition: SnackPosition.TOP);
+        AppFeedback.show(
+          'Lỗi',
+          'Không thể lưu quiz: $e',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
       }
     }
   }

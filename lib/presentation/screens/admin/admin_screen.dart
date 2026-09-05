@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:go_router/go_router.dart';
+import 'package:get_it/get_it.dart';
+import 'widgets/admin_lesson_editor.dart';
 import '../../../../data/models/lesson_model.dart';
-import '../../../app/routes/route_names.dart';
 import '../../controllers/admin_controller.dart';
 import '../../../resources/styles/colors.dart';
 
@@ -13,8 +12,10 @@ class AdminScreen extends StatefulWidget {
   State<AdminScreen> createState() => _AdminScreenState();
 }
 
-class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStateMixin {
+class _AdminScreenState extends State<AdminScreen>
+    with SingleTickerProviderStateMixin {
   late final AdminController controller;
+  late final AdminLessonEditor editor;
   late final TabController _tabController;
 
   String _searchQuery = '';
@@ -27,30 +28,36 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
-    controller = AdminController();
+    controller = GetIt.I<AdminController>();
+    editor = AdminLessonEditor(controller: controller);
     _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
   void dispose() {
     _tabController.dispose();
-    controller.dispose();
+    editor.dispose();
     super.dispose();
   }
 
   List<LessonModel> _filterLessons(List<LessonModel> lessons) {
     return lessons.where((lesson) {
       // Search filter
-      final matchesSearch = _searchQuery.isEmpty ||
+      final matchesSearch =
+          _searchQuery.isEmpty ||
           lesson.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          lesson.description.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          lesson.description.toLowerCase().contains(
+            _searchQuery.toLowerCase(),
+          ) ||
           lesson.topic.toLowerCase().contains(_searchQuery.toLowerCase());
 
       // Level filter
-      final matchesLevel = _selectedLevel == null || lesson.level == _selectedLevel;
+      final matchesLevel =
+          _selectedLevel == null || lesson.level == _selectedLevel;
 
       // Skill filter
-      final matchesSkill = _selectedSkill == null || lesson.skill == _selectedSkill;
+      final matchesSkill =
+          _selectedSkill == null || lesson.skill == _selectedSkill;
 
       return matchesSearch && matchesLevel && matchesSkill;
     }).toList();
@@ -106,12 +113,10 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
         elevation: 2,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => controller.logout(context),
+          onPressed: () => editor.logout(context),
           tooltip: 'Đăng xuất',
         ),
-        actions: [
-
-        ],
+        actions: [],
         bottom: TabBar(
           controller: _tabController,
           indicatorWeight: 1,
@@ -132,7 +137,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
         children: [
           _buildFilterBar(),
           Expanded(
-            child: StreamBuilder<QuerySnapshot>(
+            child: StreamBuilder<List<LessonModel>>(
               stream: controller.lessonsStream,
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
@@ -143,12 +148,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                final allLessons = snapshot.data!.docs
-                    .map((doc) => LessonModel.fromJson(
-                  doc.data() as Map<String, dynamic>,
-                  doc.id,
-                ))
-                    .toList();
+                final allLessons = snapshot.data!;
 
                 final filteredLessons = _filterLessons(allLessons);
 
@@ -171,7 +171,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => controller.showAddDialog(context),
+        onPressed: () => editor.showAddDialog(context),
         icon: const Icon(Icons.add),
         label: const Text('Thêm bài học'),
         backgroundColor: AppColors.primary,
@@ -202,11 +202,11 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
               prefixIcon: const Icon(Icons.search),
               suffixIcon: _searchQuery.isNotEmpty
                   ? IconButton(
-                icon: const Icon(Icons.clear),
-                onPressed: () {
-                  setState(() => _searchQuery = '');
-                },
-              )
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        setState(() => _searchQuery = '');
+                      },
+                    )
                   : null,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -226,7 +226,10 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                const Text('Lọc: ', style: TextStyle(fontWeight: FontWeight.w500)),
+                const Text(
+                  'Lọc: ',
+                  style: TextStyle(fontWeight: FontWeight.w500),
+                ),
                 const SizedBox(width: 8),
                 _buildFilterChip(
                   label: 'Level',
@@ -282,14 +285,10 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
         backgroundColor: value != null ? Colors.blue[100] : Colors.grey[200],
       ),
       itemBuilder: (context) => [
-        PopupMenuItem(
-          value: null,
-          child: Text('Tất cả $label'),
+        PopupMenuItem(value: null, child: Text('Tất cả $label')),
+        ...options.map(
+          (option) => PopupMenuItem(value: option, child: Text(option)),
         ),
-        ...options.map((option) => PopupMenuItem(
-          value: option,
-          child: Text(option),
-        )),
       ],
       onSelected: onSelected,
     );
@@ -322,7 +321,10 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.primary,
                       borderRadius: BorderRadius.circular(20),
@@ -380,7 +382,10 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: skillColors[skill],
                       borderRadius: BorderRadius.circular(20),
@@ -437,16 +442,14 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
           ),
           title: Text(
             '$topic (${topicLessons.length})',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
-          subtitle: const Text('Nhấn để xem chi tiết', style: TextStyle(fontSize: 12, color: Colors.grey)),
+          subtitle: const Text(
+            'Nhấn để xem chi tiết',
+            style: TextStyle(fontSize: 12, color: Colors.grey),
+          ),
           childrenPadding: const EdgeInsets.only(left: 16, bottom: 16),
-          children: [
-            ...topicLessons.map((lesson) => _buildLessonCard(lesson)),
-          ],
+          children: [...topicLessons.map((lesson) => _buildLessonCard(lesson))],
           onExpansionChanged: (expanded) {
             if (expanded) {
               print('Expanded topic: $topic');
@@ -484,18 +487,27 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
               runSpacing: 0,
               children: [
                 Chip(
-                  label: Text(lesson.level, style: const TextStyle(fontSize: 10)),
+                  label: Text(
+                    lesson.level,
+                    style: const TextStyle(fontSize: 10),
+                  ),
                   backgroundColor: Colors.transparent,
                   padding: EdgeInsets.zero,
                 ),
                 Chip(
-                  label: Text(lesson.skill.toUpperCase(), style: const TextStyle(fontSize: 10)),
+                  label: Text(
+                    lesson.skill.toUpperCase(),
+                    style: const TextStyle(fontSize: 10),
+                  ),
                   backgroundColor: Colors.transparent,
                   padding: EdgeInsets.zero,
                 ),
                 if (lesson.topic.isNotEmpty)
                   Chip(
-                    label: Text(lesson.topic, style: const TextStyle(fontSize: 10)),
+                    label: Text(
+                      lesson.topic,
+                      style: const TextStyle(fontSize: 10),
+                    ),
                     backgroundColor: Colors.transparent,
                     padding: EdgeInsets.zero,
                   ),
@@ -508,11 +520,11 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
           children: [
             IconButton(
               icon: Icon(Icons.edit, color: Colors.blue[400], size: 28),
-              onPressed: () => controller.showEditDialog(context, lesson),
+              onPressed: () => editor.showEditDialog(context, lesson),
             ),
             IconButton(
               icon: Icon(Icons.delete, color: Colors.red[400], size: 28),
-              onPressed: () => controller.deleteLesson(context, lesson.id),
+              onPressed: () => editor.deleteLesson(context, lesson.id),
             ),
           ],
         ),

@@ -5,7 +5,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../data/models/chat_room_model.dart';
 import '../../../data/models/message_model.dart';
@@ -17,11 +16,7 @@ class ChatScreen extends StatefulWidget {
   final String roomId;
   final String currentUid;
 
-  const ChatScreen({
-    super.key,
-    required this.roomId,
-    required this.currentUid,
-  });
+  const ChatScreen({super.key, required this.roomId, required this.currentUid});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -51,7 +46,10 @@ class _ChatScreenState extends State<ChatScreen> {
     _scrollController.addListener(_onScroll);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final chatController = Provider.of<ChatController>(context, listen: false);
+      final chatController = Provider.of<ChatController>(
+        context,
+        listen: false,
+      );
       chatController.setCurrentRoom(widget.roomId);
       _loadFriendName();
       _startListeningMessages(chatController);
@@ -60,16 +58,20 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _startListeningMessages(ChatController chatController) {
     _messagesSubscription?.cancel();
-    _messagesSubscription =
-        chatController.getMessagesStream(widget.roomId).listen((newMessages) {
-          _handleNewMessages(newMessages);
-        }, onError: (error) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Lỗi tải tin nhắn: $error')),
-            );
-          }
-        });
+    _messagesSubscription = chatController
+        .getMessagesStream(widget.roomId)
+        .listen(
+          (newMessages) {
+            _handleNewMessages(newMessages);
+          },
+          onError: (error) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Lỗi tải tin nhắn: $error')),
+              );
+            }
+          },
+        );
   }
 
   void _handleNewMessages(List<MessageModel> newMessages) {
@@ -106,7 +108,8 @@ class _ChatScreenState extends State<ChatScreen> {
   void _onScroll() {
     if (!_scrollController.hasClients) return;
 
-    if (_scrollController.position.userScrollDirection != ScrollDirection.idle) {
+    if (_scrollController.position.userScrollDirection !=
+        ScrollDirection.idle) {
       _isUserScrolling = false;
       Future.delayed(const Duration(milliseconds: 1500), () {
         if (mounted &&
@@ -205,10 +208,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   const Center(
                     child: Text(
                       'Chưa có tin nhắn nào',
-                      style: TextStyle(
-                        color: Color(0xFF757575),
-                        fontSize: 16,
-                      ),
+                      style: TextStyle(color: Color(0xFF757575), fontSize: 16),
                     ),
                   ),
 
@@ -229,16 +229,18 @@ class _ChatScreenState extends State<ChatScreen> {
                             : Alignment.centerLeft,
                         child: Container(
                           margin: const EdgeInsets.symmetric(
-                              vertical: 2, horizontal: 8),
+                            vertical: 2,
+                            horizontal: 8,
+                          ),
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 10),
+                            horizontal: 16,
+                            vertical: 10,
+                          ),
                           constraints: BoxConstraints(
                             maxWidth: MediaQuery.of(context).size.width * 0.75,
                           ),
                           decoration: BoxDecoration(
-                            color: isMe
-                                ? AppColors.primary
-                                : Colors.grey[200],
+                            color: isMe ? AppColors.primary : Colors.grey[200],
                             borderRadius: BorderRadius.circular(18),
                           ),
                           child: Column(
@@ -249,13 +251,13 @@ class _ChatScreenState extends State<ChatScreen> {
                               //         _messages[index].sentAt.toDate().day !=
                               //             _messages[index + 1].sentAt.toDate().day))
                               // Padding(
-                                 // padding: const EdgeInsets.only(bottom: 8),
-                                  // child: Text(
-                                  //   _formatTime(msg.sentAt),
-                                  //   style: TextStyle(
-                                  //       fontSize: 12,
-                                  //       color: Colors.grey[500]),
-                                  // ),
+                              // padding: const EdgeInsets.only(bottom: 8),
+                              // child: Text(
+                              //   _formatTime(msg.sentAt),
+                              //   style: TextStyle(
+                              //       fontSize: 12,
+                              //       color: Colors.grey[500]),
+                              // ),
                               //  ),
                               Text(
                                 msg.content,
@@ -285,8 +287,11 @@ class _ChatScreenState extends State<ChatScreen> {
                         _scrollToTop(animate: true);
                       },
                       backgroundColor: AppColors.primary,
-                      child: const Icon(Icons.arrow_downward,
-                          color: Colors.white, size: 20),
+                      child: const Icon(
+                        Icons.arrow_downward,
+                        color: Colors.white,
+                        size: 20,
+                      ),
                     ),
                   ),
               ],
@@ -319,10 +324,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 controller: _messageController,
                 decoration: InputDecoration(
                   hintText: 'Nhập tin nhắn...',
-                  hintStyle: TextStyle(
-                    color: Colors.grey[500],
-                    fontSize: 16,
-                  ),
+                  hintStyle: TextStyle(color: Colors.grey[500], fontSize: 16),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(24),
                     borderSide: BorderSide.none,
@@ -334,10 +336,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     vertical: 8,
                   ),
                 ),
-                style: const TextStyle(
-                  color: Colors.black87,
-                  fontSize: 16,
-                ),
+                style: const TextStyle(color: Colors.black87, fontSize: 16),
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => _sendMessage(chatController),
               ),
@@ -351,11 +350,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 onTap: () => _sendMessage(chatController),
                 child: const Padding(
                   padding: EdgeInsets.all(12),
-                  child: Icon(
-                    Icons.send,
-                    color: Colors.white,
-                    size: 20,
-                  ),
+                  child: Icon(Icons.send, color: Colors.white, size: 20),
                 ),
               ),
             ),

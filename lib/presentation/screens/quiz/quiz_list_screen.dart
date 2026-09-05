@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
-import '../../../data/models/quiz_model.dart';
 import '../../../resources/styles/colors.dart';
-import '../../../resources/styles/text_styles.dart';
 import '../../controllers/quiz_controller.dart';
 import '../../widgets/info_card.dart';
 import '../../widgets/search_bar.dart'; // Import SearchBarWidget
@@ -11,7 +9,7 @@ import '../../widgets/search_bar.dart'; // Import SearchBarWidget
 class QuizListScreen extends StatelessWidget {
   QuizListScreen({super.key});
 
-  final QuizController controller = Get.put(QuizController());
+  final QuizController controller = Get.find<QuizController>();
 
   @override
   Widget build(BuildContext context) {
@@ -26,9 +24,11 @@ class QuizListScreen extends StatelessWidget {
         ),
         title: const Text(
           'Danh sách Quiz',
-          style:TextStyle(color: Colors.white,
+          style: TextStyle(
+            color: Colors.white,
             fontWeight: FontWeight.w600,
-            fontSize: 20,),
+            fontSize: 20,
+          ),
         ),
         actions: [
           IconButton(
@@ -47,14 +47,23 @@ class QuizListScreen extends StatelessWidget {
               return const Center(child: CircularProgressIndicator());
             }
 
-            final allQuizzes = controller.quizzes; // Use all quizzes for display
+            final allQuizzes =
+                controller.quizzes; // Use all quizzes for display
             final searchQuery = controller.searchQuery.value.trim();
             final filteredList = searchQuery.isEmpty
                 ? allQuizzes
-                : allQuizzes.where((quiz) =>
-            quiz.title.toLowerCase().contains(searchQuery.toLowerCase()) ||
-                (quiz.description?.toLowerCase().contains(searchQuery.toLowerCase()) ?? false)
-            ).toList();
+                : allQuizzes
+                      .where(
+                        (quiz) =>
+                            quiz.title.toLowerCase().contains(
+                              searchQuery.toLowerCase(),
+                            ) ||
+                            (quiz.description?.toLowerCase().contains(
+                                  searchQuery.toLowerCase(),
+                                ) ??
+                                false),
+                      )
+                      .toList();
 
             return Column(
               children: [
@@ -76,44 +85,53 @@ class QuizListScreen extends StatelessWidget {
                     fillColor: Colors.white,
                     iconSize: 20,
                     borderRadius: BorderRadius.circular(12),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 12,
+                      horizontal: 16,
+                    ),
                   ),
                 ),
 
                 Expanded(
                   child: filteredList.isEmpty
                       ? Center(
-                    child: Text(
-                      searchQuery.isEmpty ? 'Không có quiz nào' : 'Không tìm thấy quiz nào',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey[600],
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  )
+                          child: Text(
+                            searchQuery.isEmpty
+                                ? 'Không có quiz nào'
+                                : 'Không tìm thấy quiz nào',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        )
                       : RefreshIndicator(
-                    onRefresh: () async {
-                      await controller.fetchAllQuizzes();
-                    },
-                    child: ListView.builder(
-                      key: ValueKey('quiz_list_${filteredList.length}'),
-                      padding: const EdgeInsets.symmetric(vertical:12 ),
-                      itemCount: filteredList.length,
-                      itemBuilder: (context, index) {
-                        final quiz = filteredList[index];
-                        return InfoCard(
-                          title: quiz.title,
-                          subtitle: quiz.description,
-                          infoPairs: [
-                            IconTextPair(Icons.quiz, '${quiz.totalQuestions} câu hỏi'), // Reusable info pair
-                          ],
-                        //  isCompleted: false, // Or from model if available (e.g., quiz.isCompleted)
-                          onTap: () => context.push('/quiz/detail/${quiz.id}'),
-                        );
-                      },
-                    ),
-                  ),
+                          onRefresh: () async {
+                            await controller.fetchAllQuizzes();
+                          },
+                          child: ListView.builder(
+                            key: ValueKey('quiz_list_${filteredList.length}'),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            itemCount: filteredList.length,
+                            itemBuilder: (context, index) {
+                              final quiz = filteredList[index];
+                              return InfoCard(
+                                title: quiz.title,
+                                subtitle: quiz.description,
+                                infoPairs: [
+                                  IconTextPair(
+                                    Icons.quiz,
+                                    '${quiz.totalQuestions} câu hỏi',
+                                  ), // Reusable info pair
+                                ],
+                                //  isCompleted: false, // Or from model if available (e.g., quiz.isCompleted)
+                                onTap: () =>
+                                    context.push('/quiz/detail/${quiz.id}'),
+                              );
+                            },
+                          ),
+                        ),
                 ),
               ],
             );

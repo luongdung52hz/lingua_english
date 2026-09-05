@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../resources/styles/colors.dart';
-import '../../../resources/styles/text_styles.dart';
 import '../../controllers/grammar_controller.dart';
 import '../../widgets/expanded_card.dart';
 
@@ -25,9 +24,7 @@ class GrammarDetailScreen extends StatelessWidget {
       final subTopic = controller.getCurrentSubTopic();
       if (subTopic == null) {
         return const Scaffold(
-          body: Center(
-            child: Text('Không tìm thấy nội dung'),
-          ),
+          body: Center(child: Text('Không tìm thấy nội dung')),
         );
       }
 
@@ -36,13 +33,12 @@ class GrammarDetailScreen extends StatelessWidget {
       return Scaffold(
         appBar: AppBar(
           foregroundColor: Colors.white,
-          title: Text(subTopic.title,),
+          title: Text(subTopic.title),
           iconTheme: IconThemeData(color: Colors.white),
           backgroundColor: AppColors.primary,
           elevation: 0,
         ),
         body: Container(
-
           child: ListView.builder(
             padding: const EdgeInsets.all(12),
             itemCount: sectionsList.length,
@@ -50,7 +46,8 @@ class GrammarDetailScreen extends StatelessWidget {
               final entry = sectionsList[index];
               final section = entry.value;
               final sectionKey = entry.key;
-              final isCompleted = controller.completedSections[sectionKey] ?? false;
+              final isCompleted =
+                  controller.completedSections[sectionKey] ?? false;
 
               return ExpandableCard(
                 index: index,
@@ -60,7 +57,8 @@ class GrammarDetailScreen extends StatelessWidget {
                 content: section.content, // Content đã ở dạng Markdown
                 examples: section.examples,
                 isCompleted: isCompleted,
-                onMarkComplete: () => controller.markSectionCompleted(sectionKey),
+                onMarkComplete: () =>
+                    controller.markSectionCompleted(sectionKey),
               );
             },
           ),

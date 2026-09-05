@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:go_router/go_router.dart';
 import '../../../../../data/models/lesson_model.dart';
 import './shared/lesson_header.dart';
 import './shared/question_list.dart';
@@ -84,14 +82,30 @@ class _ListeningContentState extends State<ListeningContent> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Chọn tốc độ đọc', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text(
+              'Chọn tốc độ đọc',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 16),
             ..._speedOptions.entries.map((entry) {
               final isSelected = _speechRate == entry.value;
               return ListTile(
-                leading: Icon(isSelected ? Icons.check_circle : Icons.circle_outlined, color: isSelected ? Colors.blue : Colors.grey),
-                title: Text(entry.key, style: TextStyle(color: isSelected ? Colors.blue : Colors.black)),
-                trailing: Text('${entry.value}x', style: TextStyle(color: isSelected ? Colors.blue : Colors.grey)),
+                leading: Icon(
+                  isSelected ? Icons.check_circle : Icons.circle_outlined,
+                  color: isSelected ? Colors.blue : Colors.grey,
+                ),
+                title: Text(
+                  entry.key,
+                  style: TextStyle(
+                    color: isSelected ? Colors.blue : Colors.black,
+                  ),
+                ),
+                trailing: Text(
+                  '${entry.value}x',
+                  style: TextStyle(
+                    color: isSelected ? Colors.blue : Colors.grey,
+                  ),
+                ),
                 onTap: () {
                   _changeSpeechRate(entry.value);
                   Navigator.pop(context);
@@ -166,7 +180,10 @@ class _ListeningContentState extends State<ListeningContent> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
@@ -187,7 +204,11 @@ class _ListeningContentState extends State<ListeningContent> {
                         ),
                       ),
                       const SizedBox(width: 4),
-                      const Icon(Icons.arrow_drop_down, color: Colors.white, size: 12),
+                      const Icon(
+                        Icons.arrow_drop_down,
+                        color: Colors.white,
+                        size: 12,
+                      ),
                     ],
                   ),
                 ),
@@ -215,8 +236,13 @@ class _ListeningContentState extends State<ListeningContent> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: Colors.blue[600],
-                padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 26,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             ),
           ),

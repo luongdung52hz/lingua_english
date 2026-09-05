@@ -1,3 +1,4 @@
+import 'package:learn_english/presentation/feedback/app_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -9,7 +10,8 @@ import '../../controllers/youtube_controller.dart';
 import '../../widgets/info_card.dart';
 
 class YoutubePlayerScreen extends StatefulWidget {
-  const YoutubePlayerScreen({Key? key, required this.videoId}) : super(key: key);
+  const YoutubePlayerScreen({Key? key, required this.videoId})
+    : super(key: key);
 
   final String videoId;
 
@@ -58,7 +60,8 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
       _isInitializing.value = true;
 
       // Get video from route or create fallback
-      _video = GoRouterState.of(context).extra as YoutubeVideo? ??
+      _video =
+          GoRouterState.of(context).extra as YoutubeVideo? ??
           YoutubeVideo(
             id: widget.videoId,
             title: 'Video',
@@ -89,7 +92,9 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
       _playerController!.addListener(_onPlayerStateChanged);
 
       // Update video index
-      final foundIndex = _controller.videos.indexWhere((v) => v.id == _video!.id);
+      final foundIndex = _controller.videos.indexWhere(
+        (v) => v.id == _video!.id,
+      );
       if (foundIndex != -1) {
         _controller.setCurrentVideoIndex(foundIndex);
       }
@@ -130,7 +135,8 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
       }
 
       // Get new video
-      _video = GoRouterState.of(context).extra as YoutubeVideo? ??
+      _video =
+          GoRouterState.of(context).extra as YoutubeVideo? ??
           YoutubeVideo(
             id: widget.videoId,
             title: 'Video',
@@ -164,7 +170,9 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
       _playerController!.addListener(_onPlayerStateChanged);
 
       // Update video index
-      final foundIndex = _controller.videos.indexWhere((v) => v.id == _video!.id);
+      final foundIndex = _controller.videos.indexWhere(
+        (v) => v.id == _video!.id,
+      );
       if (foundIndex != -1) {
         _controller.setCurrentVideoIndex(foundIndex);
       }
@@ -233,10 +241,10 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
       if (_autoPlayEnabled.value) {
         _playNextVideo();
       } else {
-        Get.snackbar(
+        AppFeedback.show(
           'Video đã kết thúc',
           'Nhấn "Xem lại" để xem lại hoặc chọn video khác',
-          snackPosition: SnackPosition.BOTTOM,
+
           duration: const Duration(seconds: 2),
           backgroundColor: Colors.black87,
           colorText: Colors.white,
@@ -266,10 +274,10 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
   void _playNextVideo() {
     final currentIndex = _controller.currentVideoIndex.value;
     if (currentIndex == -1 || currentIndex >= _controller.videos.length - 1) {
-      Get.snackbar(
+      AppFeedback.show(
         'Thông báo',
         'Đã phát hết danh sách video',
-        snackPosition: SnackPosition.BOTTOM,
+
         duration: const Duration(seconds: 2),
         margin: const EdgeInsets.all(16),
       );
@@ -282,16 +290,19 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
     _controller.setCurrentVideoIndex(nextIndex);
     final nextVideo = _controller.videos[nextIndex];
 
-    context.pushReplacement('/youtube/player/${nextVideo.id}', extra: nextVideo);
+    context.pushReplacement(
+      '/youtube/player/${nextVideo.id}',
+      extra: nextVideo,
+    );
   }
 
   void _playNextManually() {
     final currentIndex = _controller.currentVideoIndex.value;
     if (currentIndex == -1 || currentIndex >= _controller.videos.length - 1) {
-      Get.snackbar(
+      AppFeedback.show(
         'Thông báo',
         'Đây là video cuối cùng',
-        snackPosition: SnackPosition.BOTTOM,
+
         margin: const EdgeInsets.all(16),
       );
       return;
@@ -303,16 +314,19 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
     _controller.setCurrentVideoIndex(nextIndex);
     final nextVideo = _controller.videos[nextIndex];
 
-    context.pushReplacement('/youtube/player/${nextVideo.id}', extra: nextVideo);
+    context.pushReplacement(
+      '/youtube/player/${nextVideo.id}',
+      extra: nextVideo,
+    );
   }
 
   void _playPreviousManually() {
     final currentIndex = _controller.currentVideoIndex.value;
     if (currentIndex <= 0) {
-      Get.snackbar(
+      AppFeedback.show(
         'Thông báo',
         'Đây là video đầu tiên',
-        snackPosition: SnackPosition.BOTTOM,
+
         margin: const EdgeInsets.all(16),
       );
       return;
@@ -324,7 +338,10 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
     _controller.setCurrentVideoIndex(prevIndex);
     final prevVideo = _controller.videos[prevIndex];
 
-    context.pushReplacement('/youtube/player/${prevVideo.id}', extra: prevVideo);
+    context.pushReplacement(
+      '/youtube/player/${prevVideo.id}',
+      extra: prevVideo,
+    );
   }
 
   void _saveCurrentPosition() {
@@ -371,7 +388,7 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const CircularProgressIndicator(color: AppColors.primary,),
+            const CircularProgressIndicator(color: AppColors.primary),
             const SizedBox(height: 16),
             Text(
               'Đang tải video...',
@@ -384,47 +401,53 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
   }
 
   Widget _buildPlayerScreen(bool isDesktop) {
-    final crossAxisCount = isDesktop ? (MediaQuery.of(context).size.width > 1200 ? 3 : 2) : 1;
+    final crossAxisCount = isDesktop
+        ? (MediaQuery.of(context).size.width > 1200 ? 3 : 2)
+        : 1;
 
     return Scaffold(
       appBar: _isFullScreen.value
           ? null
           : AppBar(
-        title: Text(
-          _video?.title ?? 'Video',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: Icon(
-              _autoPlayEnabled.value ? Icons.playlist_play : Icons.playlist_remove,
+              title: Text(
+                _video?.title ?? 'Video',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              actions: [
+                IconButton(
+                  icon: Icon(
+                    _autoPlayEnabled.value
+                        ? Icons.playlist_play
+                        : Icons.playlist_remove,
+                  ),
+                  tooltip: _autoPlayEnabled.value
+                      ? 'Tắt tự động phát'
+                      : 'Bật tự động phát',
+                  onPressed: () {
+                    _autoPlayEnabled.value = !_autoPlayEnabled.value;
+                    AppFeedback.show(
+                      'Tự động phát',
+                      _autoPlayEnabled.value ? 'Đã bật' : 'Đã tắt',
+
+                      duration: const Duration(seconds: 1),
+                      margin: const EdgeInsets.all(16),
+                    );
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.fullscreen),
+                  onPressed: _toggleFullScreen,
+                ),
+              ],
             ),
-            tooltip: _autoPlayEnabled.value ? 'Tắt tự động phát' : 'Bật tự động phát',
-            onPressed: () {
-              _autoPlayEnabled.value = !_autoPlayEnabled.value;
-              Get.snackbar(
-                'Tự động phát',
-                _autoPlayEnabled.value ? 'Đã bật' : 'Đã tắt',
-                snackPosition: SnackPosition.BOTTOM,
-                duration: const Duration(seconds: 1),
-                margin: const EdgeInsets.all(16),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.fullscreen),
-            onPressed: _toggleFullScreen,
-          ),
-        ],
-      ),
       body: YoutubePlayerBuilder(
         player: YoutubePlayer(
           controller: _playerController!,
-        showVideoProgressIndicator: true,
-           thumbnail: Text(_video!.title) ,
+          showVideoProgressIndicator: true,
+          thumbnail: Text(_video!.title),
           progressIndicatorColor: AppColors.primary,
           progressColors: ProgressBarColors(
             playedColor: AppColors.primary,
@@ -460,8 +483,10 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
     return Obx(() {
       final currentIndex = _controller.currentVideoIndex.value;
       final hasPrev = currentIndex > 0;
-      final hasNext = currentIndex < _controller.videos.length - 1 && currentIndex != -1;
-      final showReplay = _isVideoEnded.value && (!hasNext || !_autoPlayEnabled.value);
+      final hasNext =
+          currentIndex < _controller.videos.length - 1 && currentIndex != -1;
+      final showReplay =
+          _isVideoEnded.value && (!hasNext || !_autoPlayEnabled.value);
 
       return Container(
         padding: const EdgeInsets.all(16),
@@ -537,10 +562,7 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
             currentIndex != -1
                 ? 'Video ${currentIndex + 1}/${_controller.videos.length}'
                 : 'Video',
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
           ),
           if (_autoPlayEnabled.value) ...[
             const SizedBox(height: 4),
@@ -548,7 +570,11 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.playlist_play, size: 14, color: Colors.green.shade700),
+                Icon(
+                  Icons.playlist_play,
+                  size: 14,
+                  color: Colors.green.shade700,
+                ),
                 const SizedBox(width: 4),
                 Text(
                   'Tự động phát',
@@ -562,7 +588,11 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
     });
   }
 
-  Widget _buildVideoList(BuildContext context, int crossAxisCount, bool isDesktop) {
+  Widget _buildVideoList(
+    BuildContext context,
+    int crossAxisCount,
+    bool isDesktop,
+  ) {
     return Obx(() {
       if (_controller.videos.isEmpty) {
         return _buildEmptyState('Không có video tiếp theo');
@@ -600,7 +630,11 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.video_library_outlined, size: 64, color: Colors.grey.shade400),
+            Icon(
+              Icons.video_library_outlined,
+              size: 64,
+              color: Colors.grey.shade400,
+            ),
             const SizedBox(height: 16),
             Text(
               message,
@@ -635,9 +669,7 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
               onPressed: () => context.pop(),
               icon: const Icon(Icons.list, size: 16),
               label: const Text('Xem tất cả'),
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.primary,
-              ),
+              style: TextButton.styleFrom(foregroundColor: AppColors.primary),
             ),
         ],
       ),
@@ -646,16 +678,19 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
 
   Widget _buildListView(List<YoutubeVideo> videos, BuildContext context) {
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical:12 ),
+      padding: const EdgeInsets.symmetric(vertical: 12),
       itemCount: videos.length,
       itemBuilder: (context, index) {
         final videoItem = videos[index];
-        final actualIndex = _controller.videos.indexWhere((v) => v.id == videoItem.id);
+        final actualIndex = _controller.videos.indexWhere(
+          (v) => v.id == videoItem.id,
+        );
         final isNext = actualIndex == _controller.currentVideoIndex.value + 1;
 
         return InfoCard(
           title: videoItem.title,
-          subtitle: '${videoItem.channelTitle} • ${_formatDate(videoItem.publishedAt)}',
+          subtitle:
+              '${videoItem.channelTitle} • ${_formatDate(videoItem.publishedAt)}',
           subtitleStyle: const TextStyle(
             fontSize: 12,
             color: Colors.grey,
@@ -671,7 +706,11 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) => Container(
                   color: Colors.grey.shade200,
-                  child: const Icon(Icons.play_circle_outline, color: Colors.grey, size: 32),
+                  child: const Icon(
+                    Icons.play_circle_outline,
+                    color: Colors.grey,
+                    size: 32,
+                  ),
                 ),
               ),
             ),
@@ -682,14 +721,20 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
             size: 28,
           ),
           onTap: () => _handleVideoTap(videoItem, context),
-          gradientStartColor: isNext ? AppColors.primary.withOpacity(0.05) : null,
+          gradientStartColor: isNext
+              ? AppColors.primary.withOpacity(0.05)
+              : null,
           gradientEndColor: isNext ? AppColors.primary.withOpacity(0.05) : null,
         );
       },
     );
   }
 
-  Widget _buildGridView(List<YoutubeVideo> videos, BuildContext context, int crossAxisCount) {
+  Widget _buildGridView(
+    List<YoutubeVideo> videos,
+    BuildContext context,
+    int crossAxisCount,
+  ) {
     return GridView.builder(
       padding: const EdgeInsets.all(16),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -701,7 +746,9 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
       itemCount: videos.length,
       itemBuilder: (context, index) {
         final videoItem = videos[index];
-        final actualIndex = _controller.videos.indexWhere((v) => v.id == videoItem.id);
+        final actualIndex = _controller.videos.indexWhere(
+          (v) => v.id == videoItem.id,
+        );
         final isNext = actualIndex == _controller.currentVideoIndex.value + 1;
 
         return InfoCard(
@@ -724,14 +771,17 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
           ),
           overlay: isNext ? _buildNextBadge() : null,
           title: videoItem.title,
-          subtitle: '${videoItem.channelTitle} • ${_formatDate(videoItem.publishedAt)}',
+          subtitle:
+              '${videoItem.channelTitle} • ${_formatDate(videoItem.publishedAt)}',
           subtitleStyle: const TextStyle(
             fontSize: 11,
             color: Colors.grey,
             height: 1.2,
           ),
           onTap: () => _handleVideoTap(videoItem, context),
-          gradientStartColor: isNext ? AppColors.primary.withOpacity(0.05) : null,
+          gradientStartColor: isNext
+              ? AppColors.primary.withOpacity(0.05)
+              : null,
           gradientEndColor: isNext ? AppColors.primary.withOpacity(0.05) : null,
         );
       },
@@ -768,21 +818,26 @@ class _YoutubePlayerScreenState extends State<YoutubePlayerScreen> {
   }
 
   void _handleVideoTap(YoutubeVideo nextVideo, BuildContext context) {
-    final nextIndex = _controller.videos.indexWhere((v) => v.id == nextVideo.id);
+    final nextIndex = _controller.videos.indexWhere(
+      (v) => v.id == nextVideo.id,
+    );
     if (nextIndex != -1) {
       _controller.setCurrentVideoIndex(nextIndex);
     }
 
     _autoPlayEnabled.value = false;
 
-    Get.snackbar(
+    AppFeedback.show(
       'Tự động phát',
       'Đã tắt để chỉ phát video này',
-      snackPosition: SnackPosition.BOTTOM,
+
       duration: const Duration(seconds: 1),
       margin: const EdgeInsets.all(16),
     );
 
-    context.pushReplacement('/youtube/player/${nextVideo.id}', extra: nextVideo);
+    context.pushReplacement(
+      '/youtube/player/${nextVideo.id}',
+      extra: nextVideo,
+    );
   }
 }

@@ -5,10 +5,15 @@ import '../../models/chat_room_model.dart';
 import '../../models/message_model.dart';
 
 class ChatService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  ChatService({required FirebaseFirestore firestore}) : _firestore = firestore;
+  final FirebaseFirestore _firestore;
 
   // Gửi tin nhắn
-  Future<void> sendMessage(String chatRoomId, String senderUid, String content) async {
+  Future<void> sendMessage(
+    String chatRoomId,
+    String senderUid,
+    String content,
+  ) async {
     final messageRef = _firestore
         .collection('chat_rooms')
         .doc(chatRoomId)
@@ -23,13 +28,15 @@ class ChatService {
       sentAt: Timestamp.now(),
     );
 
-    await messageRef.set(message.toJson());
+    final batch = _firestore.batch();
+    batch.set(messageRef, message.toJson());
 
     // Cập nhật lastMessage cho room
-    await _firestore.collection('chat_rooms').doc(chatRoomId).update({
+    batch.update(_firestore.collection('chat_rooms').doc(chatRoomId), {
       'lastMessage': content,
       'lastMessageAt': Timestamp.now(),
     });
+    await batch.commit();
   }
 
   // Stream tin nhắn cho room
@@ -41,9 +48,11 @@ class ChatService {
         .orderBy('sentAt', descending: true)
         .limit(50)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-        .map((doc) => MessageModel.fromJson(doc.data()..['id'] = doc.id))
-        .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => MessageModel.fromJson(doc.data()..['id'] = doc.id))
+              .toList(),
+        );
   }
 
   // Stream danh sách rooms của user
@@ -52,8 +61,10 @@ class ChatService {
         .collection('chat_rooms')
         .where('participants', arrayContains: uid)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-        .map((doc) => ChatRoomModel.fromJson(doc.data()..['id'] = doc.id))
-        .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => ChatRoomModel.fromJson(doc.data()..['id'] = doc.id))
+              .toList(),
+        );
   }
 }

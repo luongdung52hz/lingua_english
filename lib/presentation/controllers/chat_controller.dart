@@ -1,5 +1,4 @@
 // lib/controllers/chat_controller.dart
-import 'package:flutter/material.dart';
 import '../../data/datasources/remote/chat_service.dart';
 import '../../data/models/chat_room_model.dart';
 
@@ -7,7 +6,8 @@ import '../../data/models/message_model.dart';
 import 'base_controller.dart';
 
 class ChatController extends BaseController {
-  final ChatService _chatService = ChatService();
+  ChatController({required ChatService repository}) : _chatService = repository;
+  final ChatService _chatService;
   List<MessageModel> _messages = [];
   List<ChatRoomModel> _chatRooms = [];
   String? _currentRoomId;

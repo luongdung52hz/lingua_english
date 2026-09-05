@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../../../../data/datasources/remote/ai/ai_service.dart';
 import '../../../../../data/datasources/remote/ai/models/writing_result.dart';
 import '../../../../../data/datasources/remote/ai/providers/ai_provider.dart';
@@ -123,9 +122,7 @@ class _WritingContentState extends State<WritingContent> {
         children: [
           Icon(Icons.assignment, color: Colors.purple.shade700),
           const SizedBox(width: 12),
-          Expanded(
-            child: Text(prompt, style: const TextStyle(fontSize: 16)),
-          ),
+          Expanded(child: Text(prompt, style: const TextStyle(fontSize: 16))),
         ],
       ),
     );
@@ -183,10 +180,17 @@ class _WritingContentState extends State<WritingContent> {
             padding: const EdgeInsets.only(bottom: 8),
             child: Row(
               children: [
-                Icon(Icons.check_circle_outline, color: Colors.purple.shade700, size: 20),
+                Icon(
+                  Icons.check_circle_outline,
+                  color: Colors.purple.shade700,
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(req.toString(), style: const TextStyle(fontSize: 15)),
+                  child: Text(
+                    req.toString(),
+                    style: const TextStyle(fontSize: 15),
+                  ),
                 ),
               ],
             ),
@@ -276,18 +280,24 @@ class _WritingContentState extends State<WritingContent> {
             : _checkWritingWithAI,
         icon: isCheckingWriting
             ? const SizedBox(
-          width: 20,
-          height: 20,
-          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-        )
-            : const Icon(Icons.auto_awesome,color: Colors.white,),
-        label: Text(isCheckingWriting ? 'AI đang chấm bài...' : 'CHẤM BÀI VỚI AI',style: TextStyle(
-          color: Colors.white
-        ),),
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : const Icon(Icons.auto_awesome, color: Colors.white),
+        label: Text(
+          isCheckingWriting ? 'AI đang chấm bài...' : 'CHẤM BÀI VỚI AI',
+          style: TextStyle(color: Colors.white),
+        ),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.purple[400],
           padding: const EdgeInsets.symmetric(vertical: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       ),
     );
@@ -306,7 +316,11 @@ class _WritingContentState extends State<WritingContent> {
     try {
       final content = widget.lesson.content;
       final promptText = content['prompt'] ?? '';
-      final requirements = (content['requirements'] as List?)?.map((r) => r.toString()).toList() ?? [];
+      final requirements =
+          (content['requirements'] as List?)
+              ?.map((r) => r.toString())
+              .toList() ??
+          [];
 
       final result = await aiService.checkWriting(
         text: text,

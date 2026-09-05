@@ -1,3 +1,5 @@
+import 'package:get_it/get_it.dart';
+import '../../controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../app/routes/route_names.dart';
@@ -40,9 +42,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       'image': 'lib/resources/assets/images/onboarding5.png',
       'title': 'Theo dõi tiến độ & Đạt mục \ntiêu',
       'description':
-      'Biểu đồ chi tiết, huy hiệu thành tích và \nđộng lực mỗi ngày',
+          'Biểu đồ chi tiết, huy hiệu thành tích và \nđộng lực mỗi ngày',
     },
   ];
+
+  Future<void> _finish() async {
+    await GetIt.I<AuthController>().completeOnboarding();
+    if (mounted) context.go(Routes.login);
+  }
 
   @override
   void dispose() {
@@ -87,16 +94,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               textAlign: TextAlign.center,
                               style: Theme.of(context).textTheme.headlineSmall
                                   ?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: Colors.black,
-                              ),
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.black,
+                                  ),
                             ),
                             const SizedBox(height: 16),
                             // Mô tả
                             Text(
                               content['description']!,
                               textAlign: TextAlign.center,
-                              style: const TextStyle(color: Colors.grey, fontSize: 14),
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 14,
+                              ),
                             ),
                           ],
                         ),
@@ -113,7 +123,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: List.generate(
                           _onboardingContents.length,
-                              (index) => AnimatedContainer(
+                          (index) => AnimatedContainer(
                             duration: const Duration(milliseconds: 300),
                             margin: const EdgeInsets.symmetric(horizontal: 4),
                             height: 8,
@@ -132,14 +142,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: CustomButton(
-                          onPressed: _currentPage == _onboardingContents.length - 1
-                              ? () => context.go(Routes.login)
+                          onPressed:
+                              _currentPage == _onboardingContents.length - 1
+                              ? () => _finish()
                               : () {
-                            _pageController.nextPage(
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeIn,
-                            );
-                          },
+                                  _pageController.nextPage(
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeIn,
+                                  );
+                                },
                           text: _currentPage == _onboardingContents.length - 1
                               ? 'Bắt đầu '
                               : 'Tiếp tục',
@@ -158,7 +169,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               top: 6,
               right: 24,
               child: TextButton(
-                onPressed: () => context.go(Routes.login),
+                onPressed: () => _finish(),
                 child: const Text(
                   'Bỏ qua',
                   style: TextStyle(color: Colors.grey),

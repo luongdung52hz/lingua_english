@@ -10,7 +10,6 @@ class Routes {
   static const register = '/auth/register';
   static const forgotPassword = '/auth/forgot-password';
 
-
   // Learn
   static const learn = '/learn';
   static const learnDetail = '/learn/detail';
@@ -25,7 +24,6 @@ class Routes {
   static const quizTaking = '/quiz/taking';
   static const quizCreate = '/quiz/create';
 
-
   static const quizDuel = '/quiz/duel';
 
   static const grammar = '/grammar';
@@ -34,10 +32,10 @@ class Routes {
 
   // Flashcards
   static const flashcards = '/flashcards';
-  static const flashcardDetail = '/flashcards/detail';  // Đã có
-  static const flashcardCreate = '/flashcards/create';  // Mới
-  static const flashcardStudy = '/flashcards/study';    // Mới
-  static const folders = '/flashcards/folders';         // Mới
+  static const flashcardDetail = '/flashcards/detail'; // Đã có
+  static const flashcardCreate = '/flashcards/create'; // Mới
+  static const flashcardStudy = '/flashcards/study'; // Mới
+  static const folders = '/flashcards/folders'; // Mới
 
   // Chats
   static const chat = '/chat';

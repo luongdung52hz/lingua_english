@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:learn_english/presentation/screens/learn/widgets/lesson_detail/listening_content.dart';
 import 'package:learn_english/presentation/screens/learn/widgets/lesson_detail/reading_content.dart';
-import 'package:learn_english/presentation/screens/learn/widgets/lesson_detail/speaking_content.dart';
 import 'package:learn_english/presentation/screens/learn/widgets/lesson_detail/writing_content.dart';
 import '../../../data/models/lesson_model.dart';
 import '../../../resources/styles/colors.dart';
@@ -11,10 +10,7 @@ import '../../controllers/lesson_controller.dart';
 class LessonDetailScreen extends StatefulWidget {
   final String lessonId;
 
-  const LessonDetailScreen({
-    super.key,
-    required this.lessonId,
-  });
+  const LessonDetailScreen({super.key, required this.lessonId});
 
   @override
   State<LessonDetailScreen> createState() => _LessonDetailScreenState();
@@ -46,9 +42,9 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
     if (isLoading) {
       return Scaffold(
         appBar: AppBar(title: const Text('Đang tải...')),
-        body: const Center(child: CircularProgressIndicator(
-          color: AppColors.primary,
-        )),
+        body: const Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
       );
     }
 
@@ -74,11 +70,7 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(lesson!.title),
-        backgroundColor: Colors.white,
-
-      ),
+      appBar: AppBar(title: Text(lesson!.title), backgroundColor: Colors.white),
       body: _buildContentBySkill(),
     );
   }
@@ -86,29 +78,18 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
   Widget _buildContentBySkill() {
     switch (lesson!.skill) {
       case 'listening':
-        return ListeningContent(
-          lesson: lesson!,
-          startTime: startTime!,
-        );
+        return ListeningContent(lesson: lesson!, startTime: startTime!);
       // case 'speaking':
       //   return SpeakingContent(
       //     lesson: lesson!,
       //     startTime: startTime!,
       //   );
       case 'reading':
-        return ReadingContent(
-          lesson: lesson!,
-          startTime: startTime!,
-        );
+        return ReadingContent(lesson: lesson!, startTime: startTime!);
       case 'writing':
-        return WritingContent(
-          lesson: lesson!,
-          startTime: startTime!,
-        );
+        return WritingContent(lesson: lesson!, startTime: startTime!);
       default:
-        return Center(
-          child: Text('Skill "${lesson!.skill}" chưa được hỗ trợ'),
-        );
+        return Center(child: Text('Skill "${lesson!.skill}" chưa được hỗ trợ'));
     }
   }
 

@@ -1,3 +1,4 @@
+import 'package:learn_english/presentation/feedback/app_feedback.dart';
 import 'package:get/get.dart';
 import '../../data/datasources/remote/youtube_service.dart';
 import '../../data/models/youtube_playlists_model.dart';
@@ -15,49 +16,47 @@ class YoutubeController extends GetxController {
 
   var videoPositions = <String, Duration>{}.obs;
 
-  final YoutubeService _service = Get.put(YoutubeService());
+  YoutubeController({required YoutubeService service}) : _service = service;
+  final YoutubeService _service;
 
   var autoPlayEnabled = true.obs;
 
   final channels = [
-
     {
       'name': 'BBC Learning English',
       'id': 'UCHaHD477h-FeBbVh9Sh7syA',
       'playlists': [
-        {'id': 'PLcetZ6gSk96_zHuVg6Ecy2F7j4Aq4valQ', 'title': '6 Minute English'},
-        {'id': 'PLcetZ6gSk968x0G5TK-FXGrDjqjm-tYmB', 'title': 'English In A Minute'},
+        {
+          'id': 'PLcetZ6gSk96_zHuVg6Ecy2F7j4Aq4valQ',
+          'title': '6 Minute English',
+        },
+        {
+          'id': 'PLcetZ6gSk968x0G5TK-FXGrDjqjm-tYmB',
+          'title': 'English In A Minute',
+        },
       ],
     },
-    {
-      'name': 'TED-Ed',
-      'id': 'UCsooa4yRKGN_zEE8iknghZA',
-    },
-    {
-      'name': 'Family Guy',
-      'id': 'UCzI57speLHzZgl2Qq-cqe9Q',
-    },
+    {'name': 'TED-Ed', 'id': 'UCsooa4yRKGN_zEE8iknghZA'},
+    {'name': 'Family Guy', 'id': 'UCzI57speLHzZgl2Qq-cqe9Q'},
     {
       'name': 'Extra',
       'id': 'UCqZfc196aqw1edr9IvIaWow',
       'playlists': [
         {'id': 'PLHss0Pf8TrW5um35ZMSYRCjUjEwEjXLPh', 'title': 'Extra English'},
-
       ],
-
     },
 
-    {
-      'name': 'Alex-Tiếng Anh',
-      'id': 'UCOHC3mlHop6TRXl7i8o2AYQ',
-    },
+    {'name': 'Alex-Tiếng Anh', 'id': 'UCOHC3mlHop6TRXl7i8o2AYQ'},
   ].obs;
 
-  Future<void> fetchPlaylistsByChannel(String channelId, {int maxResults = 50}) async {
+  Future<void> fetchPlaylistsByChannel(
+    String channelId, {
+    int maxResults = 50,
+  }) async {
     isLoading.value = true;
     try {
       final channel = channels.firstWhere(
-            (ch) => ch['id'] == channelId,
+        (ch) => ch['id'] == channelId,
         orElse: () => {'name': 'Unknown', 'id': channelId},
       );
 
@@ -66,66 +65,83 @@ class YoutubeController extends GetxController {
           (channel['playlists'] as List).isNotEmpty) {
         final manualPlaylists = (channel['playlists'] as List)
             .map<YoutubePlaylist>((pl) {
-          final playlistJson = {
-            'kind': 'youtube#playlist',
-            'id': pl['id'] as String? ?? '',
-            'snippet': {
-              'publishedAt': DateTime.now().toIso8601String(),
-              'channelId': channelId,
-              'title': pl['title'] as String? ?? 'Manual Playlist',
-              'description': '',
-              'thumbnails': {
-                'default': {'url': '', 'width': 120, 'height': 90},
-                'medium': {'url': '', 'width': 320, 'height': 180},
-                'high': {'url': '', 'width': 480, 'height': 360},
-              },
-              'channelTitle': channel['name'] as String? ?? 'Unknown Channel',
-              'tags': <String>[],
-              'defaultLanguage': '',
-            },
-            'contentDetails': {
-              'itemCount': 0,
-              'playlistId': pl['id'] as String? ?? '',
-            },
-          };
-          return YoutubePlaylist.fromJson(playlistJson);
-        }).toList();
+              final playlistJson = {
+                'kind': 'youtube#playlist',
+                'id': pl['id'] as String? ?? '',
+                'snippet': {
+                  'publishedAt': DateTime.now().toIso8601String(),
+                  'channelId': channelId,
+                  'title': pl['title'] as String? ?? 'Manual Playlist',
+                  'description': '',
+                  'thumbnails': {
+                    'default': {'url': '', 'width': 120, 'height': 90},
+                    'medium': {'url': '', 'width': 320, 'height': 180},
+                    'high': {'url': '', 'width': 480, 'height': 360},
+                  },
+                  'channelTitle':
+                      channel['name'] as String? ?? 'Unknown Channel',
+                  'tags': <String>[],
+                  'defaultLanguage': '',
+                },
+                'contentDetails': {
+                  'itemCount': 0,
+                  'playlistId': pl['id'] as String? ?? '',
+                },
+              };
+              return YoutubePlaylist.fromJson(playlistJson);
+            })
+            .toList();
 
         playlists.value = manualPlaylists;
       } else {
-        playlists.value = await _service.fetchPlaylistsByChannel(channelId, maxResults: maxResults);
+        playlists.value = await _service.fetchPlaylistsByChannel(
+          channelId,
+          maxResults: maxResults,
+        );
       }
 
       selectedChannelId.value = channelId;
       selectedPlaylistId.value = '';
     } catch (e) {
-      Get.snackbar('Lỗi', 'Không thể tải playlists: ${e.toString()}');
+      AppFeedback.show('Lỗi', 'Không thể tải playlists: ${e.toString()}');
     } finally {
       isLoading.value = false;
     }
   }
 
-  Future<void> fetchVideosByPlaylist(String playlistId, {int maxResults = 20}) async {
+  Future<void> fetchVideosByPlaylist(
+    String playlistId, {
+    int maxResults = 20,
+  }) async {
     isLoading.value = true;
     try {
-      videos.value = await _service.fetchVideosByPlaylist(playlistId, maxResults: maxResults);
+      videos.value = await _service.fetchVideosByPlaylist(
+        playlistId,
+        maxResults: maxResults,
+      );
       selectedPlaylistId.value = playlistId;
       currentVideoIndex.value = 0;
     } catch (e) {
-      Get.snackbar('Lỗi', 'Không thể tải videos: ${e.toString()}');
+      AppFeedback.show('Lỗi', 'Không thể tải videos: ${e.toString()}');
     } finally {
       isLoading.value = false;
     }
   }
 
-  Future<void> fetchVideosByChannel(String channelId, {int maxResults = 20}) async {
+  Future<void> fetchVideosByChannel(
+    String channelId, {
+    int maxResults = 20,
+  }) async {
     isLoading.value = true;
     try {
-      videos.value = await _service.fetchVideosByChannel(channelId, maxResults: maxResults);
+      videos.value = await _service.fetchVideosByChannel(
+        channelId,
+        maxResults: maxResults,
+      );
       selectedChannelId.value = channelId;
       currentVideoIndex.value = 0;
     } catch (e) {
-      Get.snackbar('Lỗi', 'Không thể tải videos: ${e.toString()}');
+      AppFeedback.show('Lỗi', 'Không thể tải videos: ${e.toString()}');
     } finally {
       isLoading.value = false;
     }

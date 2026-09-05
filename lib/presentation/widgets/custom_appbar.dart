@@ -1,16 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final List<Widget>? actions;
 
-  const CustomAppBar({
-    super.key,
-    required this.title,
-    this.actions,
-  });
+  const CustomAppBar({super.key, required this.title, this.actions});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +17,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             height: 60,
             width: 60,
             errorBuilder: (context, error, stackTrace) {
-              return const Icon(Icons.image_not_supported, size: 20, color: Colors.white);
+              return const Icon(
+                Icons.image_not_supported,
+                size: 20,
+                color: Colors.white,
+              );
             },
           ),
           const SizedBox(width: 8),
@@ -39,15 +38,23 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ],
       ),
-      actions: actions ?? [ ElevatedButton(
-        onPressed: () {},
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          padding: const EdgeInsets.all(8),
-        ),
-        child: const Icon(Icons.notifications_none, color: Colors.grey,size: 26,),
-      ),],
+      actions:
+          actions ??
+          [
+            ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                padding: const EdgeInsets.all(8),
+              ),
+              child: const Icon(
+                Icons.notifications_none,
+                color: Colors.grey,
+                size: 26,
+              ),
+            ),
+          ],
       backgroundColor: Colors.white,
       elevation: 0.5,
       shadowColor: Colors.black26,

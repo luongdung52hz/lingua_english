@@ -1,9 +1,7 @@
 // lib/ui/widgets/action_buttons.dart
 
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../../resources/styles/colors.dart';
 import '../../../widgets/app_button.dart'; // Import CustomButton
 
 class ActionButtons extends StatelessWidget {
@@ -42,7 +40,10 @@ class ActionButtons extends StatelessWidget {
               icon: createIcon ?? Icons.add,
               iconSize: 20, // Adjust if needed
               height: 52, // Match original height
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16), // Adjust for text + icon fit
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 16,
+              ), // Adjust for text + icon fit
               borderRadius: BorderRadius.circular(12),
               // No loading, no shadow/gradient for simplicity
             ),
@@ -50,7 +51,7 @@ class ActionButtons extends StatelessWidget {
           const SizedBox(width: 8),
           SizedBox(
             height: 52, // Chiều cao bằng với nút Tạo flashcard
-            width: 52,  // Vuông để icon nằm giữa
+            width: 52, // Vuông để icon nằm giữa
             child: CustomButton(
               onPressed: studyEnabled ? onStudyPressed : null,
               text: '', // Empty text for icon-only

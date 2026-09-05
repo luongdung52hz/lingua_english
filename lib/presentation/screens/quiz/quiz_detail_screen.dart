@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import '../../../data/models/quiz_model.dart';
 import '../../../resources/styles/colors.dart';
-import '../../../resources/styles/text_styles.dart';
 import '../../controllers/quiz_controller.dart';
 import '../../widgets/app_button.dart';
 
@@ -20,7 +19,9 @@ class QuizDetailScreen extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
-            body: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+            body: Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            ),
           );
         }
         final quiz = snapshot.data;
@@ -31,14 +32,13 @@ class QuizDetailScreen extends StatelessWidget {
         }
 
         return Scaffold(
-
-            appBar: AppBar(
-              backgroundColor: AppColors.primary,
-            title: const Text(
-              'Chi tiết Quiz',),
-              foregroundColor: Colors.white,
-                //style: AppTextStyles.headlinew),
-            iconTheme: IconThemeData(color: Colors.white),),
+          appBar: AppBar(
+            backgroundColor: AppColors.primary,
+            title: const Text('Chi tiết Quiz'),
+            foregroundColor: Colors.white,
+            //style: AppTextStyles.headlinew),
+            iconTheme: IconThemeData(color: Colors.white),
+          ),
 
           body: Column(
             children: [
@@ -67,10 +67,7 @@ class QuizDetailScreen extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text(
                         quiz.description,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                       ),
                     ],
                     const SizedBox(height: 16),
@@ -94,11 +91,15 @@ class QuizDetailScreen extends StatelessWidget {
                       onPressed: () => _showQuizSettingsDialog(context, quiz),
                       text: 'Bắt đầu làm bài',
                       height: 56,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 16,
+                      ),
                       borderRadius: BorderRadius.circular(8),
                       fontWeight: FontWeight.w900,
-                   //   buttonColor: AppColors.primary,
-                      boxShadow: null, // No shadow to match original elevation: 0
+                      //   buttonColor: AppColors.primary,
+                      boxShadow:
+                          null, // No shadow to match original elevation: 0
                     ),
                   ],
                 ),
@@ -154,39 +155,48 @@ class QuizDetailScreen extends StatelessWidget {
                                   ),
                                 ),
                               ),
-
                             ],
                           ),
                           if (q.options.isNotEmpty) ...[
                             const SizedBox(height: 2),
-                            ...q.options.take(4).map((option) => Padding(
-                              padding: const EdgeInsets.only(left: 32, top: 4),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 6,
-                                    height: 6,
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.shade400,
-                                      shape: BoxShape.circle,
+                            ...q.options
+                                .take(4)
+                                .map(
+                                  (option) => Padding(
+                                    padding: const EdgeInsets.only(
+                                      left: 32,
+                                      top: 4,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          width: 6,
+                                          height: 6,
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey.shade400,
+                                            shape: BoxShape.circle,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            option,
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              color: Colors.grey[700],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      option,
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        color: Colors.grey[700],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )),
+                                ),
                             if (q.options.length > 4)
                               Padding(
-                                padding: const EdgeInsets.only(left: 32, top: 4),
+                                padding: const EdgeInsets.only(
+                                  left: 32,
+                                  top: 4,
+                                ),
                                 child: Text(
                                   '...và ${q.options.length - 3} đáp án khác',
                                   style: TextStyle(
@@ -287,7 +297,8 @@ class QuizDetailScreen extends StatelessWidget {
                 _buildCheckboxOption(
                   title: 'Đảo thứ tự câu hỏi',
                   value: shuffleQuestions,
-                  onChanged: (value) => setState(() => shuffleQuestions = value!),
+                  onChanged: (value) =>
+                      setState(() => shuffleQuestions = value!),
                 ),
                 _buildCheckboxOption(
                   title: 'Đảo thứ tự đáp án',
@@ -365,15 +376,15 @@ class QuizDetailScreen extends StatelessWidget {
               ),
               child: isSelected
                   ? Center(
-                child: Container(
-                  width: 10,
-                  height: 10,
-                  decoration: const BoxDecoration(
-                    color: AppColors.primary,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              )
+                      child: Container(
+                        width: 10,
+                        height: 10,
+                        decoration: const BoxDecoration(
+                          color: AppColors.primary,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    )
                   : null,
             ),
             const SizedBox(width: 12),

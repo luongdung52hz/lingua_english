@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../../data/models/lesson_model.dart';
 import 'package:lottie/lottie.dart';
@@ -7,21 +6,19 @@ import '../../../../../../resources/styles/colors.dart';
 
 class CompleteResultDialog {
   static void show(
-      BuildContext context,
-      LessonModel lesson,
-      int score,
-      DateTime startTime,
-      Map<String, String>? userAnswers,
-      ) {
+    BuildContext context,
+    LessonModel lesson,
+    int score,
+    DateTime startTime,
+    Map<String, String>? userAnswers,
+  ) {
     final isPassed = score >= 70;
 
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         elevation: 0,
         backgroundColor: Colors.transparent,
         child: Container(
@@ -187,14 +184,16 @@ class CompleteResultDialog {
   }
 
   static Widget _buildStatsSection(
-      LessonModel lesson,
-      Map<String, String>? userAnswers,
-      DateTime startTime,
-      ) {
+    LessonModel lesson,
+    Map<String, String>? userAnswers,
+    DateTime startTime,
+  ) {
     final seconds = DateTime.now().difference(startTime).inSeconds;
     final minutes = seconds ~/ 60;
     final remainingSeconds = seconds % 60;
-    final timeSpent = minutes > 0 ? '${minutes}p ${remainingSeconds}s' : '${remainingSeconds}s';
+    final timeSpent = minutes > 0
+        ? '${minutes}p ${remainingSeconds}s'
+        : '${remainingSeconds}s';
 
     int correctCount = 0;
     int totalQuestions = 0;
@@ -348,10 +347,7 @@ class CompleteResultDialog {
                 ),
                 child: const Text(
                   'Làm lại',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                 ),
               ),
             ),

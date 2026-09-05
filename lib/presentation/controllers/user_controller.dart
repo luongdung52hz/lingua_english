@@ -1,14 +1,16 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../data/repositories/user_repository.dart';
 
 import '../../data/models/user_model.dart';
 import 'base_controller.dart';
 
 class UserController extends BaseController {
+  UserController({required UserRepository repository})
+    : _repository = repository;
+  final UserRepository _repository;
   Future<UserModel?> getUserByUid(String uid) async {
     setLoading(true);
     try {
-      final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
-      return doc.exists ? UserModel.fromJson(doc.data()!) : null;
+      return await _repository.getUserByUid(uid);
     } catch (e) {
       setError(e.toString());
       return null;

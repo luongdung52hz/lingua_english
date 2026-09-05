@@ -10,10 +10,7 @@ import '../../../widgets/result_dialog.dart';
 class QuizTakingScreen extends StatefulWidget {
   final String quizId;
 
-  const QuizTakingScreen({
-    super.key,
-    required this.quizId,
-  });
+  const QuizTakingScreen({super.key, required this.quizId});
 
   @override
   State<QuizTakingScreen> createState() => _QuizTakingScreenState();
@@ -81,10 +78,10 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                border: Border(
-                  bottom: BorderSide(color: Colors.grey.shade200),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(16),
                 ),
+                border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -197,10 +194,7 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
         const SizedBox(width: 4),
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.black87,
-          ),
+          style: const TextStyle(fontSize: 12, color: Colors.black87),
         ),
       ],
     );
@@ -285,7 +279,10 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -311,9 +308,7 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
             style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
           ),
         ),
-        body: const Center(
-          child: Text('Không tìm thấy câu hỏi'),
-        ),
+        body: const Center(child: Text('Không tìm thấy câu hỏi')),
       );
     }
 
@@ -369,18 +364,16 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
 
     final unanswered = quiz.questions.length - _userAnswers.length;
     if (unanswered > 0) {
-      Get.dialog(
-        AlertDialog(
+      showDialog<void>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
           backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
           title: const Text(
             'Chưa hoàn thành',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: Colors.black,
-            ),
+            style: TextStyle(fontWeight: FontWeight.w600, color: Colors.black),
           ),
           content: Text(
             'Bạn còn $unanswered câu chưa trả lời. Bạn có muốn nộp bài không?',
@@ -388,7 +381,7 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Get.back(),
+              onPressed: () => Navigator.of(dialogContext).pop(),
               child: const Text(
                 'Hủy',
                 style: TextStyle(color: AppColors.primary),
@@ -404,7 +397,7 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
                 elevation: 0,
               ),
               onPressed: () {
-                Get.back();
+                Navigator.of(dialogContext).pop();
                 _showResults();
               },
               child: const Text('Nộp bài'),
@@ -599,9 +592,7 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.white,
-              border: Border(
-                bottom: BorderSide(color: Colors.grey.shade200),
-              ),
+              border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -616,10 +607,7 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
                 ),
                 Text(
                   '${_userAnswers.length}/$totalQuestions đã trả lời',
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 13,
-                  ),
+                  style: TextStyle(color: Colors.grey[600], fontSize: 13),
                 ),
               ],
             ),
@@ -697,9 +685,13 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
                                   borderRadius: BorderRadius.circular(4),
                                   color: isQuestionAnswered
                                       ? (isCorrectAnswer
-                                      ? Colors.green
-                                      : (isSelected ? Colors.red : Colors.grey.shade200))
-                                      : (isSelected ? AppColors.primary : Colors.grey.shade200),
+                                            ? Colors.green
+                                            : (isSelected
+                                                  ? Colors.red
+                                                  : Colors.grey.shade200))
+                                      : (isSelected
+                                            ? AppColors.primary
+                                            : Colors.grey.shade200),
                                 ),
                                 child: Center(
                                   child: Text(
@@ -707,9 +699,11 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
                                     style: TextStyle(
                                       color: isQuestionAnswered
                                           ? (isCorrectAnswer || isSelected
-                                          ? Colors.white
-                                          : Colors.black87)
-                                          : (isSelected ? Colors.white : Colors.black87),
+                                                ? Colors.white
+                                                : Colors.black87)
+                                          : (isSelected
+                                                ? Colors.white
+                                                : Colors.black87),
                                       fontWeight: FontWeight.w600,
                                       fontSize: 14,
                                     ),
@@ -732,7 +726,9 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
                                   color: Colors.green,
                                   size: 20,
                                 ),
-                              if (isQuestionAnswered && isSelected && !isCorrectAnswer)
+                              if (isQuestionAnswered &&
+                                  isSelected &&
+                                  !isCorrectAnswer)
                                 const Icon(
                                   Icons.cancel,
                                   color: Colors.red,
@@ -787,20 +783,23 @@ class _QuizTakingScreenState extends State<QuizTakingScreen> {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.white,
-              border: Border(
-                top: BorderSide(color: Colors.grey.shade200),
-              ),
+              border: Border(top: BorderSide(color: Colors.grey.shade200)),
             ),
             child: Row(
               children: [
                 OutlinedButton.icon(
                   onPressed: _showQuestionIndex,
                   icon: const Icon(Icons.grid_view, size: 18),
-                  label: Text('${_currentQuestionIndex + 1}/${_quiz!.questions.length}'),
+                  label: Text(
+                    '${_currentQuestionIndex + 1}/${_quiz!.questions.length}',
+                  ),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.primary,
                     side: BorderSide(color: Colors.grey.shade300),
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 12,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),

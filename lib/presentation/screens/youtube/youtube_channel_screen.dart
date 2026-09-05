@@ -11,7 +11,7 @@ class YoutubeChannelsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(YoutubeController());
+    final controller = Get.find<YoutubeController>();
 
     return Scaffold(
       appBar: AppBar(
@@ -19,34 +19,38 @@ class YoutubeChannelsScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => context.go('/home'),
         ),
-        title: const Text('Video Học Tiếng Anh',style: AppTextStyles.headlinew,),
+        title: const Text(
+          'Video Học Tiếng Anh',
+          style: AppTextStyles.headlinew,
+        ),
         backgroundColor: AppColors.primary,
-       // foregroundColor: Colors.white,
+        // foregroundColor: Colors.white,
       ),
-      body: Obx(() => ListView.builder(
-        padding: const EdgeInsets.symmetric(vertical:12 ),
-        itemCount: controller.channels.length,
-        itemBuilder: (context, index) {
-          final channel = controller.channels[index];
-          final channelName = channel['name'] as String;
-          final channelId = channel['id'] as String;
+      body: Obx(
+        () => ListView.builder(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          itemCount: controller.channels.length,
+          itemBuilder: (context, index) {
+            final channel = controller.channels[index];
+            final channelName = channel['name'] as String;
+            final channelId = channel['id'] as String;
 
-          return InfoCard(
-            title: channelName,
-            subtitle: 'Truy cập kênh',
-            onTap: () {
-              controller.changeChannel(channelId);
-              context.push('/youtube/playlists');
-            },
-            trailing: const Icon(
-              Icons.arrow_forward_ios,
-              size: 16,
-              color: Colors.grey,
-            ),
-
-          );
-        },
-      )),
+            return InfoCard(
+              title: channelName,
+              subtitle: 'Truy cập kênh',
+              onTap: () {
+                controller.changeChannel(channelId);
+                context.push('/youtube/playlists');
+              },
+              trailing: const Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+                color: Colors.grey,
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }

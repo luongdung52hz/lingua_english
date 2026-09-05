@@ -3,7 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../models/user_model.dart';
 
 class UserService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  UserService({required FirebaseFirestore firestore}) : _firestore = firestore;
+  final FirebaseFirestore _firestore;
 
   // Tìm user theo tên hoặc email
   Future<List<UserModel>> searchUsers(String query) async {
@@ -12,7 +13,10 @@ class UserService {
     final snapshot = await _firestore
         .collection('users')
         .where('name', isGreaterThanOrEqualTo: query)
-        .where('name', isLessThanOrEqualTo: query + '\uf8ff') // Prefix search cho tên
+        .where(
+          'name',
+          isLessThanOrEqualTo: query + '\uf8ff',
+        ) // Prefix search cho tên
         .limit(10)
         .get();
 
@@ -23,7 +27,9 @@ class UserService {
           .where('email', isEqualTo: query)
           .limit(1)
           .get();
-      // Convert sang UserModel...
+      return emailSnapshot.docs
+          .map((doc) => UserModel.fromJson({...doc.data(), 'uid': doc.id}))
+          .toList();
     }
 
     return snapshot.docs
@@ -35,13 +41,14 @@ class UserService {
   Future<void> addFriend(String currentUid, String friendUid) async {
     // Cập nhật current user
     final currentRef = _firestore.collection('users').doc(currentUid);
-    await currentRef.update({
+    final batch = _firestore.batch();
+    batch.update(currentRef, {
       'friends': FieldValue.arrayUnion([friendUid]),
     });
 
     // Cập nhật friend user
     final friendRef = _firestore.collection('users').doc(friendUid);
-    await friendRef.update({
+    batch.update(friendRef, {
       'friends': FieldValue.arrayUnion([currentUid]),
     });
 
@@ -49,11 +56,12 @@ class UserService {
     final chatId = [currentUid, friendUid]..sort(); // Sắp xếp để ID unique
     final chatIdStr = chatId.join('_');
     final chatRef = _firestore.collection('chat_rooms').doc(chatIdStr);
-    await chatRef.set({
+    batch.set(chatRef, {
       'id': chatIdStr,
       'participants': [currentUid, friendUid],
       'lastMessageAt': Timestamp.now(),
       'lastMessage': 'Bắt đầu chat!',
     }, SetOptions(merge: true));
+    await batch.commit();
   }
 }

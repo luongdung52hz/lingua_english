@@ -9,7 +9,6 @@ import 'package:learn_english/presentation/screens/learn/widgets/learn_screen/to
 import '../../../util/skill_untils.dart';
 import '../../controllers/lesson_controller.dart';
 import '../../widgets/bottom_nav_bar.dart';
-import '../../../app/routes/route_names.dart';
 import '../../../resources/styles/colors.dart';
 import '../../widgets/custom_sliver_appbar.dart';
 
@@ -28,7 +27,7 @@ class _LearnScreenState extends State<LearnScreen>
   @override
   void initState() {
     super.initState();
-    controller = Get.put(LearnController());
+    controller = Get.find<LearnController>();
     _levelController = TabController(length: 6, vsync: this);
   }
 
